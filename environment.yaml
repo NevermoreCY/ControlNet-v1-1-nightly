@@ -33,6 +33,8 @@ dependencies:
       - prettytable==3.6.0
       - safetensors==0.2.7
       - basicsr==1.4.2
+      - fairscale==0.4.4
       - fvcore
       - pycocotools
       - wandb
+      - pycocoevalcap
