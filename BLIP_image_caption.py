@@ -5,7 +5,7 @@ import requests
 import torch
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
-import tqdm
+from tqdm import tqdm
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
