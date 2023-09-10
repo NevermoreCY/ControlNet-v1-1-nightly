@@ -109,8 +109,8 @@ job_length = total_n // 8
 
 print("******** cur job_num is " , job_num)
 start_n = 10000 * job_num
-end_n = 10000 * job_num + 1
-bz = 10
+end_n = 10000 * (job_num + 1)
+bz = 100
 
 
 batch_s = start_n
@@ -176,7 +176,7 @@ while batch_s < end_n:
     batch_s += bz
     batch_e += bz
     time_cost = time.time() - iter_time_s
-    print("1 iteration takes time :", time_cost /60 , " minutes." )
+    print("when bz is ", bz ,", 1 iteration takes time :", time_cost /60 , " minutes." , "1 sample will take ", time_cost/bz, " seconds")
 
     print(batch_s,batch_e,end_n)
     # for f_id in tqdm(range(len(sub_folder_list))):
