@@ -35,21 +35,22 @@ def load_demo_image(image_size, device):
 def load_image(image_size, device, im_path):
 
     raw_image = Image.open(im_path).convert('RGB')
-    print("raw_image shape", raw_image.size)
-    print("raw_image type", type(raw_image))
+    # print("raw_image shape", raw_image.size)
+    # print("raw_image type", type(raw_image))
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
         transforms.ToTensor(),
         transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
     ])
-    image = transform(raw_image).unsqueeze(0).to(device)
+    # image = transform(raw_image).unsqueeze(0).to(device)
+    image = transform(raw_image).to(device)
     return image
 
 def load_image_batch(image_size, device, batch_path):
 
     raw_image = Image.open(im_path).convert('RGB')
-    print("raw_image shape", raw_image.size)
-    print("raw_image type", type(raw_image))
+    # print("raw_image shape", raw_image.size)
+    # print("raw_image type", type(raw_image))
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
         transforms.ToTensor(),
