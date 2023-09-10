@@ -121,7 +121,7 @@ while batch_s < end_n:
 
     batch_names =  sub_folder_list[batch_s:batch_e]
     images = []
-    texts = []
+
 
     curr = time.time()
     # print("time load_image", curr)
@@ -146,10 +146,7 @@ while batch_s < end_n:
         # beam search
         curr = time.time()
         # print("time before inference", curr)
-        caption = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
-
-        print(caption)
-        print(len(caption), len(caption[0]))
+        captions = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
 
         next_t = time.time()
         # print(" time after inference =", next_t)
@@ -157,15 +154,15 @@ while batch_s < end_n:
         # nucleus sampling
         # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5)
         #        print('caption: ' + caption[0])
-        texts.append(caption[0])
+
 
     # post process
     curr = time.time()
     # print("time before post", curr)
-    print("texts length ", len(texts))
+    print("num of captions is ", len(captions) , "should be ", bz* 12 )
     for j in range(bz):
         folder = batch_names[j]
-        cur_texts = texts[j*12:(j+1)*12]
+        cur_texts = captions[j*12:(j+1)*12]
         print(len(cur_texts))
         best_text = most_frequent(cur_texts)
         out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
