@@ -110,7 +110,7 @@ job_length = total_n // 8
 print("******** cur job_num is " , job_num)
 start_n = 10000 * job_num
 end_n = 10000 * job_num + 1
-bz = 100
+bz = 10
 
 batch_s = start_n
 batch_e = batch_s + bz
@@ -147,6 +147,7 @@ while batch_s < end_n:
         curr = time.time()
         # print("time before inference", curr)
         caption = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
+        print(caption.shape)
         next_t = time.time()
         # print(" time after inference =", next_t)
         print("time for inference diff 2", next_t - curr)
