@@ -11,77 +11,239 @@ import time
 import numpy as np
 import sys
 from torchvision.io import read_image
-
+import argparse
 
 # log = open("image_caption_logs/sep10_job0_t1.log", "a")
 # sys.stdout = log
 # sys.stderr = log
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-cwd = os.getcwd()
-print("cwd is ", cwd)
-os.chdir("BLIP")
-cwd = os.getcwd()
-print("cwd is ", cwd)
-print("device is ", device )
+def doArgs(argList, name):
+    parser = argparse.ArgumentParser()
 
-def load_demo_image(image_size, device):
-    img_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg'
-    raw_image = Image.open(requests.get(img_url, stream=True).raw).convert('RGB')
+    #parser.add_argument('-v', "--verbose", action="store_true", help="Enable verbose debugging", default=False)
+    parser.add_argument('--job_num',type=int, help="Input file name", required=True)
+    # parser.add_argument('--output', action="store", dest="outputFn", type=str, help="Output file name", required=True)
 
-    w, h = raw_image.size
-    #display(raw_image.resize((w // 5, h // 5)))
+    return parser.parse_args(argList)
 
-    transform = transforms.Compose([
-        transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
-        transforms.ToTensor(),
-        transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
-    ])
-    image = transform(raw_image).unsqueeze(0).to(device)
-    return image
+def main():
+    args = doArgs(sys.argv[1:])
 
-image_size = 256
-transform1 = transforms.Compose([
+    job_num = args.job_num
+
+
+    # print "Starting %s" % (progName)
+    startTime = float(time.time())
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+    cwd = os.getcwd()
+    print("cwd is ", cwd)
+    os.chdir("BLIP")
+    cwd = os.getcwd()
+    print("cwd is ", cwd)
+    print("device is ", device)
+
+    def load_demo_image(image_size, device):
+        img_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/demo.jpg'
+        raw_image = Image.open(requests.get(img_url, stream=True).raw).convert('RGB')
+
+        w, h = raw_image.size
+        # display(raw_image.resize((w // 5, h // 5)))
+
+        transform = transforms.Compose([
+            transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
+            transforms.ToTensor(),
+            transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
+        ])
+        image = transform(raw_image).unsqueeze(0).to(device)
+        return image
+
+    image_size = 256
+    transform1 = transforms.Compose([
         transforms.ToTensor()
     ])
 
-transform2 = transforms.Compose([
-    transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
-    transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
-])
-def load_image(image_size, device, im_path):
+    transform2 = transforms.Compose([
+        transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
+        transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
+    ])
+
+    def load_image(image_size, device, im_path):
+
+        # load_1 = time.time()
+        raw_image = Image.open(im_path).convert('RGB')
+        # load_2 = time.time()
+        # print("load_diff1" , load_2-load_1)
+        raw_image = transform1(raw_image).to(device)
+        # load_3 = time.time()
+        # print("load_diff2", load_3 - load_2)
+        #
+        # load_5
+        # raw_image2 = read_image(im_path).to(device)
+        # raw_image2 = raw_image2.type('torch.FloatTensor')
+        # load_4 = time.time()
+        # print("load_diff3", load_4 - load_3)
+        # print(raw_image.shape , raw_image2[:3].shape)
+
+        # print("raw_image shape", raw_image.size)
+        # print("raw_image type", type(raw_image))
+
+        # image = transform(raw_image).unsqueeze(0).to(device)
+        # image = transform2(raw_image).to(device)
+        image = transform2(raw_image).to(device)
+        # load_5 = time.time()
+        # print("load_diff4", load_5 - load_4)
+
+        return image
+
+    from BLIP.models.blip import blip_decoder
+
+    s = 0
+    model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
+    image_size = 256
+
+    model = blip_decoder(pretrained=model_url, image_size=image_size, vit='base')
+    model.eval()
+    model = model.to(device)
+
+    cwd = os.getcwd()
+    print("cwd is ", cwd)
+    os.chdir("../")
+    cwd = os.getcwd()
+    print("cwd is ", cwd)
+
+    def most_frequent(List):
+        counter = 0
+        item = List[0]
+        for i in List:
+            curr_frequency = List.count(i)
+            if (curr_frequency > counter):
+                counter = curr_frequency
+                item = i
+        return item
+
+    img_folder = "/yuch_ws/views_release"
+    # sub_folder_list = os.listdir(img_folder)
+    # sub_folder_list.sort()
+
+    with open('valid_paths.json') as f:
+        sub_folder_list = json.load(f)
+
+    sub_folder_list.sort()
+
+    total_n = len(sub_folder_list)
+    print("total_n", total_n)  # 772870
+
+    # job_num = 21
+    job_length = 40000
+
+    start_n = job_num* job_length
+    end_n = (job_num+1) * job_length
+    bz = 400
+
+    print("******** cur job_num is ", job_num, "start is", start_n, "end is", end_n)
+    print("first few names", sub_folder_list[start_n:start_n + 5])
+
+    batch_s = start_n
+    batch_e = batch_s + bz
+
+    bad_folders = []
+
+    while batch_s < end_n:
+        print(batch_s, batch_e)
+        iter_time_s = time.time()
+
+        batch_names = sub_folder_list[batch_s:batch_e]
+        images = []
+
+        curr = time.time()
+        # print("time load_image", curr)
+        skip_index = []
+        target_index = [0, 4, 8]
+        views = len(target_index)
+
+        for j in range(bz):
+            #print(j)
+            folder = batch_names[j]
+            if folder[-4:] != "json":
+                for idx in range(views):
+                    i = target_index[idx]
+                    im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
+                    if not os.path.isfile(im_path):
+                        bad_folders.append(folder)
+                        images = images[:-idx]
+                        skip_index.append(j)
+
+                        # save the bad items
+                        out_text_name = "logs/Bad_folder_names_job_" + str(job_num) + ".txt"
+                        with open(out_text_name, 'w') as f:
+                            for line in bad_folders:
+                                f.write(line)
+
+                        break
+
+                    images.append(load_image(image_size=image_size, device=device, im_path=im_path))
+        # print(assert(bz*12 == len(images)) )
+        next_t = time.time()
+        # print(" time after load_image =", next_t)
+        print("time for load diff 1", next_t - curr)
+
+        print("total num is ", len(images), ", should be", (bz - len(skip_index)) * views)
+
+        # make them a batch
+        batch_images = torch.stack(images, 0)
+        print("batch shape is ", batch_images.shape)
+        with torch.no_grad():
+            # beam search
+            curr = time.time()
+            # print("time before inference", curr)
+            captions = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
+
+            next_t = time.time()
+            # print(" time after inference =", next_t)
+            print("time for inference diff 2", next_t - curr)
+            # nucleus sampling
+            # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5)
+            #        print('caption: ' + caption[0])
+
+        # post process
+        curr = time.time()
+        # print("time before post", curr)
+        print("num of captions is ", len(captions), "should be ", (bz - len(skip_index)) * views)
+        print("skip_index is", skip_index)
+        offset = 0
+        for j in range(bz):
+            if j not in skip_index:
+                folder = batch_names[j]
+                cur_texts = captions[(j + offset) * views:(j + 1 + offset) * views]
+                # print(len(cur_texts))
+                best_text = most_frequent(cur_texts)
+                out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
+                with open(out_text_name, 'w') as f:
+                    f.write(best_text)
+            else:
+                offset -= 1
+        # print(" time after post =", next_t)
+        print("time for post diff 3", next_t - curr)
+
+        # update id
+        batch_s += bz
+        batch_e += bz
+        time_cost = time.time() - iter_time_s
+        print("when bz is ", bz, ", 1 iteration takes time :", time_cost / 60, " minutes.", "1 sample will take ",
+              time_cost / bz, " seconds")
+
+        print(batch_s, batch_e, end_n)
 
 
-    # load_1 = time.time()
-    raw_image = Image.open(im_path).convert('RGB')
-    # load_2 = time.time()
-    # print("load_diff1" , load_2-load_1)
-    raw_image = transform1(raw_image).to(device)
-    #load_3 = time.time()
-    # print("load_diff2", load_3 - load_2)
-    #
-    #load_5
-    # raw_image2 = read_image(im_path).to(device)
-    # raw_image2 = raw_image2.type('torch.FloatTensor')
-    # load_4 = time.time()
-    # print("load_diff3", load_4 - load_3)
-    # print(raw_image.shape , raw_image2[:3].shape)
+    return
 
-    # print("raw_image shape", raw_image.size)
-    # print("raw_image type", type(raw_image))
-
-    # image = transform(raw_image).unsqueeze(0).to(device)
-    # image = transform2(raw_image).to(device)
-    image = transform2(raw_image).to(device)
-    # load_5 = time.time()
-    # print("load_diff4", load_5 - load_4)
-
-    return image
+if __name__ == '__main__':
+    #sys.argv = ["programName.py","--input","test.txt","--output","tmp/test.txt"]
+    main()
 
 
-
-from BLIP.models.blip import blip_decoder
 
 
 
@@ -228,39 +390,3 @@ while batch_s < end_n:
     print("when bz is ", bz ,", 1 iteration takes time :", time_cost /60 , " minutes." , "1 sample will take ", time_cost/bz, " seconds")
 
     print(batch_s,batch_e,end_n)
-    # for f_id in tqdm(range(len(sub_folder_list))):
-    #     folder = sub_folder_list[f_id]
-    #     if folder[-4:] != "json":
-    #         texts = []
-    #         for i in range(12):
-    #             im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
-    #
-    #             curr = time.time()
-    #             print("time load_image", curr)
-    #             x = load_image(image_size=image_size, device=device, im_path=im_path)
-    #             next_t = time.time()
-    #             print(" time after load_image =", next_t)
-    #             print("diff 1", next_t - curr)
-    #
-    #             image = x.repeat(1800, 1, 1, 1)
-    #             print(image.shape)
-    #
-    #
-    #             with torch.no_grad():
-    #                 # beam search
-    #                 curr = time.time()
-    #                 print("time before inference", curr)
-    #                 caption = model.generate(image, sample=False, num_beams=3, max_length=20, min_length=5)
-    #                 next_t = time.time()
-    #                 print(" time after inference =", next_t)
-    #                 print("diff 2", next_t - curr)
-    #                 # nucleus sampling
-    #                 # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5)
-    #         #        print('caption: ' + caption[0])
-    #                 texts.append(caption[0])
-    #
-    #         out_text_name = img_folder + "/" + folder + "/BLIP_text.txt"
-    #         name = most_frequent(texts)
-    #
-    #         with open(out_text_name, 'w') as f:
-    #             f.write(name)
