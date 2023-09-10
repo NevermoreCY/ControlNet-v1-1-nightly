@@ -53,17 +53,17 @@ transform2 = transforms.Compose([
 def load_image(image_size, device, im_path):
 
 
-    load_1 = time.time()
-    raw_image = Image.open(im_path).convert('RGB')
-    load_2 = time.time()
-    print("load_diff1" , load_2-load_1)
-    raw_image = transform1(raw_image).to(device)
-    load_3 = time.time()
-    print("load_diff2", load_3 - load_2)
+    # load_1 = time.time()
+    # raw_image = Image.open(im_path).convert('RGB')
+    # load_2 = time.time()
+    # print("load_diff1" , load_2-load_1)
+    # raw_image = transform1(raw_image).to(device)
+    # load_3 = time.time()
+    # print("load_diff2", load_3 - load_2)
     #
-    #
-    # raw_image2 = read_image(im_path).to(device)
-    load_4 = time.time()
+    #load_5
+    raw_image2 = read_image(im_path).to(device)
+    # load_4 = time.time()
     # print("load_diff3", load_4 - load_3)
     # print(raw_image.shape , raw_image2[:3].shape)
 
@@ -71,9 +71,10 @@ def load_image(image_size, device, im_path):
     # print("raw_image type", type(raw_image))
 
     # image = transform(raw_image).unsqueeze(0).to(device)
-    image = transform2(raw_image).to(device)
-    load_5 = time.time()
-    print("load_diff4", load_5 - load_4)
+    # image = transform2(raw_image).to(device)
+    image = transform2(raw_image2[:3]).to(device)
+    # load_5 = time.time()
+    # print("load_diff4", load_5 - load_4)
 
     # print(raw_image == raw_image2[:3])
     return image
