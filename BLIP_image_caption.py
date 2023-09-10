@@ -77,7 +77,7 @@ img_folder = "/yuch_ws/views_release"
 # sub_folder_list = os.listdir(img_folder)
 # sub_folder_list.sort()
 
-with open('test_paths.json') as f:
+with open('valid_paths.json') as f:
     sub_folder_list = json.load(f)
 
 sub_folder_list.sort()
