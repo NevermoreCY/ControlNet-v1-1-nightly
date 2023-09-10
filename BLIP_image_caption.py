@@ -18,7 +18,7 @@ import argparse
 # sys.stderr = log
 
 
-def doArgs(argList, name):
+def doArgs(argList):
     parser = argparse.ArgumentParser()
 
     #parser.add_argument('-v', "--verbose", action="store_true", help="Enable verbose debugging", default=False)
