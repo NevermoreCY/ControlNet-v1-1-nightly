@@ -9,6 +9,10 @@ from tqdm import tqdm
 import json
 import time
 import numpy as np
+import sys
+
+log = open("image_caption_logs/sep10_job0.log", "w")
+sys.stdout = log
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
