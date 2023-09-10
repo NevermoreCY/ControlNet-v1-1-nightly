@@ -103,7 +103,7 @@ for f_id in tqdm(range(len(sub_folder_list))):
             print(" time after load_image =", next_t)
             print("diff 1", next_t - curr)
 
-            image = x.repeat(100, 1, 1, 1)
+            image = x.repeat(1800, 1, 1, 1)
             print(image.shape)
 
 
