@@ -123,7 +123,9 @@ while batch_s < end_n:
 
     curr = time.time()
     # print("time load_image", curr)
-    for folder in batch_names:
+    for j in range(bz):
+        print(j)
+        folder = batch_names[j]
         if folder[-4:] != "json":
             for i in range(12):
                 im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
