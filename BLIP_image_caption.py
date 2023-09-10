@@ -40,16 +40,20 @@ def load_demo_image(image_size, device):
     return image
 def load_image(image_size, device, im_path):
 
+    transform1 = transforms.Compose([
+        transforms.ToTensor()
+    ])
+
     raw_image = Image.open(im_path).convert('RGB')
+    raw_image = transform1(raw_image).to(device)
     # print("raw_image shape", raw_image.size)
     # print("raw_image type", type(raw_image))
-    transform = transforms.Compose([
+    transform2 = transforms.Compose([
         transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
-        transforms.ToTensor(),
         transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
     ])
     # image = transform(raw_image).unsqueeze(0).to(device)
-    image = transform(raw_image).to(device)
+    image = transform2(raw_image).to(device)
     return image
 
 def load_image_batch(image_size, device, batch_path):
@@ -110,12 +114,12 @@ print("total_n", total_n)  # 772870
 print("first few names",sub_folder_list[:5])
 
 
-job_num = 9
+job_num = 8
 job_length = total_n // 8
 
 
-start_n = 16000
-end_n = 20000
+start_n = 11200
+end_n = 16000
 bz = 100
 
 print("******** cur job_num is " , job_num, "start is", start_n, "end is", end_n )
@@ -186,15 +190,19 @@ while batch_s < end_n:
     curr = time.time()
     # print("time before post", curr)
     print("num of captions is ", len(captions) , "should be ", (bz- len(skip_index)) *12 )
+    print("skip_index is", skip_index)
+    offset = 0
     for j in range(bz):
         if j not in skip_index:
             folder = batch_names[j]
-            cur_texts = captions[j*12:(j+1)*12]
-            print(len(cur_texts))
+            cur_texts = captions[(j+offset)*12:(j+1+offset)*12]
+            #print(len(cur_texts))
             best_text = most_frequent(cur_texts)
             out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
             with open(out_text_name, 'w') as f:
                 f.write(best_text)
+        else:
+            offset -= 1
     # print(" time after post =", next_t)
     print("time for post diff 3", next_t - curr)
 
