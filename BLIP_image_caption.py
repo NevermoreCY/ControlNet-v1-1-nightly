@@ -38,22 +38,33 @@ def load_demo_image(image_size, device):
     ])
     image = transform(raw_image).unsqueeze(0).to(device)
     return image
-def load_image(image_size, device, im_path):
 
-    transform1 = transforms.Compose([
+image_size = 256
+transform1 = transforms.Compose([
         transforms.ToTensor()
     ])
 
+transform2 = transforms.Compose([
+    transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
+    transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
+])
+def load_image(image_size, device, im_path):
+
+
+    load_1 = time.time()
     raw_image = Image.open(im_path).convert('RGB')
+    load_2 = time.time()
+    print("load_diff1" , load_2-load_1)
     raw_image = transform1(raw_image).to(device)
+    load_3 = time.time()
+    print("load_diff2", load_3 - load_2)
     # print("raw_image shape", raw_image.size)
     # print("raw_image type", type(raw_image))
-    transform2 = transforms.Compose([
-        transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BILINEAR),
-        transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
-    ])
+
     # image = transform(raw_image).unsqueeze(0).to(device)
     image = transform2(raw_image).to(device)
+    load_4 = time.time()
+    print("load_diff1", load_4 - load_3)
     return image
 
 def load_image_batch(image_size, device, batch_path):
@@ -141,16 +152,19 @@ while batch_s < end_n:
     curr = time.time()
     # print("time load_image", curr)
     skip_index = []
+    target_index = [0, 4, 8]
+    views = 12
 
     for j in range(bz):
         print(j)
         folder = batch_names[j]
         if folder[-4:] != "json":
-            for i in range(12):
+            for idx in range(views):
+                i = target_index[idx]
                 im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
                 if not os.path.isfile(im_path):
                     bad_folders.append(folder)
-                    images = images[:-i]
+                    images = images[:-idx]
                     skip_index.append(j)
 
                     # save the bad items
@@ -167,7 +181,7 @@ while batch_s < end_n:
     # print(" time after load_image =", next_t)
     print("time for load diff 1", next_t - curr)
 
-    print("total num is ", len(images), ", should be", (bz- len(skip_index)) *12 )
+    print("total num is ", len(images), ", should be", (bz- len(skip_index)) *3)
 
     # make them a batch
     batch_images = torch.stack(images, 0)
@@ -189,13 +203,13 @@ while batch_s < end_n:
     # post process
     curr = time.time()
     # print("time before post", curr)
-    print("num of captions is ", len(captions) , "should be ", (bz- len(skip_index)) *12 )
+    print("num of captions is ", len(captions) , "should be ", (bz- len(skip_index)) *3 )
     print("skip_index is", skip_index)
     offset = 0
     for j in range(bz):
         if j not in skip_index:
             folder = batch_names[j]
-            cur_texts = captions[(j+offset)*12:(j+1+offset)*12]
+            cur_texts = captions[(j+offset)*3:(j+1+offset)*3]
             #print(len(cur_texts))
             best_text = most_frequent(cur_texts)
             out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
