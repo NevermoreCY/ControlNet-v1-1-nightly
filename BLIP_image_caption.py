@@ -8,6 +8,7 @@ from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
 import json
 import time
+import numpy as np
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -116,6 +117,7 @@ batch_e = batch_s + bz
 
 while batch_s < end_n:
     print(batch_s, batch_e)
+    iter_time_s = time.time()
 
     batch_names =  sub_folder_list[batch_s:batch_e]
     images = []
@@ -156,9 +158,11 @@ while batch_s < end_n:
     # post process
     curr = time.time()
     # print("time before post", curr)
+    print("texts length ", len(texts))
     for j in range(bz):
         folder = batch_names[j]
         cur_texts = texts[j*12:(j+1)*12]
+        print(len(cur_texts))
         best_text = most_frequent(cur_texts)
         out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
         with open(out_text_name, 'w') as f:
@@ -169,7 +173,8 @@ while batch_s < end_n:
     # update id
     batch_s += bz
     batch_e += bz
-
+    time_cost = time.time() - iter_time_s
+    print("1 iteration takes time :", time_cost /60 , " minutes." )
     # for f_id in tqdm(range(len(sub_folder_list))):
     #     folder = sub_folder_list[f_id]
     #     if folder[-4:] != "json":
