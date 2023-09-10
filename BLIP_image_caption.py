@@ -6,6 +6,8 @@ import torch
 from torchvision import transforms
 from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
+import json
+import time
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -32,6 +34,8 @@ def load_demo_image(image_size, device):
 def load_image(image_size, device, im_path):
 
     raw_image = Image.open(im_path).convert('RGB')
+    print("raw_image shape", raw_image.size)
+    print("raw_image type", type(raw_image))
     transform = transforms.Compose([
         transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
         transforms.ToTensor(),
@@ -45,7 +49,7 @@ from BLIP.models.blip import blip_decoder
 
 
 model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
-image_size = 512
+image_size = 256
 
 model = blip_decoder(pretrained=model_url, image_size=image_size, vit='base')
 model.eval()
@@ -70,12 +74,21 @@ def most_frequent(List):
     return item
 
 img_folder = "/yuch_ws/views_release"
-sub_folder_list = os.listdir(img_folder)
+# sub_folder_list = os.listdir(img_folder)
+# sub_folder_list.sort()
+
+with open('test_paths.json') as f:
+    sub_folder_list = json.load(f)
+
 sub_folder_list.sort()
 
+bz = 100
 cur_n = 0
 total_n = len(sub_folder_list)
-print(sub_folder_list[:5])
+print("total_n", total_n)
+print("first few names",sub_folder_list[:5])
+
+
 for f_id in tqdm(range(len(sub_folder_list))):
     folder = sub_folder_list[f_id]
     if folder[-4:] != "json":
@@ -83,8 +96,14 @@ for f_id in tqdm(range(len(sub_folder_list))):
         for i in range(12):
             im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
 
+            curr = time.time()
+            print("time load_image", curr)
+            x = load_image(image_size=image_size, device=device, im_path=im_path)
+            next_t = time.time()
+            print(" time after load_image =", next_t)
+            print("diff 1", next_t - curr)
 
-            image = load_image(image_size=image_size, device=device, im_path=im_path)
+            image = x.repeat(100, 1, 1, 1)
 
             with torch.no_grad():
                 # beam search
