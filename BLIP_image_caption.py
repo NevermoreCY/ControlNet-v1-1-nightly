@@ -49,7 +49,7 @@ def load_image(image_size, device, im_path):
     # print("raw_image shape", raw_image.size)
     # print("raw_image type", type(raw_image))
     transform2 = transforms.Compose([
-        transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BICUBIC),
+        transforms.Resize((image_size, image_size), interpolation=InterpolationMode.BILINEAR),
         transforms.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711))
     ])
     # image = transform(raw_image).unsqueeze(0).to(device)
