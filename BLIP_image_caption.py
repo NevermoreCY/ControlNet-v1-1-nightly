@@ -104,10 +104,17 @@ for f_id in tqdm(range(len(sub_folder_list))):
             print("diff 1", next_t - curr)
 
             image = x.repeat(100, 1, 1, 1)
+            print(image.shape)
+
 
             with torch.no_grad():
                 # beam search
+                curr = time.time()
+                print("time before inference", curr)
                 caption = model.generate(image, sample=False, num_beams=3, max_length=20, min_length=5)
+                next_t = time.time()
+                print(" time after inference =", next_t)
+                print("diff 2", next_t - curr)
                 # nucleus sampling
                 # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5)
         #        print('caption: ' + caption[0])
