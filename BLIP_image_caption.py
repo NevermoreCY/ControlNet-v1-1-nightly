@@ -114,12 +114,12 @@ print("total_n", total_n)  # 772870
 
 
 
-job_num = 14
+job_num = 15
 job_length = total_n // 8
 
 
-start_n = 33000
-end_n = 36500
+start_n = 36500
+end_n = 40000
 bz = 100
 
 print("******** cur job_num is " , job_num, "start is", start_n, "end is", end_n )
