@@ -176,6 +176,8 @@ while batch_s < end_n:
     batch_e += bz
     time_cost = time.time() - iter_time_s
     print("1 iteration takes time :", time_cost /60 , " minutes." )
+
+    print(batch_s,batch_e,end_n)
     # for f_id in tqdm(range(len(sub_folder_list))):
     #     folder = sub_folder_list[f_id]
     #     if folder[-4:] != "json":
