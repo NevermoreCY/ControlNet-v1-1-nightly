@@ -109,13 +109,15 @@ total_n = len(sub_folder_list)
 print("total_n", total_n)  # 772870
 print("first few names",sub_folder_list[:5])
 
-job_num = 0
+job_num = 1
 job_length = total_n // 8
 
-print("******** cur job_num is " , job_num)
+
 start_n = 10000 * job_num
 end_n = 10000 * (job_num + 1)
 bz = 200
+
+print("******** cur job_num is " , job_num, "start is", start_n, "end is", end_n )
 
 
 batch_s = start_n
