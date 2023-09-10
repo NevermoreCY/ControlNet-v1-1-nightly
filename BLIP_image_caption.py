@@ -147,7 +147,10 @@ while batch_s < end_n:
         curr = time.time()
         # print("time before inference", curr)
         caption = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
-        print(caption.shape)
+
+        print(caption)
+        print(len(caption), len(caption[0]))
+
         next_t = time.time()
         # print(" time after inference =", next_t)
         print("time for inference diff 2", next_t - curr)
