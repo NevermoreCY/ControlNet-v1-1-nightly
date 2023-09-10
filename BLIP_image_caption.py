@@ -60,12 +60,12 @@ def load_image(image_size, device, im_path):
     raw_image = transform1(raw_image).to(device)
     load_3 = time.time()
     print("load_diff2", load_3 - load_2)
-
-
-    raw_image2 = read_image(im_path).to(device)
+    #
+    #
+    # raw_image2 = read_image(im_path).to(device)
     load_4 = time.time()
-    print("load_diff3", load_4 - load_3)
-    print(raw_image.shape , raw_image2[:3].shape)
+    # print("load_diff3", load_4 - load_3)
+    # print(raw_image.shape , raw_image2[:3].shape)
 
     # print("raw_image shape", raw_image.size)
     # print("raw_image type", type(raw_image))
@@ -75,7 +75,7 @@ def load_image(image_size, device, im_path):
     load_5 = time.time()
     print("load_diff4", load_5 - load_4)
 
-    print(raw_image == raw_image2[:3])
+    # print(raw_image == raw_image2[:3])
     return image
 
 def load_image_batch(image_size, device, batch_path):
