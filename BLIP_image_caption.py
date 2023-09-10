@@ -65,6 +65,7 @@ def load_image(image_size, device, im_path):
     raw_image2 = read_image(im_path).to(device)
     load_4 = time.time()
     print("load_diff3", load_4 - load_3)
+    print(raw_image.shape , raw_image2.shape)
 
     # print("raw_image shape", raw_image.size)
     # print("raw_image type", type(raw_image))
@@ -72,7 +73,7 @@ def load_image(image_size, device, im_path):
     # image = transform(raw_image).unsqueeze(0).to(device)
     image = transform2(raw_image).to(device)
     load_5 = time.time()
-    print("load_diff4", load_4 - load_3)
+    print("load_diff4", load_5 - load_4)
 
     print(raw_image == raw_image2)
     return image
