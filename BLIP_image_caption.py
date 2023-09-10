@@ -110,7 +110,7 @@ job_length = total_n // 8
 print("******** cur job_num is " , job_num)
 start_n = 10000 * job_num
 end_n = 10000 * (job_num + 1)
-bz = 100
+bz = 10
 
 
 batch_s = start_n
