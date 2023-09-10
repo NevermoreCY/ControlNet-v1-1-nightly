@@ -110,19 +110,21 @@ print("total_n", total_n)  # 772870
 print("first few names",sub_folder_list[:5])
 
 
-job_num = 7
+job_num = 8
 job_length = total_n // 8
 
 
-start_n = 10000 * job_num
-end_n = 10000 * (job_num + 1)
-bz = 200
+start_n = 11200
+end_n = 16000
+bz = 100
 
 print("******** cur job_num is " , job_num, "start is", start_n, "end is", end_n )
 
 
 batch_s = start_n
 batch_e = batch_s + bz
+
+bad_folders = []
 
 while batch_s < end_n:
     print(batch_s, batch_e)
@@ -134,19 +136,34 @@ while batch_s < end_n:
 
     curr = time.time()
     # print("time load_image", curr)
+    skip_index = []
+
     for j in range(bz):
         print(j)
         folder = batch_names[j]
         if folder[-4:] != "json":
             for i in range(12):
                 im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
+                if not os.path.isfile(im_path):
+                    bad_folders.append(folder)
+                    images = images[:-i]
+                    skip_index.append(j)
+
+                    # save the bad items
+                    out_text_name = "Bad_folder_names_job_" + str(job_num) +  ".txt"
+                    with open(out_text_name, 'w') as f:
+                        for line in bad_folders:
+                            f.write(line)
+
+                    break
+
                 images.append(load_image(image_size=image_size, device=device, im_path=im_path))
     #print(assert(bz*12 == len(images)) )
     next_t = time.time()
     # print(" time after load_image =", next_t)
     print("time for load diff 1", next_t - curr)
 
-    print("total num is ", len(images), ", should be",bz*12)
+    print("total num is ", len(images), ", should be", (bz- len(skip_index)) *12 )
 
     # make them a batch
     batch_images = torch.stack(images, 0)
@@ -168,15 +185,16 @@ while batch_s < end_n:
     # post process
     curr = time.time()
     # print("time before post", curr)
-    print("num of captions is ", len(captions) , "should be ", bz* 12 )
+    print("num of captions is ", len(captions) , "should be ", (bz- len(skip_index)) *12 )
     for j in range(bz):
-        folder = batch_names[j]
-        cur_texts = captions[j*12:(j+1)*12]
-        print(len(cur_texts))
-        best_text = most_frequent(cur_texts)
-        out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
-        with open(out_text_name, 'w') as f:
-            f.write(best_text)
+        if j not in skip_index:
+            folder = batch_names[j]
+            cur_texts = captions[j*12:(j+1)*12]
+            print(len(cur_texts))
+            best_text = most_frequent(cur_texts)
+            out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
+            with open(out_text_name, 'w') as f:
+                f.write(best_text)
     # print(" time after post =", next_t)
     print("time for post diff 3", next_t - curr)
 
