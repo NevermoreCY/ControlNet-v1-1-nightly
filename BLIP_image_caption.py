@@ -63,7 +63,7 @@ def load_image(image_size, device, im_path):
     #
     #load_5
     raw_image2 = read_image(im_path).to(device)
-    raw_image2.type('torch.FloatTensor')
+    raw_image2 = raw_image2.type('torch.FloatTensor')
     # load_4 = time.time()
     # print("load_diff3", load_4 - load_3)
     # print(raw_image.shape , raw_image2[:3].shape)
