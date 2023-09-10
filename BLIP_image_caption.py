@@ -109,7 +109,7 @@ total_n = len(sub_folder_list)
 print("total_n", total_n)  # 772870
 print("first few names",sub_folder_list[:5])
 
-job_num = 5
+job_num = 6
 job_length = total_n // 8
 
 
