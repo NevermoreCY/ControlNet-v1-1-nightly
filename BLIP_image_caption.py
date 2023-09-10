@@ -159,12 +159,12 @@ while batch_s < end_n:
         print(j)
         folder = batch_names[j]
         if folder[-4:] != "json":
-            for idx in range(views):
-                i = target_index[idx]
+            for i in range(views):
+                #i = target_index[idx]
                 im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
                 if not os.path.isfile(im_path):
                     bad_folders.append(folder)
-                    images = images[:-idx]
+                    images = images[:-i]
                     skip_index.append(j)
 
                     # save the bad items
