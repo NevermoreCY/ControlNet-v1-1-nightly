@@ -11,7 +11,7 @@ import time
 import numpy as np
 import sys
 
-log = open("image_caption_logs/sep10_job0_t1.log", "w")
+log = open("image_caption_logs/sep10_job0_t1.log", "a")
 sys.stdout = log
 sys.stderr = log
 
