@@ -131,6 +131,7 @@ while batch_s < end_n:
                 im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
                 images.append(load_image(image_size=image_size, device=device, im_path=im_path))
     #print(assert(bz*12 == len(images)) )
+    next_t = time.time()
     # print(" time after load_image =", next_t)
     print("time for load diff 1", next_t - curr)
 
