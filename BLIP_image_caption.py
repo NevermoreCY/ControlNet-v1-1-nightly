@@ -111,7 +111,7 @@ sub_folder_list.sort()
 
 total_n = len(sub_folder_list)
 print("total_n", total_n)  # 772870
-print("first few names",sub_folder_list[:5])
+
 
 
 job_num = 8
@@ -123,7 +123,7 @@ end_n = 16000
 bz = 100
 
 print("******** cur job_num is " , job_num, "start is", start_n, "end is", end_n )
-
+print("first few names",sub_folder_list[start_n:start_n+5])
 
 batch_s = start_n
 batch_e = batch_s + bz
