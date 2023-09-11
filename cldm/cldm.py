@@ -317,7 +317,10 @@ class ControlLDM(LatentDiffusion):
 
     @torch.no_grad()
     def get_input(self, batch, k, bs=None, *args, **kwargs):
+
+        # print("* args and **kwargs should be None!" , "*args are" , *args, "**kwargs are", **kwargs)
         x, c = super().get_input(batch, self.first_stage_key, *args, **kwargs)
+        # print("control LDM extract data from batch, key is :" , self.control_key)
         control = batch[self.control_key]
         if bs is not None:
             control = control[:bs]

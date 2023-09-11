@@ -417,6 +417,7 @@ class DDPM(pl.LightningModule):
         return self.p_losses(x, t, *args, **kwargs)
 
     def get_input(self, batch, k):
+        # print( "k is ", k ,"k should be self.first stage key which is jpg")
         x = batch[k]
         if len(x.shape) == 3:
             x = x[..., None]
@@ -430,7 +431,8 @@ class DDPM(pl.LightningModule):
         return loss, loss_dict
 
     def training_step(self, batch, batch_idx):
-        for k in self.ucg_training:
+        # print(" check ucg_training , this should be None! --ddpm.py line 433", self.ucg_training)
+        for k in self.ucg_training:  # this should be None
             p = self.ucg_training[k]["p"]
             val = self.ucg_training[k]["val"]
             if val is None:
@@ -564,8 +566,15 @@ class LatentDiffusion(DDPM):
         self.instantiate_first_stage(first_stage_config)
         self.instantiate_cond_stage(cond_stage_config)
         self.cond_stage_forward = cond_stage_forward
+
         self.clip_denoised = False
         self.bbox_tokenizer = None
+
+        # Here we add extra MLP for concatenating image CLIP embedding, transfer them back to 768 size.
+        self.cc_projection = nn.Linear(772, 768)
+        nn.init.eye_(list(self.cc_projection.parameters())[0][:768, :768])
+        nn.init.zeros_(list(self.cc_projection.parameters())[1])
+        self.cc_projection.requires_grad_(True)
 
         self.restarted_from_ckpt = False
         if ckpt_path is not None:
@@ -620,20 +629,25 @@ class LatentDiffusion(DDPM):
             param.requires_grad = False
 
     def instantiate_cond_stage(self, config):
+        # print("***instantiate_cond_stage")
         if not self.cond_stage_trainable:
+            # print("*** cond_stage is not trainable ")
             if config == "__is_first_stage__":
-                print("Using first stage also as cond stage.")
+                # print("Using first stage also as cond stage.")
                 self.cond_stage_model = self.first_stage_model
             elif config == "__is_unconditional__":
                 print(f"Training {self.__class__.__name__} as an unconditional model.")
                 self.cond_stage_model = None
                 # self.be_unconditional = True
             else:
+                # print("*** else statement")
+                # print("config is ", config )
                 model = instantiate_from_config(config)
                 self.cond_stage_model = model.eval()
                 self.cond_stage_model.train = disabled_train
                 for param in self.cond_stage_model.parameters():
                     param.requires_grad = False
+
         else:
             assert config != '__is_first_stage__'
             assert config != '__is_unconditional__'
@@ -765,19 +779,40 @@ class LatentDiffusion(DDPM):
 
     @torch.no_grad()
     def get_input(self, batch, k, return_first_stage_outputs=False, force_c_encode=False,
-                  cond_key=None, return_original_cond=False, bs=None, return_x=False):
+                  cond_key=None, return_original_cond=False, bs=None, return_x=False, uncond=0.05):
+
+        # print("latent diffsuion call super model DDPM on key : " , k )
         x = super().get_input(batch, k)
+
+        # add extra input for camera pose difference
+        T = batch['camera_pose'].to(memory_format=torch.contiguous_format).float()
+
         if bs is not None:
             x = x[:bs]
+            T = T[:bs]
+
         x = x.to(self.device)
+        T = T.to(self.device)
+
+        # print("*** T shape is ", T.shape)
+        # 10 , 4
+        # print("*** T[:,NOne.] shape" ,  T[:, None, :].shape)
+        # 10,1,4
+        T = T[:, None, :].repeat(1,77,1)
+        # print("**** T shape after repeat " , T.shape)
+
+        # here we use AutoencoderKL to encode the target image into latent space
         encoder_posterior = self.encode_first_stage(x)
         z = self.get_first_stage_encoding(encoder_posterior).detach()
+        # print("shape of latent target image is : ", z.shape)
 
         if self.model.conditioning_key is not None and not self.force_null_conditioning:
+            # print("should be true since model.conditioning_key is hypered.", self.model.conditioning_key)
             if cond_key is None:
                 cond_key = self.cond_stage_key
             if cond_key != self.first_stage_key:
-                if cond_key in ['caption', 'coordinates_bbox', "txt"]:
+                if cond_key in ['caption', 'coordinates_bbox', "txt", "camera_pose"]:
+                    # print("we should have text prompt for condition, cond_key is ", cond_key)
                     xc = batch[cond_key]
                 elif cond_key in ['class_label', 'cls']:
                     xc = batch
@@ -785,17 +820,56 @@ class LatentDiffusion(DDPM):
                     xc = super().get_input(batch, cond_key).to(self.device)
             else:
                 xc = x
+            # so basically xc is the text prompt, here we use CLIP to encode the text prompt to latent space
+            # which is c
+            # print("***testing clip encoder")
+            # xc = ["a hedgehog drinking a whiskey", "der mond ist aufgegangen",
+            #              "Ein Satz mit vielen Sonderzeichen: äöü ß ?! : 'xx-y/@s'"]
+
+            # if bs is not None:
+            #     print("*** bs is ", bs)
+            #     xc = xc[:bs]
+            # cond = {}
+
+            # To support classifier-free guidance, randomly drop out only text conditioning 5%, only image conditioning 5%, and both 5%.
+            # random = torch.rand(x.size(0), device=x.device)
+            # prompt_mask = rearrange(random < 2 * uncond, "n -> n 1 1")
+            # input_mask = 1 - rearrange((random >= uncond).float() * (random < 3 * uncond).float(), "n -> n 1 1 1")
+
             if not self.cond_stage_trainable or force_c_encode:
+                # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
                 if isinstance(xc, dict) or isinstance(xc, list):
                     c = self.get_learned_conditioning(xc)
+                    # print("*** text clip embedding shape is ", c.shape , c.type)
+
+                    clip_camera = torch.concat([c,T], dim=-1)
+                    # print("*** after concate camerapose into c, shape is ", clip_camera.shape)
+                    c = self.cc_projection(clip_camera)
+                    # print("*** after cc projection, shape is ", c.shape)
+                    #torch.save(c, 'text_clip_output.pt')
                 else:
-                    c = self.get_learned_conditioning(xc.to(self.device))
+                    # c = self.get_learned_conditioning(xc.to(self.device))
+                    with torch.enable_grad():
+                        c = self.get_learned_conditioning(xc.to(self.device))
+                        # c = self.get_learned_conditioning(xc).detach()
+                    #     null_prompt = self.get_learned_conditioning([""]).detach()
+                    #     cond["c_crossattn"] = [self.cc_projection(
+                    #         torch.cat([torch.where(prompt_mask, null_prompt, c), T[:, None, :]], dim=-1))]
+                    #     # cond["c_crossattn"] = [self.cc_projection(
+                    #     #     torch.cat([torch.where(prompt_mask, null_prompt, clip_emb), T[:, None, :]], dim=-1))]
+                    #
+                    # # torch.save(c, 'img_clip_output.pt')
+                    # cond["c_concat"] = [input_mask * self.encode_first_stage((xc.to(self.device))).mode().detach()]
+                    #
+                    # print("*** c_crossattn shape is ", cond["c_crossattn"][0].shape )
+                    # print("*** c_concat shape is ", cond["c_concat"][0].shape)
+
             else:
                 c = xc
             if bs is not None:
                 c = c[:bs]
-
-            if self.use_positional_encodings:
+            # print("*** use_positional encodings : ", self.use_positional_encodings)
+            if self.use_positional_encodings: # here we don't use positional encodings
                 pos_x, pos_y = self.compute_latent_shifts(batch)
                 ckey = __conditioning_keys__[self.model.conditioning_key]
                 c = {ckey: c, 'pos_x': pos_x, 'pos_y': pos_y}
@@ -806,7 +880,9 @@ class LatentDiffusion(DDPM):
             if self.use_positional_encodings:
                 pos_x, pos_y = self.compute_latent_shifts(batch)
                 c = {'pos_x': pos_x, 'pos_y': pos_y}
+        # output is usually (target image in latent space , test prompt embedding)
         out = [z, c]
+
         if return_first_stage_outputs:
             xrec = self.decode_first_stage(z)
             out.extend([x, xrec])
@@ -832,17 +908,22 @@ class LatentDiffusion(DDPM):
         return self.first_stage_model.encode(x)
 
     def shared_step(self, batch, **kwargs):
+
+        # print("***kwargs should be None if we call shared_step from training_step or validation_step!", "kwargs are ", **kwargs)
+
         x, c = self.get_input(batch, self.first_stage_key)
         loss = self(x, c)
         return loss
 
     def forward(self, x, c, *args, **kwargs):
+        # print("** we got the input x and cond, now it's forwaring time")
+        # print("*** shorten_cond_schedule : " , self.shorten_cond_schedule)
         t = torch.randint(0, self.num_timesteps, (x.shape[0],), device=self.device).long()
         if self.model.conditioning_key is not None:
             assert c is not None
             if self.cond_stage_trainable:
                 c = self.get_learned_conditioning(c)
-            if self.shorten_cond_schedule:  # TODO: drop this option
+            if self.shorten_cond_schedule:  # This is false TODO: drop this option
                 tc = self.cond_ids[t].to(self.device)
                 c = self.q_sample(x_start=c, t=tc, noise=torch.randn_like(c.float()))
         return self.p_losses(x, c, t, *args, **kwargs)
@@ -1284,7 +1365,11 @@ class LatentDiffusion(DDPM):
         if self.learn_logvar:
             print('Diffusion model optimizing logvar')
             params.append(self.logvar)
-        opt = torch.optim.AdamW(params, lr=lr)
+        print("*** parameters to optimize is ", params)
+        # opt = torch.optim.AdamW(params, lr=lr)
+        opt = torch.optim.AdamW([{"params": self.model.parameters(), "lr": lr},
+                                 {"params": self.cc_projection.parameters(), "lr": 10. * lr}], lr=lr)
+
         if self.use_scheduler:
             assert 'target' in self.scheduler_config
             scheduler = instantiate_from_config(self.scheduler_config)
