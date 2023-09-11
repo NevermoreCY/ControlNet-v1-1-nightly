@@ -210,7 +210,7 @@ class ObjaverseData(Dataset):
 
         except:
             # very hacky solution, sorry about this
-            filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
+            filename = os.path.join(self.root_dir, '692db5f2d3a04bb286cb977a7dba903e_1')  # this one we know is valid
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             # read prompt from BLIP
