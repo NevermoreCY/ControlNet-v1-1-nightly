@@ -110,7 +110,7 @@ class ObjaverseData(Dataset):
         # with open(os.path.join(root_dir, 'test_paths.json')) as f:
         #     self.paths = json.load(f)
 
-        with open(os.path.join('valid_paths.json')) as f:
+        with open('valid_paths.json') as f:
             self.paths = json.load(f)
 
         total_objects = len(self.paths)
