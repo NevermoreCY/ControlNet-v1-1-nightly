@@ -278,11 +278,11 @@ from cldm.model import create_model, load_state_dict
 # Configs
 # resume_path0 = './models/control_sd15_ini.ckpt'  # totorial
 # resume_path1 = './models/control_v11p_sd15_canny.pth'  # conv 1.1
-resume_path = './models/control_sd15_canny.pth'  # conv 1
+resume_path = 'models/control_sd15_canny.pth'  # conv 1
 
 
 # # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
-model = create_model('./models/yuch_v11p_sd15_canny.yaml').cpu()
+model = create_model('models/yuch_v11p_sd15_canny.yaml').cpu()
 model.load_state_dict(load_state_dict(resume_path, location='cpu'), strict=False)
 # model.load_state_dict(torch.load(resume_path))
 model.learning_rate = learning_rate
