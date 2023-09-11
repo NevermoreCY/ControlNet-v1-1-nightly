@@ -117,9 +117,9 @@ class ObjaverseData(Dataset):
 
         print("*********number of total objects", total_objects)
         if validation:
-            self.paths = self.paths[math.floor(total_objects / 100. * 60.):]  # used last 1% as validation
+            self.paths = self.paths[math.floor(total_objects / 100. * 99.):]  # used last 1% as validation
         else:
-            self.paths = self.paths[:math.floor(total_objects / 100. * 40.)]  # used first 99% as training
+            self.paths = self.paths[:math.floor(total_objects / 100. * 99.)]  # used first 99% as training
         print('============= length of dataset %d =============' % len(self.paths))
         self.tform = image_transforms
 
