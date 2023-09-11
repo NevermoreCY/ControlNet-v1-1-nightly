@@ -250,7 +250,7 @@ class ObjaverseData(Dataset):
 # setting for training
 batch_size= 1000
 gpus=8
-root_dir = '/yuch_ws/view_release'
+root_dir = '/yuch_ws/views_release'
 # setting for local test
 # batch_size= 1
 # gpus=1
