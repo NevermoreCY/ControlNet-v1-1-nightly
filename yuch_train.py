@@ -107,7 +107,10 @@ class ObjaverseData(Dataset):
         # if not isinstance(ext, (tuple, list, ListConfig)):
         #     ext = [ext]
 
-        with open(os.path.join(root_dir, 'test_paths.json')) as f:
+        # with open(os.path.join(root_dir, 'test_paths.json')) as f:
+        #     self.paths = json.load(f)
+
+        with open(os.path.join(root_dir, 'valid_paths.json')) as f:
             self.paths = json.load(f)
 
         total_objects = len(self.paths)
@@ -242,15 +245,16 @@ class ObjaverseData(Dataset):
         return self.tform(im)
 
 
-root_dir = 'objvarse_views'
+
 
 # setting for training
-batch_size= 1
-gpus=1
-
+batch_size= 1000
+gpus=8
+root_dir = '/yuch_ws/view_release'
 # setting for local test
-batch_size= 1
-gpus=1
+# batch_size= 1
+# gpus=1
+# root_dir = 'objvarse_views'
 
 num_workers = 16
 total_view = 12
