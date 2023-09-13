@@ -236,6 +236,7 @@ class ObjaverseData(Dataset):
         data["txt"] = prompt
 
         print("test prompt is ", prompt)
+        print("img shape", target_im.shape, "hint shape", canny_r.shape)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
