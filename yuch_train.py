@@ -235,6 +235,8 @@ class ObjaverseData(Dataset):
         data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
         data["txt"] = prompt
 
+        print("test prompt is ", prompt)
+
         if self.postprocess is not None:
             data = self.postprocess(data)
 
@@ -249,7 +251,7 @@ class ObjaverseData(Dataset):
 
 # setting for training
 batch_size= 4
-gpus=8
+gpus=1
 # total batch = batch_size * gpus
 root_dir = '/yuch_ws/views_release'
 # setting for local test
