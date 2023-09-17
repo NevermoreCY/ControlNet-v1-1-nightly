@@ -98,7 +98,9 @@ class FrozenCLIPEmbedder(AbstractEncoder):
                  freeze=True, layer="last", layer_idx=None):  # clip-vit-base-patch32
         super().__init__()
         assert layer in self.LAYERS
+        #print("load CLIP tokenizer")
         self.tokenizer = CLIPTokenizer.from_pretrained(version)
+        #print("load CLIP textmodel")
         self.transformer = CLIPTextModel.from_pretrained(version)
         self.device = device
         self.max_length = max_length
