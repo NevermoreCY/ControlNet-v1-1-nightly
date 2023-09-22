@@ -193,7 +193,7 @@ class ControlNet(nn.Module):
                         disabled_sa = disable_self_attentions[level]
                     else:
                         disabled_sa = False
-
+                    print("num_attention_blocks should be None, which is : " , num_attention_blocks)
                     if not exists(num_attention_blocks) or nr < num_attention_blocks[level]:
                         layers.append(
                             AttentionBlock(
