@@ -726,15 +726,15 @@ if __name__ == "__main__":
             del callbacks_cfg['ignore_keys_callback']
 
         print("*** callbacks_cfg", callbacks_cfg)
-        callbacks_cfg["checkpoint_callback"]["params"]['save_top_k'] = -1
-        # callbacks_cfg["checkpoint_callback"]["params"]['save_last'] = None
-        callbacks_cfg["checkpoint_callback"]["params"]['filename'] = '{epoch}-{step}'
-        # callbacks_cfg["checkpoint_callback"]["params"]['mode'] = 'min'
-        callbacks_cfg["checkpoint_callback"]["params"]['monitor'] = 'global_step'
+        # callbacks_cfg["checkpoint_callback"]["params"]['save_top_k'] = -1
+        # # callbacks_cfg["checkpoint_callback"]["params"]['save_last'] = None
+        # callbacks_cfg["checkpoint_callback"]["params"]['filename'] = '{epoch}-{step}'
+        # # callbacks_cfg["checkpoint_callback"]["params"]['mode'] = 'min'
+        # callbacks_cfg["checkpoint_callback"]["params"]['monitor'] = 'global_step'
         # del callbacks_cfg["checkpoint_callback"]["params"]['save_top_k']
         # del callbacks_cfg["checkpoint_callback"]["params"]['save_last']
         # del callbacks_cfg["checkpoint_callback"]["params"]['every_n_train_steps']
-        print("**** callbacks_cfg", callbacks_cfg)
+        # print("**** callbacks_cfg", callbacks_cfg)
         # from datetime import timedelta
         # delta = timedelta(
         #     minutes=1,
@@ -764,6 +764,10 @@ if __name__ == "__main__":
 
         logger = ImageLogger(batch_frequency=300)
 
+        from pytorch_lightning.callbacks import ModelCheckpoint
+        checkpoint_callback = ModelCheckpoint(monitor = 'val_loss',
+                                              dirpath = 'my/path/',filename = 'sample-mnist-{epoch:02d}-{val_loss:.2f}')
+
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
 
@@ -772,13 +776,20 @@ if __name__ == "__main__":
         trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
 
-        # data
-        data = instantiate_from_config(config.data)
-        # NOTE according to https://pytorch-lightning.readthedocs.io/en/latest/datamodules.html
-        # calling these ourselves should not be necessary but it is.
-        # lightning still takes care of proper multiprocessing though
+        # setting for training
+        batch_size = 10
+        root_dir = '/yuch_ws/views_release'
+        num_workers = 16
+        total_view = 12
+        logger_freq = 300
+
+        data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers)
         data.prepare_data()
         data.setup()
+
+        # data = instantiate_from_config(config.data)
+        # data.prepare_data()
+        # data.setup()
         rank_zero_print("#### Data ####")
         try:
             for k in data.datasets:
