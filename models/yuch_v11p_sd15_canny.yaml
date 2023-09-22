@@ -1,4 +1,7 @@
 model:
+  base_learning_rate: 1.0e-05
+  sd_locked: True
+  only_mid_control: False
   target: cldm.cldm.ControlLDM
   params:
     linear_start: 0.00085
