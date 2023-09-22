@@ -279,12 +279,12 @@ con22_keys = list(con22.keys())
 
 print("v1.1 keys" , con11_keys)
 
-print("v1 keys:" , con22_keys)
+print("\n\n\n\nv1 keys:" , con22_keys)
 
 
-print("v1.1 keys length " , len(con11_keys))
+print("\n\n\n\nv1.1 keys length " , len(con11_keys))
 
-print("v1 keys length" , len(con22_keys))
+print("\n\n\n\nv1 keys length" , len(con22_keys))
 
 in22 = []
 not22= []
@@ -297,5 +297,13 @@ for k in con22_keys:
     else:
         not22.append(k)
 
-print("in22", in22)
-print("not22" , not22)
+print("\n\n\n\nin22", in22)
+print("\n\n\n\nnot22" , not22)
+
+for k in con11_keys:
+    print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
+    con22[k] = con11[k]
+    print(con22[k] == con11[k])
+
+print("saving the ckpt.")
+torch.save(con22,'control_v11_sd15_canny_full.ckpt')
