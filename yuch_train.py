@@ -595,7 +595,7 @@ if __name__ == "__main__":
             m, u = model.load_state_dict(load_state_dict(opt.finetune_from, location='cpu'), strict=False)
             # m, u = model.load_state_dict(old_state, strict=False)
 
-
+            print("missing parameters: " , len(m) , "unkown parameters: ", len(u))
             if len(m) > 0:
                 rank_zero_print("missing keys:")
                 rank_zero_print(m)
@@ -655,8 +655,8 @@ if __name__ == "__main__":
             modelckpt_cfg = OmegaConf.create()
         modelckpt_cfg = OmegaConf.merge(default_modelckpt_cfg, modelckpt_cfg)
         rank_zero_print(f"Merged modelckpt-cfg: \n{modelckpt_cfg}")
-        if version.parse(pl.__version__) < version.parse('1.4.0'):
-            trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
+        # if version.parse(pl.__version__) < version.parse('1.4.0'):
+        #     trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
 
         # add callback which sets up log directory
         default_callbacks_cfg = {
@@ -692,8 +692,8 @@ if __name__ == "__main__":
                 "target": "main.CUDACallback"
             },
         }
-        if version.parse(pl.__version__) >= version.parse('1.4.0'):
-            default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
+        # if version.parse(pl.__version__) >= version.parse('1.4.0'):
+        #     default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
 
         if "callbacks" in lightning_config:
             callbacks_cfg = lightning_config.callbacks
@@ -745,21 +745,17 @@ if __name__ == "__main__":
         # personalization:
         # trainer_kwargs["callbacks"][-1].CHECKPOINT_NAME_LAST = "{epoch}-{step}--last"
 
+        print("plugins in trainer_kwargs? " , "plugins" in trainer_kwargs)
         if not "plugins" in trainer_kwargs:
             trainer_kwargs["plugins"] = list()
+
+        print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
         if not lightning_config.get("find_unused_parameters", True):
+            print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
             from pytorch_lightning.plugins import DDPPlugin
 
             trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=False))
-        if MULTINODE_HACKS:
-            # disable resume from hpc ckpts
-            # NOTE below only works in later versions
-            # from pytorch_lightning.plugins.environments import SLURMEnvironment
-            # trainer_kwargs["plugins"].append(SLURMEnvironment(auto_requeue=False))
-            # hence we monkey patch things
-            from pytorch_lightning.trainer.connectors.checkpoint_connector import CheckpointConnector
 
-            setattr(CheckpointConnector, "hpc_resume_path", None)
 
         # save ckpt every n steps:
         # checkpoint_callback2 = ModelCheckpoint( monitor='global_step',save_last=True,filename='*cb2{epoch}-{step}', every_n_train_steps=5)
