@@ -303,7 +303,7 @@ print("\n\n\n\nnot22" , not22)
 for k in con11_keys:
     print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
     con22[k] = con11[k]
-    print(con22[k] == con11[k])
+    # print(con22[k] == con11[k])
 
 print("saving the ckpt.")
-torch.save(con22,'control_v11_sd15_canny_full.ckpt')
+# torch.save(con22,'control_v11_sd15_canny_full.ckpt')
