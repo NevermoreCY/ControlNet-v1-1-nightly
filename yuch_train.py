@@ -741,7 +741,7 @@ if __name__ == "__main__":
         # )
 
         # val/loss_simple_ema
-        trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
+        # trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
         # personalization:
         # trainer_kwargs["callbacks"][-1].CHECKPOINT_NAME_LAST = "{epoch}-{step}--last"
@@ -765,8 +765,9 @@ if __name__ == "__main__":
         logger = ImageLogger(batch_frequency=300)
 
         from pytorch_lightning.callbacks import ModelCheckpoint
-        checkpoint_callback = ModelCheckpoint(monitor = 'val_loss',
-                                              dirpath = 'my/path/',filename = 'sample-mnist-{epoch:02d}-{val_loss:.2f}')
+        checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
+                                              filename = 'control_{epoch}-{step}',verbose=True,
+                                              every_n_train_steps=500)
 
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
