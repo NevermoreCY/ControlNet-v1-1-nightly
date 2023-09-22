@@ -24,6 +24,7 @@ from pytorch_lightning import seed_everything
 from pytorch_lightning.utilities.distributed import rank_zero_only
 from omegaconf import OmegaConf
 from ldm.util import instantiate_from_config
+from cldm.logger import ImageLogger
 @rank_zero_only
 def rank_zero_print(*args):
     print(*args)
@@ -761,8 +762,12 @@ if __name__ == "__main__":
         # checkpoint_callback2 = ModelCheckpoint( monitor='global_step',save_last=True,filename='*cb2{epoch}-{step}', every_n_train_steps=5)
         # trainer_kwargs["callbacks"].append(checkpoint_callback2)
 
-        # print("*** trainer opt " , trainer_opt)
-        # print("*** trainer kwargs " , trainer_kwargs)
+        logger = ImageLogger(batch_frequency=300)
+
+        print("*** trainer opt " , trainer_opt)
+        print("*** trainer kwargs " , trainer_kwargs)
+
+
 
         trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
@@ -836,19 +841,6 @@ if __name__ == "__main__":
         if not opt.no_test and not trainer.interrupted:
             trainer.test(model, data)
     except RuntimeError as err:
-        if MULTINODE_HACKS:
-            import requests
-            import datetime
-            import os
-            import socket
-
-            device = os.environ.get("CUDA_VISIBLE_DEVICES", "?")
-            hostname = socket.gethostname()
-            ts = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-            resp = requests.get('http://169.254.169.254/latest/meta-data/instance-id')
-            rank_zero_print(
-                f'ERROR at {ts} on {hostname}/{resp.text} (CUDA_VISIBLE_DEVICES={device}): {type(err).__name__}: {err}',
-                flush=True)
         raise err
     except Exception:
         if opt.debug and trainer.global_rank == 0:
