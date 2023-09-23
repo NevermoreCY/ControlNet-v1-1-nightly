@@ -252,7 +252,7 @@ class ObjaverseData(Dataset):
 
 
 # setting for training
-batch_size= 20
+batch_size=10
 gpus=1
 # total batch = batch_size * gpus
 root_dir = '/yuch_ws/views_release'
@@ -304,9 +304,9 @@ logger = ImageLogger(batch_frequency=logger_freq)
 checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
                                               filename = 'control_{epoch}-{step}',verbose=True,
                                               every_n_train_steps=500)
-
+# plugins=[DDPPlugin(find_unused_parameters=True)]
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=True)] , accelerator='ddp',
+trainer = Trainer(accelerator='ddp',
                           accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
 # trainer = pl.Trainer(accelerator="ddp", devices='0,', precision=32, callbacks=[logger,checkpoint_callback])
 
