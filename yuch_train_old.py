@@ -236,8 +236,8 @@ class ObjaverseData(Dataset):
         data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
         data["txt"] = prompt
 
-        print("test prompt is ", prompt)
-        print("img shape", target_im.shape, "hint shape", canny_r.shape)
+        # print("test prompt is ", prompt)
+        # print("img shape", target_im.shape, "hint shape", canny_r.shape)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
@@ -306,7 +306,7 @@ checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/ch
                                               every_n_train_steps=500)
 
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
+trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=True)] , accelerator='ddp',
                           accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
 # trainer = pl.Trainer(accelerator="ddp", devices='0,', precision=32, callbacks=[logger,checkpoint_callback])
 
