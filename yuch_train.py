@@ -481,6 +481,7 @@ if __name__ == "__main__":
 
     ckptdir = os.path.join(logdir, "checkpoints")
     cfgdir = os.path.join(logdir, "configs")
+    imgdir = os.path.join(logdir, "images")
     seed_everything(opt.seed)
 
     try:
@@ -762,7 +763,7 @@ if __name__ == "__main__":
         # checkpoint_callback2 = ModelCheckpoint( monitor='global_step',save_last=True,filename='*cb2{epoch}-{step}', every_n_train_steps=5)
         # trainer_kwargs["callbacks"].append(checkpoint_callback2)
 
-        logger = ImageLogger(batch_frequency=300)
+        logger = ImageLogger(batch_frequency=300, log_dir=imgdir)
 
         from pytorch_lightning.callbacks import ModelCheckpoint
 
