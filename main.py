@@ -1079,6 +1079,7 @@ if __name__ == "__main__":
 
         data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers)
         data.prepare_data()
+
         data.setup()
 
         # data = instantiate_from_config(config.data)
