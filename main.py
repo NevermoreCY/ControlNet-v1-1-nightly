@@ -968,7 +968,7 @@ if __name__ == "__main__":
             "image_logger": {
                 "target": "main.ImageLogger",
                 "params": {
-                    "batch_frequency": 10,
+                    "batch_frequency": 500,
                     "max_images": 4,
                     "clamp": True
                 }
@@ -1032,7 +1032,7 @@ if __name__ == "__main__":
         # )
 
         # val/loss_simple_ema
-        logger = ImageLogger2(batch_frequency=10, log_dir=imgdir)
+        logger = ImageLogger2(batch_frequency=500, log_dir=imgdir)
         trainer_kwargs["callbacks"] = [logger] + [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
         # personalization:
@@ -1084,7 +1084,7 @@ if __name__ == "__main__":
         root_dir = '/yuch_ws/views_release'
         num_workers = 16
         total_view = 12
-        logger_freq = 300
+        logger_freq = 500
 
         data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers)
         data.prepare_data()
