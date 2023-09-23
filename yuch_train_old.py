@@ -104,12 +104,7 @@ class ObjaverseData(Dataset):
         #     postprocess = instantiate_from_config(postprocess)
         self.postprocess = postprocess
         self.total_view = total_view
-
-        # if not isinstance(ext, (tuple, list, ListConfig)):
-        #     ext = [ext]
-
-        # with open(os.path.join(root_dir, 'test_paths.json')) as f:
-        #     self.paths = json.load(f)
+        self.bad_files = []
 
         with open('valid_paths.json') as f:
             self.paths = json.load(f)
@@ -206,12 +201,18 @@ class ObjaverseData(Dataset):
             # print("*** canny_r.shape after concatenate", canny_r.shape)
             # normalize
             canny_r = canny_r.astype(np.float32) / 255.0
+            canny_r = torch.tensor(canny_r)
             target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+            target_im = torch.tensor(target_im)
 
 
         except:
+
+            if filename not in self.bad_files:
+                self.bad_files.append(filename)
+            print("Bad file encoutered : ", filename)
             # very hacky solution, sorry about this
-            filename = os.path.join(self.root_dir, '692db5f2d3a04bb286cb977a7dba903e_1')  # this one we know is valid
+            filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             # read prompt from BLIP
@@ -225,9 +226,14 @@ class ObjaverseData(Dataset):
             target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
             # get canny edge
             canny_r = random_canny(cond_im)
+            canny_r = canny_r[:, :, None]
+            canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
             # normalize
             canny_r = canny_r.astype(np.float32) / 255.0
             target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+
+            canny_r = torch.tensor(canny_r)
+            target_im = torch.tensor(target_im)
 
 
 
@@ -239,8 +245,6 @@ class ObjaverseData(Dataset):
         # print("test prompt is ", prompt)
         # print("img shape", target_im.shape, "hint shape", canny_r.shape)
 
-        if self.postprocess is not None:
-            data = self.postprocess(data)
 
         return data
 
@@ -306,8 +310,9 @@ checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/ch
                                               every_n_train_steps=500)
 # plugins=[DDPPlugin(find_unused_parameters=True)]
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = Trainer(accelerator='ddp',
-                          accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
+trainer = Trainer(plugins=[DDPPlugin()],accelerator='ddp',
+                          accumulate_grad_batches=1, benchmark=True, gpus='0,',
+                  num_sanity_val_steps=0, val_check_interval=5000000,callbacks=[logger,checkpoint_callback] )
 # trainer = pl.Trainer(accelerator="ddp", devices='0,', precision=32, callbacks=[logger,checkpoint_callback])
 
 # Train!
