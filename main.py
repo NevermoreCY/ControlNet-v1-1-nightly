@@ -1003,7 +1003,7 @@ if __name__ == "__main__":
                          "filename": "{epoch:06}-{step:09}",
                          "verbose": True,
                          'save_top_k': 3,
-                         'every_n_train_steps': 10,
+                         'every_n_train_steps': 500,
                          'save_weights_only': True
                      }
                      }
