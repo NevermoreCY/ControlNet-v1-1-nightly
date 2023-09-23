@@ -1069,16 +1069,17 @@ if __name__ == "__main__":
         print("*** trainer kwargs " , trainer_kwargs)
         # gpus = '0,'
         # gpus = '0,1,2,3,4,5,6,7'
-        gpus = getattr(trainer_opt, 'gpus')
-        print("gpus is ", gpus )
-        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=trainer_kwargs["callbacks"],logger=trainer_kwargs["logger"])
+        # gpus = getattr(trainer_opt, 'gpus')
+        # print("gpus is ", gpus )
+        # trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=trainer_kwargs["callbacks"],logger=trainer_kwargs["logger"])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
+        trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
         trainer.logdir = logdir  ###
         # trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
         #                   accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
         # # setting for training
-        batch_size = 15
+        batch_size = 20
         root_dir = '/yuch_ws/views_release'
         num_workers = 16
         total_view = 12
