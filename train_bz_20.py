@@ -249,7 +249,7 @@ model.only_mid_control = only_mid_control
 logger = ImageLogger(batch_frequency=logger_freq)
 checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'test/checkpoints',
                                               filename = 'control_{epoch}-{step}',verbose=True,
-                                              every_n_train_steps=500)
+                                              every_n_train_steps=10)
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
 trainer = pl.Trainer(accelerator="gpu", devices=gpus, strategy="ddp", precision=32, callbacks=[logger,checkpoint_callback])
 
