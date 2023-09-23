@@ -281,8 +281,8 @@ from cldm.model import create_model, load_state_dict
 #
 # Configs
 # resume_path0 = './models/control_sd15_ini.ckpt'  # totorial
-# resume_path1 = './models/control_v11p_sd15_canny.pth'  # conv 1.1
-resume_path = 'models/control_sd15_canny.pth'  # conv 1
+resume_path = 'models/control_v11_sd15_canny_full.ckpt'  # conv 1.1
+# resume_path = 'models/control_sd15_canny.pth'  # conv 1
 
 
 # # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
@@ -306,7 +306,7 @@ checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/ch
                                               every_n_train_steps=500)
 
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = pl.Trainer(accelerator="ddp", devices=gpus, precision=32, callbacks=[logger,checkpoint_callback])
+trainer = pl.Trainer(accelerator="ddp", devices='0,', precision=32, callbacks=[logger,checkpoint_callback])
 
 # Train!
 trainer.fit(model, dataset)
