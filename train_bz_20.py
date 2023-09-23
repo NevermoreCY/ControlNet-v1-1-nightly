@@ -203,7 +203,7 @@ class ObjaverseData(Dataset):
         im = im.convert("RGB")
         return self.tform(im)
 # setting for training
-batch_size= 20
+batch_size= 32
 gpus=1
 # total batch = batch_size * gpus
 root_dir = '/yuch_ws/views_release'
