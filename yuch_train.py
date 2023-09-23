@@ -775,7 +775,9 @@ if __name__ == "__main__":
         trainer_kwargs["callbacks"] = [logger, checkpoint_callback]
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
-        trainer = pl.Trainer(accelerator="ddp", gpus='0,', precision=32, callbacks=[logger, checkpoint_callback])
+        # gpus = '0,'
+        # gpus = '0,1,2,3,4,5,6,7'
+        trainer = pl.Trainer(accelerator="ddp", gpus = '0,1,2,3,4,5,6,7', precision=32, callbacks=[logger, checkpoint_callback])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
