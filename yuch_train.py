@@ -775,8 +775,8 @@ if __name__ == "__main__":
         trainer_kwargs["callbacks"] = [logger, checkpoint_callback]
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
-
-        trainer = Trainer.from_argparse_args(trainer_opt)
+        trainer = pl.Trainer(accelerator="ddp", gpus='0,', precision=32, callbacks=[logger, checkpoint_callback])
+        # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
         # trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
