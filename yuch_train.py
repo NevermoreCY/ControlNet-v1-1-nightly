@@ -359,8 +359,8 @@ class ObjaverseData(Dataset):
         data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
         data["txt"] = prompt
 
-        print("test prompt is ", prompt)
-        print("img shape", target_im.shape, "hint shape", canny_r.shape)
+        # print("test prompt is ", prompt)
+        # print("img shape", target_im.shape, "hint shape", canny_r.shape)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
@@ -750,14 +750,14 @@ if __name__ == "__main__":
         if not "plugins" in trainer_kwargs:
             trainer_kwargs["plugins"] = list()
 
-        print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
-        if not lightning_config.get("find_unused_parameters", True):
-            print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
-            from pytorch_lightning.plugins import DDPPlugin
+        # print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
+        # if not lightning_config.get("find_unused_parameters", True):
+        #     print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
+        #     from pytorch_lightning.plugins import DDPPlugin
+        #
+        #     trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=False))
 
-            trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=False))
-
-
+        from pytorch_lightning.plugins import DDPPlugin
         # save ckpt every n steps:
         # checkpoint_callback2 = ModelCheckpoint( monitor='global_step',save_last=True,filename='*cb2{epoch}-{step}', every_n_train_steps=5)
         # trainer_kwargs["callbacks"].append(checkpoint_callback2)
@@ -766,19 +766,21 @@ if __name__ == "__main__":
 
         from pytorch_lightning.callbacks import ModelCheckpoint
 
-        print("***ckpt dir is :" , ckptdir)
-        checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
+        # print("***ckpt dir is :" , ckptdir)
+        checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = ckptdir,
                                               filename = 'control_{epoch}-{step}',verbose=True,
                                               every_n_train_steps=500)
 
+
+        trainer_kwargs["callbacks"] = [logger, checkpoint_callback]
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
 
-
-
-        trainer = Trainer.from_argparse_args(trainer_opt, **trainer_kwargs)
+        trainer = Trainer.from_argparse_args(trainer_opt)
+        print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
-
+        trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
+                          accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
         # setting for training
         batch_size = 10
         root_dir = '/yuch_ws/views_release'
