@@ -1070,7 +1070,7 @@ if __name__ == "__main__":
         # gpus = '0,1,2,3,4,5,6,7'
         gpus = getattr(trainer_opt, 'gpus')
         print("gpus is ", gpus )
-        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=trainer_kwargs["callbacks"])
+        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=trainer_kwargs["callbacks"],logger=trainer_kwargs["logger"])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
