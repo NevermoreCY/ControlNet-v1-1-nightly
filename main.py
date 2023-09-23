@@ -1080,7 +1080,7 @@ if __name__ == "__main__":
         # trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
         #                   accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
         # # setting for training
-        batch_size = 20
+        batch_size = 22
         root_dir = '/yuch_ws/views_release'
         num_workers = 16
         total_view = 12
