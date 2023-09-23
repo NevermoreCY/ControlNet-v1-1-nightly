@@ -297,14 +297,16 @@ model.only_mid_control = only_mid_control
 # # Misc
 #
 #dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
+
 logger = ImageLogger(batch_frequency=logger_freq)
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
                                               filename = 'control_{epoch}-{step}',verbose=True,
                                               every_n_train_steps=500)
 
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = pl.Trainer(accelerator="gpu", devices=gpus, precision=32, callbacks=[logger])
+trainer = pl.Trainer(accelerator="ddp", devices=gpus, precision=32, callbacks=[logger,checkpoint_callback])
 
 # Train!
 trainer.fit(model, dataset)
