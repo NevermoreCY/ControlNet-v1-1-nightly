@@ -106,7 +106,7 @@ lightning:
   metrics_over_trainsteps_checkpoint: True
   modelcheckpoint:
     params:
-      every_n_train_steps: 500
+      every_n_train_steps: 10
   callbacks:
     image_logger:
       target: main.ImageLogger
