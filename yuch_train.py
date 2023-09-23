@@ -779,9 +779,9 @@ if __name__ == "__main__":
         trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
-        trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
-                          accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
-        # setting for training
+        # trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
+        #                   accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
+        # # setting for training
         batch_size = 10
         root_dir = '/yuch_ws/views_release'
         num_workers = 16
