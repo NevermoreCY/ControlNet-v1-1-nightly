@@ -731,19 +731,24 @@ if __name__ == "__main__":
         if not os.path.exists(opt.resume):
             raise ValueError("Cannot find {}".format(opt.resume))
         if os.path.isfile(opt.resume):
+            print("is file")
             paths = opt.resume.split("/")
             # idx = len(paths)-paths[::-1].index("logs")+1
             # logdir = "/".join(paths[:idx])
             logdir = "/".join(paths[:-2])  # eg : logs/2023_08_01_training
             ckpt = opt.resume
         else:
+
             assert os.path.isdir(opt.resume), opt.resume
+            print("is dir")
             logdir = opt.resume.rstrip("/")
             ckpt = os.path.join(logdir, "checkpoints", "last.ckpt")
 
         opt.resume_from_checkpoint = ckpt
         base_configs = sorted(glob.glob(os.path.join(logdir, "configs/*.yaml")))
+        print("base_configs:", base_configs)
         opt.base = base_configs + opt.base
+        print("opt.base", opt.base)
         _tmp = logdir.split("/")
         nowname = _tmp[-1]
     else:
@@ -761,9 +766,9 @@ if __name__ == "__main__":
 
     ckptdir = os.path.join(logdir, "checkpoints")
     cfgdir = os.path.join(logdir, "configs")
-    imgdir = os.path.join(logdir, "images")
+    imgdir = os.path.join(logdir, "images_control")
 
-    os.makedirs(imgdir, exist_ok=True)
+    # os.makedirs(imgdir, exist_ok=True)
     seed_everything(opt.seed)
 
     try:
@@ -816,6 +821,7 @@ if __name__ == "__main__":
         print("*** config.model is ", config.model)
         # model
         print("model path = ", opt.base[0])
+        print("opt.base all = ", opt.base)
         model = create_model(opt.base[0]).cpu()
         model.cpu()
         print("***model load is done")
@@ -961,7 +967,7 @@ if __name__ == "__main__":
             "image_logger": {
                 "target": "main.ImageLogger",
                 "params": {
-                    "batch_frequency": 750,
+                    "batch_frequency": 10,
                     "max_images": 4,
                     "clamp": True
                 }
