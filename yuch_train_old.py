@@ -298,8 +298,13 @@ model.only_mid_control = only_mid_control
 #
 #dataloader = DataLoader(dataset, num_workers=0, batch_size=batch_size, shuffle=True)
 logger = ImageLogger(batch_frequency=logger_freq)
+
+checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
+                                              filename = 'control_{epoch}-{step}',verbose=True,
+                                              every_n_train_steps=500)
+
 # trainer = pl.Trainer(gpus=1, precision=32, callbacks=[logger])
-trainer = pl.Trainer(accelerator="gpu", devices=gpus, strategy="ddp", precision=32, callbacks=[logger])
+trainer = pl.Trainer(accelerator="gpu", devices=gpus, precision=32, callbacks=[logger])
 
 # Train!
 trainer.fit(model, dataset)

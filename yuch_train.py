@@ -765,6 +765,8 @@ if __name__ == "__main__":
         logger = ImageLogger(batch_frequency=300)
 
         from pytorch_lightning.callbacks import ModelCheckpoint
+
+        print("***ckpt dir is :" , ckptdir)
         checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = 'logs/checkpoints',
                                               filename = 'control_{epoch}-{step}',verbose=True,
                                               every_n_train_steps=500)
