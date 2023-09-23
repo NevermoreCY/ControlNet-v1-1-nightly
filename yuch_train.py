@@ -521,6 +521,7 @@ if __name__ == "__main__":
         print("*** nondefault_trainer_args:", nondefault_trainer_args(opt))
         for k in nondefault_trainer_args(opt):
             trainer_config[k] = getattr(opt, k)
+
         if not "gpus" in trainer_config:
             del trainer_config["accelerator"]
             cpu = True
@@ -778,8 +779,9 @@ if __name__ == "__main__":
         print("*** trainer kwargs " , trainer_kwargs)
         # gpus = '0,'
         # gpus = '0,1,2,3,4,5,6,7'
-        print("gpus is ", trainer_opt['gpus'] )
-        trainer = pl.Trainer(accelerator="ddp", gpus = trainer_opt['gpus'], precision=32, callbacks=[logger, checkpoint_callback])
+        gpus = getattr(trainer_opt, 'gpus')
+        print("gpus is ", gpus )
+        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=[logger, checkpoint_callback])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
