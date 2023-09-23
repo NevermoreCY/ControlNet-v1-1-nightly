@@ -25,6 +25,7 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 from omegaconf import OmegaConf
 from ldm.util import instantiate_from_config
 from cldm.logger import ImageLogger
+from packaging import version
 @rank_zero_only
 def rank_zero_print(*args):
     print(*args)
@@ -658,8 +659,8 @@ if __name__ == "__main__":
             modelckpt_cfg = OmegaConf.create()
         modelckpt_cfg = OmegaConf.merge(default_modelckpt_cfg, modelckpt_cfg)
         rank_zero_print(f"Merged modelckpt-cfg: \n{modelckpt_cfg}")
-        # if version.parse(pl.__version__) < version.parse('1.4.0'):
-        #     trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
+        if version.parse(pl.__version__) < version.parse('1.4.0'):
+            trainer_kwargs["checkpoint_callback"] = instantiate_from_config(modelckpt_cfg)
 
         # add callback which sets up log directory
         default_callbacks_cfg = {
@@ -695,8 +696,8 @@ if __name__ == "__main__":
                 "target": "main.CUDACallback"
             },
         }
-        # if version.parse(pl.__version__) >= version.parse('1.4.0'):
-        #     default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
+        if version.parse(pl.__version__) >= version.parse('1.4.0'):
+            default_callbacks_cfg.update({'checkpoint_callback': modelckpt_cfg})
 
         if "callbacks" in lightning_config:
             callbacks_cfg = lightning_config.callbacks
@@ -728,11 +729,11 @@ if __name__ == "__main__":
             del callbacks_cfg['ignore_keys_callback']
 
         print("*** callbacks_cfg", callbacks_cfg)
-        # callbacks_cfg["checkpoint_callback"]["params"]['save_top_k'] = -1
+        callbacks_cfg["checkpoint_callback"]["params"]['save_top_k'] = -1
         # # callbacks_cfg["checkpoint_callback"]["params"]['save_last'] = None
-        # callbacks_cfg["checkpoint_callback"]["params"]['filename'] = '{epoch}-{step}'
+        callbacks_cfg["checkpoint_callback"]["params"]['filename'] = '{epoch}-{step}'
         # # callbacks_cfg["checkpoint_callback"]["params"]['mode'] = 'min'
-        # callbacks_cfg["checkpoint_callback"]["params"]['monitor'] = 'global_step'
+        callbacks_cfg["checkpoint_callback"]["params"]['monitor'] = 'global_step'
         # del callbacks_cfg["checkpoint_callback"]["params"]['save_top_k']
         # del callbacks_cfg["checkpoint_callback"]["params"]['save_last']
         # del callbacks_cfg["checkpoint_callback"]["params"]['every_n_train_steps']
@@ -743,7 +744,8 @@ if __name__ == "__main__":
         # )
 
         # val/loss_simple_ema
-        # trainer_kwargs["callbacks"] = [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
+        logger = ImageLogger(batch_frequency=10, log_dir=imgdir)
+        trainer_kwargs["callbacks"] = [logger] + [instantiate_from_config(callbacks_cfg[k]) for k in callbacks_cfg]
 
         # personalization:
         # trainer_kwargs["callbacks"][-1].CHECKPOINT_NAME_LAST = "{epoch}-{step}--last"
@@ -766,22 +768,22 @@ if __name__ == "__main__":
 
         logger = ImageLogger(batch_frequency=10, log_dir=imgdir)
 
-        from pytorch_lightning.callbacks import ModelCheckpoint
+        # from pytorch_lightning.callbacks import ModelCheckpoint
 
         # print("***ckpt dir is :" , ckptdir)
-        checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = ckptdir,
-                                              filename = 'control_{epoch}-{step}',verbose=True,
-                                              every_n_train_steps=10, save_top_k=-1, save_last=True)
+        # checkpoint_callback = ModelCheckpoint(monitor = 'global_step',dirpath = ckptdir,
+        #                                       filename = 'control_{epoch}-{step}',verbose=True,
+        #                                       every_n_train_steps=10, save_top_k=-1, save_last=True)
 
 
-        trainer_kwargs["callbacks"] = [logger, checkpoint_callback]
+        # trainer_kwargs["callbacks"] = [logger, checkpoint_callback]
         print("*** trainer opt " , trainer_opt)
         print("*** trainer kwargs " , trainer_kwargs)
         # gpus = '0,'
         # gpus = '0,1,2,3,4,5,6,7'
         gpus = getattr(trainer_opt, 'gpus')
         print("gpus is ", gpus )
-        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=[logger, checkpoint_callback])
+        trainer = pl.Trainer(accelerator="ddp", gpus = gpus, precision=32, callbacks=trainer_kwargs["callbacks"])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
