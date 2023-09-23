@@ -778,7 +778,8 @@ if __name__ == "__main__":
         print("*** trainer kwargs " , trainer_kwargs)
         # gpus = '0,'
         # gpus = '0,1,2,3,4,5,6,7'
-        trainer = pl.Trainer(accelerator="ddp", gpus = '0,1,2,3,4,5,6,7', precision=32, callbacks=[logger, checkpoint_callback])
+        print("gpus is ", trainer_opt['gpus'] )
+        trainer = pl.Trainer(accelerator="ddp", gpus = trainer_opt['gpus'], precision=32, callbacks=[logger, checkpoint_callback])
         # trainer = Trainer.from_argparse_args(trainer_opt)
         print("*** log dir is " , logdir)
         trainer.logdir = logdir  ###
