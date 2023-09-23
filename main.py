@@ -822,7 +822,8 @@ if __name__ == "__main__":
         # model
         print("model path = ", opt.base[0])
         print("opt.base all = ", opt.base)
-        model = create_model(opt.base[0]).cpu()
+        # model = create_model(opt.base[0]).cpu()
+        model = instantiate_from_config(config.model)
         model.cpu()
         print("***model load is done")
 
