@@ -193,8 +193,8 @@ class ObjaverseData(Dataset):
         data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
         data["txt"] = prompt
 
-        print("test prompt is ", prompt)
-        print("img shape", target_im.shape, "hint shape", canny_r.shape)
+        # print("test prompt is ", prompt)
+        # print("img shape", target_im.shape, "hint shape", canny_r.shape)
 
         if self.postprocess is not None:
             data = self.postprocess(data)
