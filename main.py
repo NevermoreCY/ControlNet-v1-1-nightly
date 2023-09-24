@@ -333,12 +333,17 @@ class ObjaverseData(Dataset):
             # print("*** canny_r.shape after concatenate", canny_r.shape)
             # normalize
             canny_r = canny_r.astype(np.float32) / 255.0
+            canny_r = torch.tensor(canny_r)
             target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+            target_im = torch.tensor(target_im)
 
 
         except:
+            if filename not in self.bad_files:
+                self.bad_files.append(filename)
+            print("Bad file encoutered : ", filename)
             # very hacky solution, sorry about this
-            filename = os.path.join(self.root_dir, '692db5f2d3a04bb286cb977a7dba903e_1')  # this one we know is valid
+            filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             # read prompt from BLIP
@@ -352,9 +357,14 @@ class ObjaverseData(Dataset):
             target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
             # get canny edge
             canny_r = random_canny(cond_im)
+            canny_r = canny_r[:, :, None]
+            canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
             # normalize
             canny_r = canny_r.astype(np.float32) / 255.0
             target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+
+            canny_r = torch.tensor(canny_r)
+            target_im = torch.tensor(target_im)
 
 
 
