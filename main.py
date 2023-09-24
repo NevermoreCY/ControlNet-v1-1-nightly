@@ -232,6 +232,8 @@ class ObjaverseData(Dataset):
         self.postprocess = postprocess
         self.total_view = total_view
 
+        self.bad_files = []
+
         # if not isinstance(ext, (tuple, list, ListConfig)):
         #     ext = [ext]
 
