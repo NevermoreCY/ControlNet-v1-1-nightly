@@ -139,12 +139,12 @@ def main():
             out.append(item['name'])
         return out
 
-    def extract_category(cate):
-        out = []
-        for item in cate:
-            for dic in item:
-                out.append(dic['name'])
-        return out
+    # def extract_category(cate):
+    #     out = []
+    #     for item in cate:
+    #         for dic in item:
+    #             out.append(dic['name'])
+    #     return out
 
     def remove_useless_tail(texts):
         out = []
@@ -227,7 +227,7 @@ def main():
             data = annotations[key]
             data_list[0].append(data['name'])
             data_list[1].append(extract_tags(data['tags']))
-            data_list[2].append(extract_category(data['categories']))
+            data_list[2].append(extract_tags(data['categories']))
             data_list[3].append(data['description'])
         print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
         images = []
