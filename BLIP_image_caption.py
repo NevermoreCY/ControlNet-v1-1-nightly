@@ -13,6 +13,13 @@ import sys
 from torchvision.io import read_image
 import argparse
 
+import objaverse
+from sentence_transformers import SentenceTransformer, util
+
+import nltk
+from nltk.tokenize import word_tokenize
+nltk.download('averaged_perceptron_tagger')
+nltk.download('punkt')
 # log = open("image_caption_logs/sep10_job0_t1.log", "a")
 # sys.stdout = log
 # sys.stderr = log
@@ -99,6 +106,9 @@ def main():
 
     from BLIP.models.blip import blip_decoder
 
+    model_clip = SentenceTransformer('clip-ViT-L-14')
+
+
     s = 0
     model_url = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_capfilt_large.pth'
     image_size = 256
@@ -123,6 +133,52 @@ def main():
                 item = i
         return item
 
+    def extract_tags(tags):
+        out = []
+        for item in tags:
+            out.append(item['name'])
+        return out
+
+    def extract_category(cate):
+        out = []
+        for item in cate:
+            for dic in item:
+                out.append(dic['name'])
+        return out
+
+    def remove_useless_tail(texts):
+        out = []
+        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky']
+
+        for text in texts:
+            for bad_ending in bad_endings:
+                l = len(bad_ending)
+                if bad_ending in text and text[-l:] == bad_ending:
+                    text = text[:-l]
+            out.append(text)
+        return out
+
+    def find_best_text(cos_scores, cur_texts, thresh=0.9):
+
+        best_text = ''
+        l = len(cur_texts)
+        good = cos_scores >= thresh
+        idx = torch.argmax(good.sum(dim=1))
+        count = torch.max(good.sum(dim=1)).item()
+
+        row = good[idx]
+        # print("row", row)
+        for i in range(len(row)):
+            if row[i]  and len(cur_texts[i]) > len(best_text):
+                # print( best_text, cur_texts[i])
+                best_text = cur_texts[i]
+        return best_text, count
+
+
+
+
+
+
     img_folder = "/yuch_ws/views_release"
     # sub_folder_list = os.listdir(img_folder)
     # sub_folder_list.sort()
@@ -136,7 +192,7 @@ def main():
     print("total_n", total_n)  # 772870
 
     # job_num = 21
-    job_length = 40000
+    job_length = 20000
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
@@ -150,17 +206,36 @@ def main():
 
     bad_folders = []
 
+    data_split_by_count = {}
+    for i in range(14):
+        data_split_by_count[i] = []
+
+
+
     while batch_s < end_n:
         print(batch_s, batch_e)
         iter_time_s = time.time()
 
         batch_names = sub_folder_list[batch_s:batch_e]
+
+        annotations = objaverse.load_annotations(batch_names)
+
+        might_useful = ['name', 'tags', 'categories', 'description']
+        data_list = [[], [], [], []]
+
+        for key in annotations:
+            data = annotations[key]
+            data_list[0].append(data['name'])
+            data_list[1].append(extract_tags(data['tags']))
+            data_list[2].append(extract_category(data['cate']))
+            data_list[3].append(data['description'])
+        print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
         images = []
 
         curr = time.time()
         # print("time load_image", curr)
         skip_index = []
-        target_index = [0, 4, 8]
+        target_index = [0, 1,2,3,4,5,6,7, 8,9,10,11]
         views = len(target_index)
 
         for j in range(bz):
@@ -179,7 +254,7 @@ def main():
                         out_text_name = "logs/Bad_folder_names_job_" + str(job_num) + ".txt"
                         with open(out_text_name, 'w') as f:
                             for line in bad_folders:
-                                f.write(line)
+                                f.write(line + "\n")
 
                         break
 
@@ -214,14 +289,52 @@ def main():
         print("skip_index is", skip_index)
         offset = 0
         for j in range(bz):
-            if j not in skip_index:
+            if j not in skip_index: # skip if file is not found
                 folder = batch_names[j]
-                cur_texts = captions[(j + offset) * views:(j + 1 + offset) * views]
+                cur_texts = remove_useless_tail(captions[(j + offset) * views:(j + 1 + offset) * views])
+                cur_tags = data_list[1][j]
+
+                best_text = ''
+                # rule 1 : if tag is included in the BLIP's text, then it's highly likely to be good text
+                # if both sentence contains the tag, we prefer the longer sentence. (we encourage longer description)
+                for tag in cur_tags:
+                    for text in cur_texts:
+                        if tag in text and len(text) > best_text:
+                            best_text = text
+                            count = 13 # 13 means selected by Rule 1
+                # case when not tag is found in the texts, we perform a vote
+                if best_text == '':
+                    text_emb = model_clip.encode(cur_texts) # 12 x D_embd
+                    cos_scores = util.cos_sim(text_emb, text_emb) # 12 x 12
+                    best_text , count = find_best_text(cos_scores, cur_texts, thresh=0.85)
+
+
+
+
                 # print(len(cur_texts))
-                best_text = most_frequent(cur_texts)
-                out_text_name = img_folder + "/" + folder + "/BLIP_best_text.txt"
+                # best_text = most_frequent(cur_texts)
+                # out_text_name = img_folder + "/" + folder + "/BLIP_v2_best_text.txt"
+
+
+                meta_data = {}
+                meta_data["name"] = data_list[0][j]
+                meta_data['tags'] = data_list[1][j]
+                meta_data['categories'] = data_list[2][j]
+                meta_data['description'] = data_list[3][j]
+                meta_data["BLIP_texts"] = cur_texts
+                meta_data['count'] = count
+
+                data_split_by_count[count].append(batch_names[j])
+
+                out_text_name = img_folder + "/" + folder + "/BLIP_best_text_v2.txt"
+                out_objarverse_metadata = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v2.json"
+
+
                 with open(out_text_name, 'w') as f:
                     f.write(best_text)
+
+                with open(out_objarverse_metadata, 'w') as f:
+                    json.dump(meta_data, f )
             else:
                 offset -= 1
         # print(" time after post =", next_t)
@@ -235,6 +348,12 @@ def main():
               time_cost / bz, " seconds")
 
         print(batch_s, batch_e, end_n)
+
+
+    data_out = "BLIP_v2_data_split_" + str(job_num) + ".json"
+    with open(data_out, 'w') as f:
+        json.dump(data_split_by_count,f)
+
 
 
     return
