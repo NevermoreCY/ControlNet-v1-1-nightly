@@ -196,7 +196,7 @@ def main():
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
-    bz = 40
+    bz = 20
 
     print("******** cur job_num is ", job_num, "start is", start_n, "end is", end_n)
     print("first few names", sub_folder_list[start_n:start_n + 5])
@@ -221,15 +221,20 @@ def main():
         annotations = objaverse.load_annotations(batch_names)
 
         might_useful = ['name', 'tags', 'categories', 'description']
-        data_list = [[], [], [], []]
+        data_dict = {}
 
         for key in annotations:
             data = annotations[key]
-            data_list[0].append(data['name'])
-            data_list[1].append(extract_tags(data['tags']))
-            data_list[2].append(extract_tags(data['categories']))
-            data_list[3].append(data['description'])
-        print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
+            data_dict[key] = {}
+            data_dict[key]['name'] = data['name']
+            data_dict[key]['tags'] = extract_tags(data['tags'])
+            data_dict[key]['categories'] = extract_tags(data['categories'])
+            data_dict[key]['description'] = data['description']
+            # data_list[0].append(data['name'])
+            # data_list[1].append(extract_tags(data['tags']))
+            # data_list[2].append(extract_tags(data['categories']))
+            # data_list[3].append(data['description'])
+        # print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
         images = []
 
         curr = time.time()
@@ -292,7 +297,7 @@ def main():
             if j not in skip_index: # skip if file is not found
                 folder = batch_names[j]
                 cur_texts = remove_useless_tail(captions[(j + offset) * views:(j + 1 + offset) * views])
-                cur_tags = data_list[1][j]
+                cur_tags = data_dict[folder]['tags']
 
                 best_text = ''
                 # rule 1 : if tag is included in the BLIP's text, then it's highly likely to be good text
@@ -316,11 +321,11 @@ def main():
                 # out_text_name = img_folder + "/" + folder + "/BLIP_v2_best_text.txt"
 
 
-                meta_data = {}
-                meta_data["name"] = data_list[0][j]
-                meta_data['tags'] = data_list[1][j]
-                meta_data['categories'] = data_list[2][j]
-                meta_data['description'] = data_list[3][j]
+                meta_data = data_dict[folder]
+                # meta_data["name"] = data_list[0][j]
+                # meta_data['tags'] = data_list[1][j]
+                # meta_data['categories'] = data_list[2][j]
+                # meta_data['description'] = data_list[3][j]
                 meta_data["BLIP_texts"] = cur_texts
                 meta_data['count'] = count
                 meta_data['Best_text'] = best_text
