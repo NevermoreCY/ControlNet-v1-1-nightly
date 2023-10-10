@@ -299,7 +299,7 @@ def main():
                 # if both sentence contains the tag, we prefer the longer sentence. (we encourage longer description)
                 for tag in cur_tags:
                     for text in cur_texts:
-                        if tag in text and len(text) > best_text:
+                        if tag in text and len(text) > len(best_text):
                             best_text = text
                             count = 13 # 13 means selected by Rule 1
                 # case when not tag is found in the texts, we perform a vote
