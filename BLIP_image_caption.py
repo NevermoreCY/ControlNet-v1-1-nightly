@@ -227,7 +227,7 @@ def main():
             data = annotations[key]
             data_list[0].append(data['name'])
             data_list[1].append(extract_tags(data['tags']))
-            data_list[2].append(extract_category(data['cate']))
+            data_list[2].append(extract_category(data['categories']))
             data_list[3].append(data['description'])
         print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
         images = []
