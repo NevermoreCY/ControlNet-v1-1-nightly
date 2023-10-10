@@ -196,7 +196,7 @@ def main():
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
-    bz = 20
+    bz = 40
 
     print("******** cur job_num is ", job_num, "start is", start_n, "end is", end_n)
     print("first few names", sub_folder_list[start_n:start_n + 5])
