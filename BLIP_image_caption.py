@@ -192,7 +192,7 @@ def main():
     print("total_n", total_n)  # 772870
 
     # job_num = 21
-    job_length = 10000
+    job_length = 20000
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
@@ -323,6 +323,7 @@ def main():
                 meta_data['description'] = data_list[3][j]
                 meta_data["BLIP_texts"] = cur_texts
                 meta_data['count'] = count
+                meta_data['Best_text'] = best_text
 
                 data_split_by_count[count].append(batch_names[j])
 
