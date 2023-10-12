@@ -201,7 +201,8 @@ def main():
     print("******** cur job_num is ", job_num, "start is", start_n, "end is", end_n)
     print("first few names", sub_folder_list[start_n:start_n + 5])
 
-    batch_s = start_n
+    # batch_s = start_n
+    batch_s = end_n-1500
     batch_e = batch_s + bz
 
     bad_folders = []
