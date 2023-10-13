@@ -15,7 +15,7 @@ for i in range(total_jobs):
         count_dict[key].extend( cur_json[key] )
 
 for i in range(14):
-    print("for count i, we have ", len( count_dict[str(i)]) , ' samples ')
+    print("for count ", i ," we have ", len( count_dict[str(i)]) , ' samples ')
 
 with open("BLIP2_split_by_count.json", 'w') as f:
     json.dump(count_dict, f)
