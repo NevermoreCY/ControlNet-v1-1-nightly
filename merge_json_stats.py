@@ -11,6 +11,7 @@ for i in range(total_jobs):
     with open(file_name, 'r') as f:
         cur_json = json.load(f)
     for key in cur_json:
+        print(type(key))
         count_dict[key].extend( cur_json[key] )
 
 for i in range(14):
