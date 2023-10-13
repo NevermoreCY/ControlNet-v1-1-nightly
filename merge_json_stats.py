@@ -13,6 +13,7 @@ for i in range(total_jobs):
     for key in cur_json:
         # print(type(key))
         count_dict[key].extend( cur_json[key] )
+        print(i, key, len(cur_json[key]))
 
 for i in range(14):
     print("for count ", i ," we have ", len( count_dict[str(i)]) , ' samples ')
