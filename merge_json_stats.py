@@ -36,7 +36,7 @@ for i in tqdm(range(len(valid))):
     folder = valid[i]
     json_path = prefix + folder + "/objarverse_BLIP_metadata_v2.json"
     with open(json_path, 'r') as f:
-        meta = json.load(json_path)
+        meta = json.load(f)
     out[meta['count']].append(meta['Best_text'])
 
 for i in range(14):
