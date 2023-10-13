@@ -4,7 +4,7 @@ total_jobs= 38
 
 count_dict= {}
 for i in range(14):
-    count_dict[i] = []
+    count_dict[str(i)] = []
 
 for i in range(total_jobs):
     file_name = "BLIP_v2_data_split_" + str(i) + ".json"
