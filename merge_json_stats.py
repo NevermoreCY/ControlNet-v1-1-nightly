@@ -29,7 +29,7 @@ for i in range(14):
     out[i] = []
 
 with open(valid_path, 'r') as f:
-    valid = json.load(valid_path)
+    valid = json.load(f)
 
 prefix = "/yuch_ws/views_release/"
 for i in tqdm(range(len(valid))):
