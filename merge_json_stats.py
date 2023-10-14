@@ -59,9 +59,9 @@ total = len(valid["-1"])
 for i in range(14):
     total += len(valid[str(i)])
 print("total is ", total)
-print("for count ", -1 ," we have ", len( valid[str(-1)]) , ' samples ' ,len( valid[str(-1)])/total, ' percentage.' )
+print("for count ", -1 ," we have ", len( valid[str(-1)]) , ' samples ' ,len( valid[str(-1)])/total * 100, ' percentage.' )
 for i in range(14):
-    print("for count ", i ," we have ", len( valid[str(i)]) , ' samples ' ,len( valid[str(i)])/total, ' percentage.' )
+    print("for count ", i ," we have ", len( valid[str(i)]) , ' samples ' ,len( valid[str(i)])/total * 100, ' percentage.' )
 
 
 
