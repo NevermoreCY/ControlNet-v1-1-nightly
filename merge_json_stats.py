@@ -22,31 +22,46 @@ import os
 # with open("BLIP2_split_by_count.json", 'w') as f:
 #     json.dump(count_dict, f)
 #
+#--function 2 --------------------------------------------------------
+# valid_path = "valid_paths.json"
+#
+# out = {}
+# for i in range(14):
+#     out[i] = []
+#
+# out[-1] = []
+# with open(valid_path, 'r') as f:
+#     valid = json.load(f)
+#
+# prefix = "/yuch_ws/views_release/"
+# for i in tqdm(range(len(valid))):
+#     folder = valid[i]
+#     json_path = prefix + folder + "/objarverse_BLIP_metadata_v2.json"
+#     if os.path.isfile(json_path):
+#         with open(json_path, 'r') as f:
+#             meta = json.load(f)
+#         out[meta['count']].append(folder)
+#     else:
+#         out[-1].append(folder)
+#
+# for i in range(14):
+#     print("for count ", i ," we have ", len( out[i]) , ' samples ')
+#
+# with open("BLIP2_split_by_count.json", 'w') as f:
+#     json.dump(out, f)
 
-valid_path = "valid_paths.json"
-
-out = {}
-for i in range(14):
-    out[i] = []
-
-out[-1] = []
+# ----------------------fuction 3 ------------------------------------------
+valid_path = "BLIP2_split_by_count.json"
 with open(valid_path, 'r') as f:
     valid = json.load(f)
 
-prefix = "/yuch_ws/views_release/"
-for i in tqdm(range(len(valid))):
-    folder = valid[i]
-    json_path = prefix + folder + "/objarverse_BLIP_metadata_v2.json"
-    if os.path.isfile(json_path):
-        with open(json_path, 'r') as f:
-            meta = json.load(f)
-        out[meta['count']].append(folder)
-    else:
-        out[-1].append(folder)
+total = len(valid[-1])
+for i in range(14):
+    total += len(valid[i])
 
 for i in range(14):
-    print("for count ", i ," we have ", len( out[i]) , ' samples ')
+    print("for count ", i ," we have ", len( valid[i]) , ' samples ' ,len( valid[i])/total, ' percentage.' )
 
-with open("BLIP2_split_by_count.json", 'w') as f:
-    json.dump(out, f)
+
+
 
