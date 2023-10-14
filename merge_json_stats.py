@@ -55,7 +55,7 @@ valid_path = "BLIP2_split_by_count.json"
 with open(valid_path, 'r') as f:
     valid = json.load(f)
 
-total = len(valid[-1])
+total = len(valid["-1"])
 for i in range(14):
     total += len(valid[i])
 
