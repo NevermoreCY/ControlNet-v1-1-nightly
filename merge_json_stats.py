@@ -68,7 +68,7 @@ for x in range(3,8):
     valid_x = []
 
     for i in range(x,14):
-        valid_x.extend(valid[str[i]])
+        valid_x.extend(valid[str(i)])
 
     print(out_path , "total samples are " , len(valid_x), len(valid_x)/ total)
     with open(out_path, 'w') as f:
