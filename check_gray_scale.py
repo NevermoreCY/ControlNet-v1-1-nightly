@@ -62,7 +62,7 @@ for i in range(5,14):
         folder = folders[j]
         m1_count = 0
         m2_count = 0
-        meta_path = img_folder + "/" + folder + "objarverse_BLIP_metadata_v2.json"
+        meta_path = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v2.json"
         with open(meta_path, 'r') as f:
             meta_data = json.load(meta_path)
 
@@ -84,7 +84,7 @@ for i in range(5,14):
             out_put_data[str(i)]["color"].append(folder)
             meta_data['grayscale'] = False
 
-        new_meta_path = img_folder + "/" + folder + "objarverse_BLIP_metadata_v3.json"
+        new_meta_path = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v3.json"
         with open(new_meta_path, 'w') as f:
             json.dump(meta_data,f)
 
