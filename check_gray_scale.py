@@ -64,7 +64,7 @@ for i in range(5,14):
         m2_count = 0
         meta_path = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v2.json"
         with open(meta_path, 'r') as f:
-            meta_data = json.load(meta_path)
+            meta_data = json.load(f)
 
         for view in range(12):
             im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % view)
