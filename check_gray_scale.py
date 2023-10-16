@@ -59,6 +59,7 @@ for i in range(5,14):
     out_put_data[str(i)]["color"] = []
 
     for j in tqdm(range(len(folders))):
+        print(folders[:10])
         folder = folders[j]
         m1_count = 0
         m2_count = 0
