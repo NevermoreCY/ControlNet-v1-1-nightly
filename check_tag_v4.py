@@ -133,8 +133,12 @@ def main():
             cos_scores = util.cos_sim(text_emb, text_emb)  # 12 x 12
             best_text, count = find_best_text(cos_scores, texts, thresh=0.85)
 
+
         meta_data['best_text_v4'] = best_text
         meta_data['text_count_v4'] = count
+
+        out_put_data[str(count)].append(folder)
+
 
         out_text_name = img_folder + "/" + folder + "/BLIP_best_text_v2.txt"
 
@@ -146,6 +150,10 @@ def main():
             json.dump(meta_data, f)
 
 
+    # s = 1
+    out_path = "BLIP2_split_by_count_recheck_tag_V4.json"
+    with open(out_path,'w') as f:
+        json.dump(out_put_data,f )
 
 
     return
