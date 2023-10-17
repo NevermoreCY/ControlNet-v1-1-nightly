@@ -298,10 +298,11 @@ for k in con_keys:
 print("\n\n\n\nin \n", intersection)
 print("\n\n\n\nnot \n" , not_in_zero123)
 
-# for k in intersection:
-#     print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
-#     con22[k] = con11[k]
-#     # print(con22[k] == con11[k])
+for k in intersection:
+    if k[:21] == 'model.diffusion_model':
+        print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
+        con11[k] = zero123['state_dict'][k]
+    # print(con22[k] == con11[k])
 #
-# print("saving the ckpt.")
-# torch.save(con22,'control_v11_sd15_canny_full.ckpt')
+print("saving the ckpt.")
+torch.save(con11,'control_v11_zero123_canny.ckpt')
