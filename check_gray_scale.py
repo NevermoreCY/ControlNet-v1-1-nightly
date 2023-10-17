@@ -61,15 +61,15 @@ def main():
     with open(valid_path, 'r') as f:
         valid = json.load(f)
 
-    total = len(valid["-1"])
-    for i in range(14):
-        total += len(valid[str(i)])
-    print("total is ", total)
-    print("for count ", -1, " we have ", len(valid[str(-1)]), ' samples ', len(valid[str(-1)]) / total * 100,
-          ' percentage.')
-    for i in range(14):
-        print("for count ", i, " we have ", len(valid[str(i)]), ' samples ', len(valid[str(i)]) / total * 100,
-              ' percentage.')
+    # total = len(valid["-1"])
+    # for i in range(14):
+    #     total += len(valid[str(i)])
+    # print("total is ", total)
+    # print("for count ", -1, " we have ", len(valid[str(-1)]), ' samples ', len(valid[str(-1)]) / total * 100,
+    #       ' percentage.')
+    # for i in range(14):
+    #     print("for count ", i, " we have ", len(valid[str(i)]), ' samples ', len(valid[str(i)]) / total * 100,
+    #           ' percentage.')
 
     out_put_data = {}
 
@@ -81,7 +81,7 @@ def main():
     out_put_data[str(i)]["color"] = []
 
     for j in tqdm(range(len(folders))):
-        print(folders[:10])
+        # print(folders[:10])
         folder = folders[j]
         grayscale_count = 0
         # m2_count = 0
