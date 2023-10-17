@@ -12,7 +12,7 @@ model:
     first_stage_key: "img"
     cond_stage_key: "txt"
     control_key: "hint"
-    image_size: 32
+    image_size: 16
     channels: 4
     cond_stage_trainable: false
     conditioning_key: crossattn
