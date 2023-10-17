@@ -300,6 +300,8 @@ print("\n\n\n\nnot \n" , not_in_zero123)
 
 for k in intersection:
     if k[:21] == 'model.diffusion_model':
+        if k == 'model.diffusion_model.input_blocks.0.0.weight':
+            print(zero123['state_dick'][k].shape)
         print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
         con11[k] = zero123['state_dict'][k]
     # print(con22[k] == con11[k])
