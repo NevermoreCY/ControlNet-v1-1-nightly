@@ -276,7 +276,7 @@ zero123 = torch.load(zero123) # <class 'collections.OrderedDict'>
 # print("load done
 # tut_keys = list(tut.keys())
 con_keys = list(con11.keys())
-zero123_keys = list(zero123.keys())
+zero123_keys = list(zero123['state_dict'].keys())
 
 print("v1.1 keys" , len(con_keys) ,con_keys)
 
