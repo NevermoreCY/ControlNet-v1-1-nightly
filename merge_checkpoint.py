@@ -263,7 +263,7 @@ conv11 = 'models/control_v11_sd15_canny_full.ckpt'  # conv 1.1
 zero123 = 'zero123-xl.ckpt'
 
 # tut = torch.load(resume_path0) # <class 'collections.OrderedDict'>
-con11 = torch.load()   # <class 'dict'>
+con11 = torch.load(conv11)   # <class 'dict'>
 zero123 = torch.load(zero123) # <class 'collections.OrderedDict'>
 
 # # # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
