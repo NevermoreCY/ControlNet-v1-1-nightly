@@ -85,20 +85,11 @@ data:
   target: ldm.data.simple.ObjaverseDataModuleFromConfig
   params:
     root_dir: '/yuch_ws/views_release'
-#    root_dir: 'view_release'
     batch_size: 192
-#    batch_size: 10
     num_workers: 16
-    total_view: 4
-    train:
-      validation: False
-      image_transforms:
-        size: 256
-
-    validation:
-      validation: True
-      image_transforms:
-        size: 256
+    total_view: 12
+    image_size: 256
+    valid_path: 'valid_paths_6.json'
 
 
 lightning:
