@@ -258,12 +258,13 @@ from cldm.model import create_model, load_state_dict
 # #
 # # Configs
 # resume_path0 = './models/control_sd15_ini.ckpt'  # totorial
-resume_path1 = './models/control_v11p_sd15_canny.pth'  # conv 1.1
-resume_path = 'models/control_sd15_canny.pth'  # conv 1
+conv11 = 'models/control_v11p_sd15_canny.pth'  # conv 1.1
+conv1 = 'models/control_sd15_canny.pth'  # conv 1
+zero123 = 'zero123-xl.ckpt'
 
 # tut = torch.load(resume_path0) # <class 'collections.OrderedDict'>
-con11 = torch.load(resume_path1)   # <class 'dict'>
-con22 = torch.load(resume_path) # <class 'collections.OrderedDict'>
+con11 = torch.load()   # <class 'dict'>
+zero123 = torch.load(zero123) # <class 'collections.OrderedDict'>
 
 # # # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
 # model = create_model('models/yuch_v11p_sd15_canny.yaml').cpu()
@@ -274,36 +275,33 @@ con22 = torch.load(resume_path) # <class 'collections.OrderedDict'>
 # model.only_mid_control = only_mid_control
 # print("load done
 # tut_keys = list(tut.keys())
-con11_keys = list(con11.keys())
-con22_keys = list(con22.keys())
+con_keys = list(con11.keys())
+zero123_keys = list(zero123.keys())
 
-print("v1.1 keys" , con11_keys)
+print("v1.1 keys" , len(con_keys) ,con_keys)
 
-print("\n\n\n\nv1 keys:" , con22_keys)
+print("\n\n\n zero123 keys:" , len(zero123_keys) ,zero123_keys )
 
 
-print("\n\n\n\nv1.1 keys length " , len(con11_keys))
 
-print("\n\n\n\nv1 keys length" , len(con22_keys))
-
-in22 = []
-not22= []
+intersection = []
 # same_shape = 0
+not_in_zero123 = []
 
-for k in con22_keys:
-    if k in con11_keys:
-        in22.append(k)
+for k in con_keys:
+    if k in zero123_keys :
+        intersection.append(k)
 
     else:
-        not22.append(k)
+        not_in_zero123.append(k)
 
-print("\n\n\n\nin22", in22)
-print("\n\n\n\nnot22" , not22)
+print("\n\n\n\nin \n", intersection)
+print("\n\n\n\nnot \n" , not_in_zero123)
 
-for k in con11_keys:
-    print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
-    con22[k] = con11[k]
-    # print(con22[k] == con11[k])
-
-print("saving the ckpt.")
+# for k in intersection:
+#     print("add parameter of ", k, " from conv1.1 to conv 1 \n" )
+#     con22[k] = con11[k]
+#     # print(con22[k] == con11[k])
+#
+# print("saving the ckpt.")
 # torch.save(con22,'control_v11_sd15_canny_full.ckpt')
