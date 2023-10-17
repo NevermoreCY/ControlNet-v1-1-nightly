@@ -1,26 +1,9 @@
-import json
-import cv2
-import numpy as np
 from PIL import Image, ImageStat
-from tqdm import tqdm
 import os
-from PIL import Image
-import requests
-import torch
-from torchvision import transforms
-from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
 import json
-import time
-import numpy as np
 import sys
-from torchvision.io import read_image
 import argparse
-
-import objaverse
-from sentence_transformers import SentenceTransformer, util
-
-import nltk
 
 
 def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True):
