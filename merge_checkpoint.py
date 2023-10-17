@@ -258,8 +258,8 @@ from cldm.model import create_model, load_state_dict
 # #
 # # Configs
 # resume_path0 = './models/control_sd15_ini.ckpt'  # totorial
-conv11 = 'models/control_v11p_sd15_canny.pth'  # conv 1.1
-conv1 = 'models/control_sd15_canny.pth'  # conv 1
+conv11 = 'models/control_v11_sd15_canny_full.ckpt'  # conv 1.1
+# conv1 = 'models/control_sd15_canny.pth'  # conv 1
 zero123 = 'zero123-xl.ckpt'
 
 # tut = torch.load(resume_path0) # <class 'collections.OrderedDict'>
