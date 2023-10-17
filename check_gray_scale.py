@@ -4,6 +4,24 @@ import numpy as np
 from PIL import Image, ImageStat
 from tqdm import tqdm
 import os
+from PIL import Image
+import requests
+import torch
+from torchvision import transforms
+from torchvision.transforms.functional import InterpolationMode
+from tqdm import tqdm
+import json
+import time
+import numpy as np
+import sys
+from torchvision.io import read_image
+import argparse
+
+import objaverse
+from sentence_transformers import SentenceTransformer, util
+
+import nltk
+
 
 def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True):
     pil_img = Image.open(file)
@@ -38,23 +56,41 @@ def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=Tru
 #
 #     return median_saturation < saturation_threshold
 
-img_folder = "/yuch_ws/views_release"
 
-valid_path = "BLIP2_split_by_count.json"
-with open(valid_path, 'r') as f:
-    valid = json.load(f)
 
-total = len(valid["-1"])
-for i in range(14):
-    total += len(valid[str(i)])
-print("total is ", total)
-print("for count ", -1 ," we have ", len( valid[str(-1)]) , ' samples ' ,len( valid[str(-1)])/total * 100, ' percentage.' )
-for i in range(14):
-    print("for count ", i ," we have ", len( valid[str(i)]) , ' samples ' ,len( valid[str(i)])/total * 100, ' percentage.' )
+def doArgs(argList):
+    parser = argparse.ArgumentParser()
 
-out_put_data = {}
+    #parser.add_argument('-v', "--verbose", action="store_true", help="Enable verbose debugging", default=False)
+    parser.add_argument('--job_num',type=int, help="Input file name", required=True)
+    # parser.add_argument('--output', action="store", dest="outputFn", type=str, help="Output file name", required=True)
 
-for i in range(5,14):
+    return parser.parse_args(argList)
+
+def main():
+
+    args = doArgs(sys.argv[1:])
+    job_num = args.job_num
+
+    img_folder = "/yuch_ws/views_release"
+
+    valid_path = "BLIP2_split_by_count.json"
+    with open(valid_path, 'r') as f:
+        valid = json.load(f)
+
+    total = len(valid["-1"])
+    for i in range(14):
+        total += len(valid[str(i)])
+    print("total is ", total)
+    print("for count ", -1, " we have ", len(valid[str(-1)]), ' samples ', len(valid[str(-1)]) / total * 100,
+          ' percentage.')
+    for i in range(14):
+        print("for count ", i, " we have ", len(valid[str(i)]), ' samples ', len(valid[str(i)]) / total * 100,
+              ' percentage.')
+
+    out_put_data = {}
+
+    i = job_num
     print("start section ", i)
     folders = valid[str(i)]
     out_put_data[str(i)] = {}
@@ -79,8 +115,7 @@ for i in range(5,14):
 
         meta_data['grayscale_count'] = grayscale_count
 
-
-        if grayscale_count >=6:
+        if grayscale_count >= 5:
             out_put_data[str(i)]["grayscale"].append(folder)
             meta_data['grayscale'] = True
         else:
@@ -89,11 +124,21 @@ for i in range(5,14):
 
         new_meta_path = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v3.json"
         with open(new_meta_path, 'w') as f:
-            json.dump(meta_data,f)
+            json.dump(meta_data, f)
 
-out_path = "BLIP2_split_by_count_and_grayscale.json"
-with open(out_path, 'w') as f:
-    json.dump(out_put_data, f)
+
+    out_path = "BLIP2_split_by_count_and_grayscale" + str(job_num) + ".json"
+    with open(out_path, 'w') as f:
+        json.dump(out_put_data, f)
+
+    return
+
+if __name__ == '__main__':
+    #sys.argv = ["programName.py","--input","test.txt","--output","tmp/test.txt"]
+    main()
+
+
+
 
 
 
