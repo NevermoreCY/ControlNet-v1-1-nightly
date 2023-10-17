@@ -313,7 +313,7 @@ class ObjaverseData(Dataset):
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             # read prompt from BLIP
-            f = open(os.path.join(filename, "BLIP_best_text.txt") , 'r')
+            f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
             prompt = f.readline()
             # get cond_im and target_im
             cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
@@ -1101,6 +1101,8 @@ if __name__ == "__main__":
         num_workers = 16
         total_view = 12
         logger_freq = 500
+
+        print('*** config.data is ', config.data )
 
         data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers)
         data.prepare_data()
