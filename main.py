@@ -332,7 +332,7 @@ class ObjaverseData(Dataset):
             # BGR TO RGB
             cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
             target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
-            print("image size is ", self.image_size)
+            # print("image size is ", self.image_size)
             cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
             target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
 
