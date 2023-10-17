@@ -148,13 +148,15 @@ def get_parser(**parser_kwargs):
     return parser
 
 class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
-    def __init__(self, root_dir, batch_size, total_view,  num_workers=4, **kwargs):
+    def __init__(self, root_dir, batch_size, total_view,  num_workers=4,valid_path='valid_path.json', img_size=256, **kwargs):
         super().__init__(self)
         self.root_dir = root_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.total_view = total_view
-        image_transforms = [torchvision.transforms.Resize(256)]
+        self.image_size = img_size
+        self.valid_path = valid_path
+        image_transforms = [torchvision.transforms.Resize(img_size)]
         image_transforms.extend([transforms.ToTensor(),
                                  transforms.Lambda(lambda x: rearrange(x * 2. - 1., 'c h w -> h w c'))])
         self.image_transforms = torchvision.transforms.Compose(image_transforms)
@@ -163,7 +165,7 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
         # total_view = 4
         # print("t1 train_data")
         dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False, \
-                                image_transforms=self.image_transforms)
+                                image_transforms=self.image_transforms, image_size=self.image_size,valid_path=self.valid_path)
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False,
                              sampler=sampler)
@@ -171,14 +173,14 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
     def val_dataloader(self):
         # print("t1 val_data")
         dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=True, \
-                                image_transforms=self.image_transforms)
+                                image_transforms=self.image_transforms,image_size=self.image_size,valid_path=self.valid_path)
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
 
     def test_dataloader(self):
         # print("t1 test_data")
         return wds.WebLoader(
-            ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=self.validation), \
+            ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=self.validation,image_size=self.image_size,valid_path=self.valid_path), \
             batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
 
 def auto_canny(image, sigma=0.33):
@@ -217,7 +219,9 @@ class ObjaverseData(Dataset):
                  postprocess=None,
                  return_paths=False,
                  total_view=12,
-                 validation=False
+                 validation=False,
+                 image_size=256,
+                 valid_path='valid_path.json'
                  ) -> None:
         """Create a dataset from a folder of images.
         If you pass in a root directory it will be searched for images
@@ -231,6 +235,7 @@ class ObjaverseData(Dataset):
         #     postprocess = instantiate_from_config(postprocess)
         self.postprocess = postprocess
         self.total_view = total_view
+        self.image_size = image_size
 
         self.bad_files = []
 
@@ -240,7 +245,7 @@ class ObjaverseData(Dataset):
         # with open(os.path.join(root_dir, 'test_paths.json')) as f:
         #     self.paths = json.load(f)
 
-        with open('valid_paths.json') as f:
+        with open(valid_path) as f:
             self.paths = json.load(f)
 
         total_objects = len(self.paths)
@@ -327,6 +332,10 @@ class ObjaverseData(Dataset):
             # BGR TO RGB
             cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
             target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
+            print("image size is ", self.image_size)
+            cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+            target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+
             # get canny edge
             canny_r = random_canny(cond_im)
             # print("*** canny_r.shape", canny_r.shape)
@@ -357,6 +366,9 @@ class ObjaverseData(Dataset):
             # BGR TO RGB
             cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
             target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
+            # resize
+            cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+            target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
             # get canny edge
             canny_r = random_canny(cond_im)
             canny_r = canny_r[:, :, None]
@@ -1096,15 +1108,22 @@ if __name__ == "__main__":
         # trainer = Trainer(plugins=[DDPPlugin(find_unused_parameters=False)] , accelerator='ddp',
         #                   accumulate_grad_batches=1, benchmark=True, gpus='0,', num_sanity_val_steps=0, val_check_interval=5000000 )
         # # setting for training
-        batch_size = 20
-        root_dir = '/yuch_ws/views_release'
-        num_workers = 16
-        total_view = 12
+        # batch_size = 20
+        # root_dir = '/yuch_ws/views_release'
+        # num_workers = 16
+        # total_view = 12
         logger_freq = 500
 
         print('*** config.data is ', config.data )
 
-        data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers)
+        total_view = config.data['params']['total_view']
+        num_workers = config.data['params']['num_workers']
+        batch_size = config.data['params']['batch_size']
+        root_dir = config.data['params']['root_dir']
+        valid_path = config.data['params']['valid_path']
+        img_size = config.data['params']['image_size']
+
+        data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers,valid_path,img_size)
         data.prepare_data()
 
         data.setup()
