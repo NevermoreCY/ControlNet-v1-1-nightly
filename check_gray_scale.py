@@ -14,10 +14,13 @@ def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=Tru
         if adjust_color_bias:
             bias = ImageStat.Stat(thumb).mean[:3]
             bias = [b - sum(bias)/3 for b in bias ]
+        # print("b" , bias )
         for pixel in thumb.getdata():
-            mu = sum(pixel)/3
+            mu = sum(pixel[:3])/3
+            # print("p,m",pixel , mu)
             SSE += sum((pixel[i] - mu - bias[i])*(pixel[i] - mu - bias[i]) for i in [0,1,2])
         MSE = float(SSE)/(thumb_size*thumb_size)
+        # print("MSE is ", MSE )
         if MSE <= MSE_cutoff:
             return 1  # grayscale
         else:
@@ -26,14 +29,14 @@ def detect_color_image(file, thumb_size=40, MSE_cutoff=22, adjust_color_bias=Tru
     elif len(bands)==1:
         return 1
 
-def is_black_and_white(img_path, saturation_threshold=30):
-
-    img = cv2.imread(img_path, cv2.IMREAD_COLOR)
-    hsv_img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
-    saturation = hsv_img[:,:,1]
-    median_saturation = np.median(saturation)
-
-    return median_saturation < saturation_threshold
+# def is_black_and_white(img_path, saturation_threshold=30):
+#
+#     img = cv2.imread(img_path, cv2.IMREAD_COLOR)
+#     hsv_img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+#     saturation = hsv_img[:,:,1]
+#     median_saturation = np.median(saturation)
+#
+#     return median_saturation < saturation_threshold
 
 img_folder = "/yuch_ws/views_release"
 
@@ -61,24 +64,23 @@ for i in range(5,14):
     for j in tqdm(range(len(folders))):
         print(folders[:10])
         folder = folders[j]
-        m1_count = 0
-        m2_count = 0
+        grayscale_count = 0
+        # m2_count = 0
         meta_path = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v2.json"
         with open(meta_path, 'r') as f:
             meta_data = json.load(f)
 
         for view in range(12):
             im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % view)
-            method1 = is_black_and_white(im_path, saturation_threshold=30)
-            method2 = detect_color_image(im_path, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True)
-            if method1:
-                m1_count += 1
-            if method2:
-                m2_count += 1
-        meta_data['m1_count'] = m1_count
-        meta_data['m2_count'] = m2_count
+            # method1 = is_black_and_white(im_path, saturation_threshold=30)
+            gray = detect_color_image(im_path, thumb_size=40, MSE_cutoff=22, adjust_color_bias=True)
+            if gray:
+                grayscale_count += 1
 
-        if m1_count >= 4 or m2_count >= 4:
+        meta_data['grayscale_count'] = grayscale_count
+
+
+        if grayscale_count >=6:
             out_put_data[str(i)]["grayscale"].append(folder)
             meta_data['grayscale'] = True
         else:
