@@ -10,7 +10,7 @@ for i in range(5,14):
     merged_data[str(i)] = data[str(i)]
     data = data[str(i)]
 
-    print('For count ', str(i) , '  grayscale ', len(data[' grayscale']) , ' color count', len(data[' color']))
+    print('For count ', str(i) , '  grayscale ', len(data['grayscale']) , ' color count', len(data['color']))
 
 out_file = 'BLIP2_split_by_count_and_grayscale.json'
 with open(out_file, 'w') as f:
