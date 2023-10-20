@@ -34,7 +34,7 @@ with open(valid_v2, 'r') as f:
     valid_v2 = json.load(f)
 
 for i in range(13):
-    valid_v2[str(i)].extend(valid[str[i]])
+    valid_v2[str(i)].extend(valid[str(i)])
     print("After fix , for count ", i, " we have ", len(valid_v2[str(i)]),
           ' samples ', len(valid_v2[str(i)]) / total * 100,' percentage.')
 
