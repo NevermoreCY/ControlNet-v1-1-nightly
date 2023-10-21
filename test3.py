@@ -61,7 +61,7 @@ for i in range(5,14):
     print('For count ', str(i) , '  grayscale ', len(data2[str(i)]['grayscale']) , ' color count', len(data2[str(i)]['color']))
 
 out_path = 'BLIP2_count_5_13_only_colored.json'
-
+print("total colored sample:", len(out))
 with open (out_path, 'w') as f:
     json.dump(out, f)
 
