@@ -51,7 +51,7 @@ import json
 
 data2 = 'BLIP2_split_by_count_and_grayscale.json'
 with open(data2, 'r') as f:
-    valid = json.load(f)
+    data2 = json.load(f)
 
 out = []
 
