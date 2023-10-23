@@ -89,7 +89,8 @@ data:
     num_workers: 16
     total_view: 12
     image_size: 256
-    valid_path: 'BLIP2_count_5_13_only_colored.json'
+    valid_path: 'valid_paths_8.json'
+#    valid_path: 'BLIP2_count_5_13_only_colored.json'
 
 
 lightning:
@@ -97,7 +98,7 @@ lightning:
   metrics_over_trainsteps_checkpoint: True
   modelcheckpoint:
     params:
-      every_n_train_steps: 20
+      every_n_train_steps: 500
   callbacks:
     image_logger:
       target: main.ImageLogger
