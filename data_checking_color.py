@@ -76,10 +76,10 @@ def main():
                     animal_data_colored.append(folder)
                     if is_cat:
                         cat_data_colored.append(folder)
-                        for idx in [0,3,7,11]:
-                            im_path = os.path.join(img_folder , '%03d.png' % idx)
-                            target_path = cur_out_dir + '/' + folder + ('%03d.png' % idx)
-                            shutil.copy(im_path,target_path)
+                        # for idx in [0,3,7,11]:
+                        #     im_path = os.path.join(img_folder , '%03d.png' % idx)
+                        #     target_path = cur_out_dir + '/' + folder + ('%03d.png' % idx)
+                        #     shutil.copy(im_path,target_path)
                     # print(count, line)
                 else:
                     animal_data_grayscale.append(folder)
