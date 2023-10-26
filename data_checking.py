@@ -1,25 +1,8 @@
 import os
-
-from PIL import Image
-import requests
-import torch
-from torchvision import transforms
-from torchvision.transforms.functional import InterpolationMode
-from tqdm import tqdm
 import json
-import time
-import numpy as np
 import sys
-from torchvision.io import read_image
 import argparse
-
-import objaverse
-from sentence_transformers import SentenceTransformer, util
 import shutil
-import nltk
-from nltk.tokenize import word_tokenize
-nltk.download('averaged_perceptron_tagger')
-nltk.download('punkt')
 
 def doArgs(argList):
     parser = argparse.ArgumentParser()
