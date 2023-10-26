@@ -18,7 +18,7 @@ def doArgs(argList):
 def main():
     args = doArgs(sys.argv[1:])
     count = 0
-    for job_num in range(13):
+    for job_num in range(6,13):
         # job_num = args.job_num
         tag = 'cat'
 
@@ -51,7 +51,7 @@ def main():
                     target_path = cur_out_dir + '/' + folder + ('%03d.png' % idx)
                     shutil.copy(im_path,target_path)
                 # print(count, line)
-            if count % 10 ==0 and count != 0:
+            if i % 2000 ==0:
                 print(count)
 
         with open('data_checking/' + tag + '/' + str(job_num) +'.json', 'w') as f :
