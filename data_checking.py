@@ -18,9 +18,9 @@ def doArgs(argList):
 def main():
     args = doArgs(sys.argv[1:])
     count = 0
-    for job_num in range(0,6):
+    for job_num in range(6,13):
         # job_num = args.job_num
-        tag = 'cat'
+        tag = 'dog'
 
 
         imgs_folder = "/yuch_ws/views_release"
