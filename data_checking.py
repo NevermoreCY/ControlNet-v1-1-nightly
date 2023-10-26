@@ -54,7 +54,7 @@ def main():
             if count % 100 ==0:
                 print(count)
 
-        with open('data_checking/' + tag + '/' + str(job_num) +'.json') as f :
+        with open('data_checking/' + tag + '/' + str(job_num) +'.json', 'w') as f :
             json.dump(data_list,f)
 
 
