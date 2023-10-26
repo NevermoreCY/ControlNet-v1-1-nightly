@@ -36,7 +36,11 @@ def main():
         cur_out_dir = 'data_checking/' + 'cat_colored' + '/' + str(job_num)
         os.makedirs(cur_out_dir,exist_ok=True)
 
+        gray_out_dir = 'data_checking/' + 'cat_gray' + '/' + str(job_num)
+        os.makedirs(gray_out_dir,exist_ok=True)
+
         cat_data_colored = []
+        cat_data_gray = []
 
 
 
@@ -79,11 +83,21 @@ def main():
                     # print(count, line)
                 else:
                     animal_data_grayscale.append(folder)
+                    if is_cat:
+                        cat_data_gray.append(folder)
+                        for idx in [0,3,7,11]:
+                            im_path = os.path.join(img_folder , '%03d.png' % idx)
+                            target_path = gray_out_dir + '/' + folder + ('%03d.png' % idx)
+                            shutil.copy(im_path,target_path)
             if i % 2000 ==0:
                 print(count)
 
         with open('data_checking/' + 'cat_colored' + '/' + str(job_num) +'.json', 'w') as f :
             json.dump(cat_data_colored,f)
+
+        with open('data_checking/' + 'cat_gray' + '/' + str(job_num) +'.json', 'w') as f :
+            json.dump(cat_data_gray,f)
+
     with open('animal_colored_data_list.json', 'w') as f:
         json.dump(animal_data_colored,f)
     with open('animal_grayscale_data_list.json', 'w') as f:
