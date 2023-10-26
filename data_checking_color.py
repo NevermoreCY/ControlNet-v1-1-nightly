@@ -43,7 +43,7 @@ def main():
         for i in tqdm(range(len(cur_data))):
             folder = cur_data[i]
             img_folder = imgs_folder + "/" + folder
-            data_path = img_folder + "/objarverse_BLIP_metadata_v2.json"
+            data_path = img_folder + "/objarverse_BLIP_metadata_v3.json"
             with open(data_path,'r') as f:
                 metadata = json.load(f)
 
