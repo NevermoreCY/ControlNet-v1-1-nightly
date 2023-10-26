@@ -3,6 +3,7 @@ import json
 import sys
 import argparse
 import shutil
+from tqdm import tqdm
 
 def doArgs(argList):
     parser = argparse.ArgumentParser()
@@ -32,7 +33,8 @@ def main():
     data_list = []
 
     count = 0
-    for folder in cur_data:
+    for i in tqdm(range(len(cur_data))):
+        folder = cur_data[i]
         img_folder = imgs_folder + "/" + folder
         text_path = img_folder + "/BLIP_best_text_v2.txt"
         with open(text_path,'r') as f:
