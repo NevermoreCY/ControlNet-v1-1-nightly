@@ -29,7 +29,7 @@ def main():
     print("processing data for count ", job_num)
     cur_data = data_dict[str(job_num)]
     cur_out_dir = 'data_checking/' + tag + '/' + str(job_num)
-    os.makedirs(cur_out_dir)
+    os.makedirs(cur_out_dir,exist_ok=True)
     data_list = []
 
     count = 0
