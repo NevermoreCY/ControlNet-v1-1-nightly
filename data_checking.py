@@ -51,7 +51,7 @@ def main():
                     target_path = cur_out_dir + '/' + folder + ('%03d.png' % idx)
                     shutil.copy(im_path,target_path)
                 # print(count, line)
-            if count % 100 ==0:
+            if count % 10 ==0 and count != 0:
                 print(count)
 
         with open('data_checking/' + tag + '/' + str(job_num) +'.json', 'w') as f :
