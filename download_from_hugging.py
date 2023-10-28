@@ -10,5 +10,5 @@ login()
 # print(x)
 
 
-x = snapshot_download(repo_id="ShapeNet/shapenetcore-glb", repo_type='dataset', cache_dir='/root/shapenet')
+x = snapshot_download(repo_id="ShapeNet/shapenetcore-glb")
 print(x)
