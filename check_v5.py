@@ -10,7 +10,7 @@ with open (file,'r') as f:
 
 
 
-for i in range(1,14):
+for i in range(6,14):
     print(i, len(x[str(i)]))
     to_update = 'valid_paths_' + str(i) + '.json'
     if i != 13:
