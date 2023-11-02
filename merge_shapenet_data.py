@@ -4,7 +4,7 @@ import os
 
 shape_path = 'shapenet_v1.json'
 turbo_path = 'turbo_v1.json'
-turbo_scale = 50
+turbo_scale = 100
 
 
 with open(shape_path, 'r') as f:
