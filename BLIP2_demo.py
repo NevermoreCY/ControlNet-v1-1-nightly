@@ -3,7 +3,7 @@ import os
 import torch
 from PIL import Image
 
-test_folder = 'test/turbo_cases/'
+test_folder = 'test/low_poly/'
 test_img = test_folder + 'a black Donkey.png'
 # setup device to use
 device = torch.device("cuda") if torch.cuda.is_available() else "cpu"
@@ -46,7 +46,7 @@ for img in img_names:
 
     print('Ask Question with context:')
     # cur_prompt = "Question: Can you generate a caption for this image as detail as possible. This is a object centered png image without background, please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption.   Answer:"
-    cur_prompt = "Question: This is an object centered png image without background, Can you provide a caption for this object. Please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption. Answer:"
+    cur_prompt = "Question: This is an object centered png image without background, Can you provide a caption for this object. Please ignore the balck background and focus on the object. Don't mention 3d model in the caption. Answer:"
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(cur_prompt, answer)
     Q = 'Can you tell me which direction is it facing?'
