@@ -29,9 +29,9 @@ for img in img_names:
     raw_image = Image.open(test_folder+img).convert("RGB")
     image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
 
-    q1a= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. Including the object's facing direction, color, action and style. please ignore the black background. Don't use 3D model as keyword. Answer:"})
+    q1a= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. Including the object's facing direction, color, action and style. This is a object centered png image without background, please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption. Answer:"})
     print(q1a)
-    q1b= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. please ignore the black background. Don't use 3D model as keyword.  Answer:"})
+    q1b= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. please ignore the black background. Don't use 3d model as keyword.  Answer:"})
     print(q1b)
     q2 = model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you tell me whether it is high poly or low poly? Answer:"})
     print(q2)
@@ -45,7 +45,8 @@ for img in img_names:
     print(q6)
 
     print('Ask Question with context:')
-    cur_prompt = "Question: Can you generate a caption for this image as detail as possible. Please ignore the black background.  Don't use 3D model as keyword.  Answer:"
+    # cur_prompt = "Question: Can you generate a caption for this image as detail as possible. This is a object centered png image without background, please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption.   Answer:"
+    cur_prompt = "Question: This is an object centered png image without background, Can you provide a caption for this object. Please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption. Answer:"
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(cur_prompt, answer)
     Q = 'Can you tell me which direction is it facing?'
