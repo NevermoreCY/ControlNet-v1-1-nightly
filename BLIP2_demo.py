@@ -29,9 +29,9 @@ for img in img_names:
     raw_image = Image.open(test_folder+img).convert("RGB")
     image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
 
-    q1a= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. Including the object's facing direction, color, action and style. please ignore the black background. Answer:"})
+    q1a= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. Including the object's facing direction, color, action and style. please ignore the black background. Don't use 3D model as keyword. Answer:"})
     print(q1a)
-    q1b= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. please ignore the black background. Answer:"})
+    q1b= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. please ignore the black background. Don't use 3D model as keyword.  Answer:"})
     print(q1b)
     q2 = model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you tell me whether it is high poly or low poly? Answer:"})
     print(q2)
@@ -39,13 +39,13 @@ for img in img_names:
     print(q3)
     q4 = model.generate({"image": image, "prompt": "Question: can you tell me what action is this object doing? please ignore the black background Answer:"})
     print(q4)
-    q5 = model.generate({"image": image, "prompt": "Question: can you tell me the style of this object? Answer:"})
+    q5 = model.generate({"image": image, "prompt": "Question: can you tell me the style of this object?  Don't use 3D model as keyword.  Answer:"})
     print(q5)
     q6 = model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you tell me whether the object has texture? Answer:"})
     print(q6)
 
     print('Ask Question with context:')
-    cur_prompt = "Question: Can you generate a caption for this image as detail as possible. Please ignore the black background. Answer:"
+    cur_prompt = "Question: Can you generate a caption for this image as detail as possible. Please ignore the black background.  Don't use 3D model as keyword.  Answer:"
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(cur_prompt, answer)
     Q = 'Can you tell me which direction is it facing?'
