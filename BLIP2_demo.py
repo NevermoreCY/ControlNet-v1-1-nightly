@@ -18,10 +18,10 @@ image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
 
 print("Done preparing")
 
-model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you generate a caption for it with details such as high polygon or low polygon, action, facing and style? Answer:"})
+x= model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you generate a caption for it with details such as high polygon or low polygon, action, facing and style? Answer:"})
+print(x)
 
-
-model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you generate a caption for it? Answer:"})
-
+r2 = model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you generate a caption for it? Answer:"})
+print(r2)
 print("Done inferencing")
 
