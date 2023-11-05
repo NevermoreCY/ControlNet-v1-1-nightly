@@ -23,3 +23,5 @@ model.generate({"image": image, "prompt": "Question: This is a rendering image o
 
 model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you generate a caption for it? Answer:"})
 
+print("Done inferencing")
+
