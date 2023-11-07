@@ -35,7 +35,7 @@ for img in img_names:
     print(q5)
     q6 = model.generate({"image": image, "prompt": "Question: This is a rendering image of a 3D asset, can you tell me whether the object has texture? Answer:"})
     print(q6)
-    q7 = model.generate({"image": image, "prompt": "Question: Can you tell me whether this is a pure black or pure white image? Answer:"})
+    q7 = model.generate({"image": image, "prompt": "Question: Can you tell me whether this is a pure black without any object?  Answer:"})
     print(q7)
 
     print('Ask Question with context:')
@@ -68,7 +68,7 @@ for img in img_names:
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(Q,answer)
 
-    Q = 'Can you tell me whether this is a pure black or pure white image? '
+    Q = 'Can you tell me whether this is a pure black without any object? '
     cur_prompt = 'Question: '+ Q + ' Answer:'
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(Q,answer)
