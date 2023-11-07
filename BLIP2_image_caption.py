@@ -165,9 +165,10 @@ def main():
                 # case when path exist:
                 raw_image = Image.open(im_path).convert("RGB")
                 image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+                print(image.shape)
 
 
-                cur_prompt = "Question: This is an object centered image, Can you provide a caption for this object. Ignore the balck or white background. Answer:"
+                cur_prompt = "Question: Can you generate an image caption and ignore the black background. Answer:"
                 caption = filter_text(model.generate({"image": image, "prompt": cur_prompt})[0])
                 data_dict['caption'].append(caption)
 
