@@ -168,28 +168,28 @@ def main():
 
 
                 cur_prompt = "Question: This is an object centered image, Can you provide a caption for this object. Ignore the balck or white background. Answer:"
-                caption = filter_text(model.generate({"image": image, "prompt": cur_prompt}))
+                caption = filter_text(model.generate({"image": image, "prompt": cur_prompt})[0])
                 data_dict['caption'].append(caption)
 
                 Q = 'Can you tell me what action is it doing? Please ignore the black background.'
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['action'].append(answer)
+                data_dict['action'].append(answer[0])
 
                 Q = 'Can you tell me the style of this image? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['style'].append(answer)
+                data_dict['style'].append(answer[0])
 
                 Q = 'This is a rendering image of a 3D asset, Can you tell me whether it is high poly or low poly? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['poly'].append(answer)
+                data_dict['poly'].append(answer[0])
 
                 Q = 'Can you tell me whether the object has texture or not? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['texture'].append(answer)
+                data_dict['texture'].append(answer[0])
 
             # after for loop
             text_emb = model_clip.encode(data_dict['caption'])  # 12 x D_embd
