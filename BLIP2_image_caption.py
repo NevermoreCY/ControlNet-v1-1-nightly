@@ -19,7 +19,7 @@ import os
 import torch
 from PIL import Image
 
-
+from sentence_transformers import SentenceTransformer, util
 from lavis.models import load_model_and_preprocess
 
 # log = open("image_caption_logs/sep10_job0_t1.log", "a")
@@ -88,7 +88,22 @@ def main():
             out.append(text)
         return out
 
+    def filter_text(text):
 
+        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky', 'with a black background' ,'3d model','3D model']
+        bad_headings = ['a 3d model of', '3d model of' , 'a 3D model of', '3D model of' , 'a 3d model', 'a 3D model', '3d model']
+        for bad_ending in bad_endings:
+            l = len(bad_ending)
+            if bad_ending in text and text[-l:] == bad_ending:
+                text = text[:-l]
+            # then check 3d
+        for bad_heading in bad_headings:
+            l = len(bad_heading)
+            if bad_heading in text and text[:l] == bad_heading:
+                text = text[l:]
+                break
+
+        return text
 
     def find_best_text(cos_scores, cur_texts, thresh=0.9):
 
@@ -106,16 +121,13 @@ def main():
                 best_text = cur_texts[i]
         return best_text, count
 
-
-
-
-
+    model_clip = SentenceTransformer('clip-ViT-L-14')
 
     img_folder = "/yuch_ws/views_release"
     # sub_folder_list = os.listdir(img_folder)
     # sub_folder_list.sort()
-
-    with open('valid_paths.json') as f:
+    valid_file = 'valid_merged_paths_r1_4.json'
+    with open(valid_file) as f:
         sub_folder_list = json.load(f)
 
     sub_folder_list.sort()
@@ -124,7 +136,7 @@ def main():
     print("total_n", total_n)  # 772870
 
     # job_num = 21
-    job_length = 20000
+    job_length = 10000
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
@@ -133,8 +145,7 @@ def main():
     print("******** cur job_num is ", job_num, "start is", start_n, "end is", end_n)
     print("first few names", sub_folder_list[start_n:start_n + 5])
 
-    # batch_s = start_n
-    batch_s = end_n-1500
+    batch_s = start_n
     batch_e = batch_s + bz
 
     bad_folders = []
@@ -144,157 +155,79 @@ def main():
         data_split_by_count[i] = []
 
 
-
-    while batch_s < end_n:
-        print(batch_s, batch_e)
+    for folder_idx in tqdm(range(start_n,end_n)):
+        cur_folder = sub_folder_list[folder_idx]
+        print(folder_idx,cur_folder)
         iter_time_s = time.time()
-
-        batch_names = sub_folder_list[batch_s:batch_e]
-
-        annotations = objaverse.load_annotations(batch_names)
-
-        might_useful = ['name', 'tags', 'categories', 'description']
         data_dict = {}
+        data_dict['caption'] = []
+        data_dict['texture'] = []
+        data_dict['action'] = []
+        data_dict['style'] = []
+        data_dict['poly'] = []
 
-        for key in annotations:
-            data = annotations[key]
-            data_dict[key] = {}
-            data_dict[key]['name'] = data['name']
-            data_dict[key]['tags'] = extract_tags(data['tags'])
-            data_dict[key]['categories'] = extract_tags(data['categories'])
-            data_dict[key]['description'] = data['description']
-            # data_list[0].append(data['name'])
-            # data_list[1].append(extract_tags(data['tags']))
-            # data_list[2].append(extract_tags(data['categories']))
-            # data_list[3].append(data['description'])
-        # print(len(data_list[0]) ,len(data_list[1]),len(data_list[2]),len(data_list[3]) )
-        images = []
-
-        curr = time.time()
-        # print("time load_image", curr)
-        skip_index = []
-        target_index = [0, 1,2,3,4,5,6,7, 8,9,10,11]
-        views = len(target_index)
-
-        for j in range(bz):
-            #print(j)
-            folder = batch_names[j]
-            if folder[-4:] != "json":
-                for idx in range(views):
-                    i = target_index[idx]
-                    im_path = os.path.join(img_folder + "/" + folder, '%03d.png' % i)
-                    if not os.path.isfile(im_path):
-                        bad_folders.append(folder)
-                        images = images[:-idx]
-                        skip_index.append(j)
-
-                        # save the bad items
-                        out_text_name = "logs/Bad_folder_names_job_" + str(job_num) + ".txt"
-                        with open(out_text_name, 'w') as f:
-                            for line in bad_folders:
-                                f.write(line + "\n")
-
-                        break
-
-                    images.append(load_image(image_size=image_size, device=device, im_path=im_path))
-        # print(assert(bz*12 == len(images)) )
-        next_t = time.time()
-        # print(" time after load_image =", next_t)
-        print("time for load diff 1", next_t - curr)
-
-        print("total num is ", len(images), ", should be", (bz - len(skip_index)) * views)
-
-        # make them a batch
-        batch_images = torch.stack(images, 0)
-        print("batch shape is ", batch_images.shape)
-        with torch.no_grad():
-            # beam search
-            curr = time.time()
-            # print("time before inference", curr)
-            captions = model.generate(batch_images, sample=False, num_beams=3, max_length=20, min_length=5)
-
-            next_t = time.time()
-            # print(" time after inference =", next_t)
-            print("time for inference diff 2", next_t - curr)
-            # nucleus sampling
-            # caption = model.generate(image, sample=True, top_p=0.9, max_length=20, min_length=5)
-            #        print('caption: ' + caption[0])
-
-        # post process
-        curr = time.time()
-        # print("time before post", curr)
-        print("num of captions is ", len(captions), "should be ", (bz - len(skip_index)) * views)
-        print("skip_index is", skip_index)
-        offset = 0
-        for j in range(bz):
-            if j not in skip_index: # skip if file is not found
-                folder = batch_names[j]
-                cur_texts = remove_useless_tail(captions[(j + offset) * views:(j + 1 + offset) * views])
-                cur_tags = data_dict[folder]['tags']
-
-                best_text = ''
-                # rule 1 : if tag is included in the BLIP's text, then it's highly likely to be good text
-                # if both sentence contains the tag, we prefer the longer sentence. (we encourage longer description)
-                for tag in cur_tags:
-                    for text in cur_texts:
-                        if tag in text and len(text) > len(best_text):
-                            best_text = text
-                            count = 13 # 13 means selected by Rule 1
-                # case when not tag is found in the texts, we perform a vote
-                if best_text == '':
-                    text_emb = model_clip.encode(cur_texts) # 12 x D_embd
-                    cos_scores = util.cos_sim(text_emb, text_emb) # 12 x 12
-                    best_text , count = find_best_text(cos_scores, cur_texts, thresh=0.85)
+        if cur_folder[-4:] != "json":
+            for idx in range(12):
+                im_path = os.path.join(img_folder + "/" + cur_folder, '%03d.png' % idx)
+                if not os.path.isfile(im_path):
+                    print("bad target", im_path)
+                    bad_folders.append(cur_folder)
+                    # save the bad items
+                    out_text_name = "logs/Bad_folder_names_job_" + str(job_num) + ".txt"
+                    with open(out_text_name, 'w') as f:
+                        for line in bad_folders:
+                            f.write(line + "\n")
+                    break
+                # case when path exist:
+                raw_image = Image.open(im_path).convert("RGB")
+                image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
 
 
+                cur_prompt = "Question: This is an object centered image, Can you provide a caption for this object. Ignore the balck or white background. Answer:"
+                caption = filter_text(model.generate({"image": image, "prompt": cur_prompt}))
+                data_dict['caption'].append(caption)
 
+                Q = 'Can you tell me what action is it doing? Please ignore the black background.'
+                cur_prompt = 'Question: ' + Q + ' Answer:'
+                answer = model.generate({"image": image, "prompt": cur_prompt})
+                data_dict['action'].append(answer)
 
-                # print(len(cur_texts))
-                # best_text = most_frequent(cur_texts)
-                # out_text_name = img_folder + "/" + folder + "/BLIP_v2_best_text.txt"
+                Q = 'Can you tell me the style of this image? '
+                cur_prompt = 'Question: ' + Q + ' Answer:'
+                answer = model.generate({"image": image, "prompt": cur_prompt})
+                data_dict['style'].append(answer)
 
+                Q = 'This is a rendering image of a 3D asset, Can you tell me whether it is high poly or low poly? '
+                cur_prompt = 'Question: ' + Q + ' Answer:'
+                answer = model.generate({"image": image, "prompt": cur_prompt})
+                data_dict['poly'].append(answer)
 
-                meta_data = data_dict[folder]
-                # meta_data["name"] = data_list[0][j]
-                # meta_data['tags'] = data_list[1][j]
-                # meta_data['categories'] = data_list[2][j]
-                # meta_data['description'] = data_list[3][j]
-                meta_data["BLIP_texts"] = cur_texts
-                meta_data['count'] = count
-                meta_data['Best_text'] = best_text
+                Q = 'Can you tell me whether the object has texture or not? '
+                cur_prompt = 'Question: ' + Q + ' Answer:'
+                answer = model.generate({"image": image, "prompt": cur_prompt})
+                data_dict['texture'].append(answer)
 
-                data_split_by_count[count].append(batch_names[j])
+            # after for loop
+            text_emb = model_clip.encode(data_dict['caption'])  # 12 x D_embd
+            cos_scores = util.cos_sim(text_emb, text_emb)  # 12 x 12
+            best_text, count = find_best_text(cos_scores, data_dict['caption'], thresh=0.85)
+            data_dict['best_text'] = best_text
+            data_dict['count'] = count
 
-                out_text_name = img_folder + "/" + folder + "/BLIP_best_text_v2.txt"
-                out_objarverse_metadata = img_folder + "/" + folder + "/objarverse_BLIP_metadata_v2.json"
+            data_split_by_count[count].append(cur_folder)
 
+            out_text_name = img_folder + "/" + cur_folder + "/BLIP2_best_text.txt"
+            out_objarverse_metadata = img_folder + "/" + cur_folder + "/BLIP2_metadata.json"
 
-                with open(out_text_name, 'w') as f:
-                    f.write(best_text)
+            with open(out_text_name, 'w') as f:
+                f.write(best_text)
 
-                with open(out_objarverse_metadata, 'w') as f:
-                    json.dump(meta_data, f )
-            else:
-                offset -= 1
-        # print(" time after post =", next_t)
-        print("time for post diff 3", next_t - curr)
+            with open(out_objarverse_metadata, 'w') as f:
+                json.dump(data_dict, f)
 
-        # update id
-        batch_s += bz
-        batch_e += bz
-        time_cost = time.time() - iter_time_s
-        print("when bz is ", bz, ", 1 iteration takes time :", time_cost / 60, " minutes.", "1 sample will take ",
-              time_cost / bz, " seconds")
-
-        print(batch_s, batch_e, end_n)
-
-
-    data_out = "BLIP_v2_data_split_" + str(job_num) + ".json"
+    data_out = "BLIP2_data_split_" + str(job_num) + ".json"
     with open(data_out, 'w') as f:
-        json.dump(data_split_by_count,f)
-
-
-
+        json.dump(data_split_by_count, f)
     return
 
 if __name__ == '__main__':
