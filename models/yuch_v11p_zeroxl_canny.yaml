@@ -89,7 +89,7 @@ data:
     num_workers: 16
     total_view: 12
     image_size: 256
-    valid_path: valid_merged_paths_9.json
+    valid_path: valid_merged_paths_4.json
 #    valid_path: 'valid_paths_8.json'
 #    valid_path: 'BLIP2_count_5_13_only_colored.json'
 
