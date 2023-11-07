@@ -37,6 +37,8 @@ for img in img_names:
     print(q6)
     q7 = model.generate({"image": image, "prompt": "Question: Can you tell me whether this is a pure black without any object?  Answer:"})
     print(q7)
+    q7 = model.generate({"image": image, "prompt": "Question: Can you tell me whether this is a pure white image without any object?  Answer:"})
+    print(q7)
 
     print('Ask Question with context:')
     # cur_prompt = "Question: Can you generate a caption for this image as detail as possible. This is a object centered png image without background, please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption.   Answer:"
@@ -68,7 +70,12 @@ for img in img_names:
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(Q,answer)
 
-    Q = 'Can you tell me whether this is a pure black without any object? '
+    Q = 'Can you tell me whether this is a pure black image without any object? '
+    cur_prompt = 'Question: '+ Q + ' Answer:'
+    answer = model.generate({"image": image, "prompt": cur_prompt})
+    print(Q,answer)
+
+    Q = 'Can you tell me if this is a pure white image without any object? '
     cur_prompt = 'Question: '+ Q + ' Answer:'
     answer = model.generate({"image": image, "prompt": cur_prompt})
     print(Q,answer)
