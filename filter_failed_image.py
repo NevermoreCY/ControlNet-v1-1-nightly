@@ -31,3 +31,5 @@ with open (out_path,'w') as f:
 out_path = 'shapenet_v1_bad.json'
 with open (out_path,'w') as f:
     json.dump(bad_path,f)
+
+print(c, total, c/total)
