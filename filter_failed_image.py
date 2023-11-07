@@ -10,6 +10,7 @@ with open(file_path, 'r') as f:
 
 c = 0
 total = len(folders)
+print(total)
 bad_path = []
 good_path = []
 for folder in folders:
