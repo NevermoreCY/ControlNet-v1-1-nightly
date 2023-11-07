@@ -1,30 +1,14 @@
-import os
-
-from PIL import Image
-import requests
-import torch
-from torchvision import transforms
-from torchvision.transforms.functional import InterpolationMode
 from tqdm import tqdm
 import json
 import time
-import numpy as np
 import sys
-from torchvision.io import read_image
 import argparse
-
-import objaverse
-# from sentence_transformers import SentenceTransformer, util
 import os
 import torch
 from PIL import Image
-
 from sentence_transformers import SentenceTransformer, util
 from lavis.models import load_model_and_preprocess
 
-# log = open("image_caption_logs/sep10_job0_t1.log", "a")
-# sys.stdout = log
-# sys.stderr = log
 
 
 def doArgs(argList):
