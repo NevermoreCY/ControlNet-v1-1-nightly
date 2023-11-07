@@ -4,8 +4,8 @@ import os
 
 shape_path = 'shapenet_v1_good.json'
 turbo_path = 'turbo_v1.json'
-turbo_scale = 2
-shape_scale = 10
+turbo_scale = 10
+shape_scale = 2
 
 
 with open(shape_path, 'r') as f:
@@ -15,6 +15,7 @@ with open(turbo_path, 'r') as f:
     turbo_data = json.load(f)
 
 turbo_data = turbo_scale * turbo_data
+shape_data = shape_scale * shape_data
 
 
 print("turbo data final length: " , len(turbo_data))
