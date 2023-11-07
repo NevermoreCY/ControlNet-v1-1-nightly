@@ -20,7 +20,7 @@ for img in img_names:
     print('Single question without remembering previous context:')
     raw_image = Image.open(test_folder+img).convert("RGB")
     image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
-    print(image.shape, torch.sim(image))
+    print(image.shape, torch.sum(image))
 
 
     q1a= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. Including the object's facing direction, color, action and style. This is a object centered png image without background, please ignore the balck background and focus on the object. Also, Don't include word '3D model' in the caption. Answer:"})
