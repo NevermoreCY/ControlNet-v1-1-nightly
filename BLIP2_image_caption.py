@@ -88,8 +88,13 @@ def main():
     valid_file = 'valid_merged_paths_r1_4.json'
     with open(valid_file) as f:
         sub_folder_list = json.load(f)
-
     sub_folder_list.sort()
+
+    # img_folder = "/yuch_ws/zero123/objaverse-rendering/views_shape"
+    # sub_folder_list = os.listdir("/yuch_ws/zero123/objaverse-rendering/views_shape")
+
+
+
 
     total_n = len(sub_folder_list)
     print("total_n", total_n)  # 772870
@@ -158,17 +163,17 @@ def main():
             data_dict['caption'] = answer
             print(answer)
 
-            Q = 'Can you tell me what action is it doing? Please ignore the black background.'
-            cur_prompt = 'Question: ' + Q + ' Answer:'
-            answer = model.generate({"image": image, "prompt": cur_prompt})
-            data_dict['action']= answer
+            # Q = 'Can you tell me what action is it doing? Please ignore the black background.'
+            # cur_prompt = 'Question: ' + Q + ' Answer:'
+            # answer = model.generate({"image": image, "prompt": cur_prompt})
+            # data_dict['action']= answer
 
             # print(answer)
 
-            Q = 'Can you tell me the style of this image? '
-            cur_prompt = 'Question: ' + Q + ' Answer:'
-            answer = model.generate({"image": image, "prompt": cur_prompt})
-            data_dict['style']= answer
+            # Q = 'Can you tell me the style of this image? '
+            # cur_prompt = 'Question: ' + Q + ' Answer:'
+            # answer = model.generate({"image": image, "prompt": cur_prompt})
+            # data_dict['style']= answer
 
             # print(answer)
             #
