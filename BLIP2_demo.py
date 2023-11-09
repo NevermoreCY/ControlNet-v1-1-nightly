@@ -37,7 +37,7 @@ for img in img_names:
     print("Image process time: ", t4 , numpy.average(image_process_t) )
 
     print(image.shape, torch.sum(image))
-    image = image.repeat(12, 1, 1, 1)
+    image = image.repeat(120, 1, 1, 1)
 
     print(image.shape)
 
@@ -46,7 +46,7 @@ for img in img_names:
     print(q1a)
     t6 = time.time()-t1
     q_t.append(t6)
-    print("Image process time: ", t6 , numpy.average(q_t) )
+    print("QA time: ", t6 , numpy.average(q_t) )
     #
     # q1b= model.generate({"image": image, "prompt": "Question: Can you generate a caption for this image as detail as possible. please ignore the black background. Don't use 3d model as keyword.  Answer:"})
     # print(q1b)
