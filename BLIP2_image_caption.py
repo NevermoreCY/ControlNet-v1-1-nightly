@@ -166,31 +166,42 @@ def main():
                 raw_image = Image.open(im_path).convert("RGB")
                 image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
                 print(image.shape)
+                image = image.repeat(10,1,1,1)
+                print("image shape after repeat", image.shape)
 
 
                 cur_prompt = "Question: Can you generate an image caption and ignore the black background. Answer:"
                 caption = filter_text(model.generate({"image": image, "prompt": cur_prompt})[0])
                 data_dict['caption'].append(caption)
 
+                print(caption)
+
                 Q = 'Can you tell me what action is it doing? Please ignore the black background.'
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
                 data_dict['action'].append(answer[0])
+
+                print(answer)
 
                 Q = 'Can you tell me the style of this image? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
                 data_dict['style'].append(answer[0])
 
+                print(answer)
+
                 Q = 'This is a rendering image of a 3D asset, Can you tell me whether it is high poly or low poly? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
                 data_dict['poly'].append(answer[0])
 
+                print(answer)
+
                 Q = 'Can you tell me whether the object has texture or not? '
                 cur_prompt = 'Question: ' + Q + ' Answer:'
                 answer = model.generate({"image": image, "prompt": cur_prompt})
                 data_dict['texture'].append(answer[0])
+                print(answer)
 
             # after for loop
             text_emb = model_clip.encode(data_dict['caption'])  # 12 x D_embd
