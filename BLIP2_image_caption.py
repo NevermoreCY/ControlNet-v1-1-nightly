@@ -83,15 +83,15 @@ def main():
         return best_text, count
 
     model_clip = SentenceTransformer('clip-ViT-L-14')
+    #
+    # img_folder = "/yuch_ws/views_release"
+    # valid_file = 'valid_merged_paths_r1_4.json'
+    # with open(valid_file) as f:
+    #     sub_folder_list = json.load(f)
+    # sub_folder_list.sort()
 
-    img_folder = "/yuch_ws/views_release"
-    valid_file = 'valid_merged_paths_r1_4.json'
-    with open(valid_file) as f:
-        sub_folder_list = json.load(f)
-    sub_folder_list.sort()
-
-    # img_folder = "/yuch_ws/zero123/objaverse-rendering/views_shape"
-    # sub_folder_list = os.listdir("/yuch_ws/zero123/objaverse-rendering/views_shape")
+    img_folder = "/yuch_ws/zero123/objaverse-rendering/views_shape_test"
+    sub_folder_list = os.listdir("/yuch_ws/zero123/objaverse-rendering/views_shape_test")
 
 
 
