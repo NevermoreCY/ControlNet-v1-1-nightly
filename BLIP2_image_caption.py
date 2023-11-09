@@ -123,7 +123,7 @@ def main():
 
     for folder_idx in tqdm(range(start_n,end_n)):
         cur_folder = sub_folder_list[folder_idx]
-        print(folder_idx,cur_folder)
+        print(folder_idx,cur_folder, start_n,end_n)
         iter_time_s = time.time()
         data_dict = {}
         data_dict['caption'] = []
@@ -158,12 +158,12 @@ def main():
 
             # after for loop
             image = torch.cat(imgs,0)
-            print(image.shape)
+            # print(image.shape)
 
             cur_prompt = "Question: Can you generate an image caption. Please ignore the black background. Answer:"
             answer = remove_useless_tail(model.generate({"image": image, "prompt": cur_prompt}))
             data_dict['caption'] = answer
-            print(answer)
+            # print(answer)
 
             # Q = 'Can you tell me what action is it doing? Please ignore the black background.'
             # cur_prompt = 'Question: ' + Q + ' Answer:'
