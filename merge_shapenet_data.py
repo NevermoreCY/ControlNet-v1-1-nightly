@@ -4,8 +4,8 @@ import os
 
 shape_path = 'shapenet_v1_good.json'
 turbo_path = 'turbo_v1.json'
-turbo_scale = 10
-shape_scale = 2
+turbo_scale = 1
+shape_scale = 1
 
 
 with open(shape_path, 'r') as f:
@@ -29,7 +29,7 @@ for i in range(4,14):
 
     update_data = shape_data + turbo_data +update_data
 
-    out_path = 'valid_merged_paths_' + str(i) + '.json'
+    out_path = 'valid_merged_paths_r1_' + str(i) + '.json'
     with open(out_path,'w') as f:
         json.dump(update_data, f)
 
