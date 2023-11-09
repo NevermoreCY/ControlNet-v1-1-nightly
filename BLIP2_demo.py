@@ -37,7 +37,7 @@ for img in img_names:
     print("Image process time: ", t4 , numpy.average(image_process_t) )
 
     print(image.shape, torch.sum(image))
-    # image = image.repeat(10, 1, 1, 1)
+    image = image.repeat(12, 1, 1, 1)
 
     print(image.shape)
 
