@@ -148,7 +148,7 @@ def main():
 
     def remove_useless_tail(texts):
         out = []
-        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky']
+        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky', 'with a black background']
 
         for text in texts:
             for bad_ending in bad_endings:
