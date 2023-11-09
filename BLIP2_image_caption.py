@@ -102,7 +102,7 @@ def main():
 
 
     # job_num = 21
-    job_length = 1000
+    job_length = 500
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
