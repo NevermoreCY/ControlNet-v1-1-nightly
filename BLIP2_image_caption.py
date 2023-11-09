@@ -99,8 +99,10 @@ def main():
     total_n = len(sub_folder_list)
     print("total_n", total_n)  # 772870
 
+
+
     # job_num = 21
-    job_length = 10000
+    job_length = 2000
 
     start_n = job_num* job_length
     end_n = (job_num+1) * job_length
