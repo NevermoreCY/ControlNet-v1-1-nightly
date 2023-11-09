@@ -31,7 +31,7 @@ for img in img_names:
     print("Image open time: ", t2 , numpy.average(image_open_t) )
 
     t3 = time.time()
-    image = vis_processors["eval"]([raw_image,raw_image]).unsqueeze(0).to(device)
+    image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
     t4 = time.time()-t1
     image_process_t.append(t4)
     print("Image process time: ", t4 , numpy.average(image_process_t) )
