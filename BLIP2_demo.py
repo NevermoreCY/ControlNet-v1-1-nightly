@@ -19,7 +19,7 @@ for img in img_names:
     print("** For image : ", img)
     print('Single question without remembering previous context:')
     raw_image = Image.open(test_folder+img).convert("RGB")
-    image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
+    image = vis_processors["eval"]([raw_image,raw_image]).unsqueeze(0).to(device)
     print(image.shape, torch.sum(image))
     image = image.repeat(10, 1, 1, 1)
 
