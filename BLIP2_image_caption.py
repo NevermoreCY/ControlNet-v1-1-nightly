@@ -32,46 +32,24 @@ def main():
                                                          device=device)
     # raw_image = Image.open(test_folder+img).convert("RGB")
     # image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
-
-    def most_frequent(List):
-        counter = 0
-        item = List[0]
-        for i in List:
-            curr_frequency = List.count(i)
-            if (curr_frequency > counter):
-                counter = curr_frequency
-                item = i
-        return item
-
-    def extract_tags(tags):
-        out = []
-        for item in tags:
-            out.append(item['name'])
-        return out
-
-    # def extract_category(cate):
-    #     out = []
-    #     for item in cate:
-    #         for dic in item:
-    #             out.append(dic['name'])
-    #     return out
-
     def remove_useless_tail(texts):
         out = []
-        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky', 'with a black background']
+        bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky', 'with a black background' ,'3d model','3D model']
+        bad_headings = ['a 3d model of', '3d model of', 'a 3D model of', '3D model of', 'a 3d model', 'a 3D model',
+                        '3d model']
 
         for text in texts:
-            # first check ending
             for bad_ending in bad_endings:
                 l = len(bad_ending)
                 if bad_ending in text and text[-l:] == bad_ending:
                     text = text[:-l]
-            # then check 3d
-            if '3d model of' or '3D model of' in text:
-                continue
+            for bad_heading in bad_headings:
+                l = len(bad_heading)
+                if bad_heading in text and text[:l] == bad_heading:
+                    text = text[l:]
+                    break
             out.append(text)
         return out
-
     def filter_text(text):
 
         bad_endings = ['in the dark', 'on a black background', 'in the night sky', 'in the sky','in the dark sky', 'with a black background' ,'3d model','3D model']
@@ -86,7 +64,6 @@ def main():
             if bad_heading in text and text[:l] == bad_heading:
                 text = text[l:]
                 break
-
         return text
 
     def find_best_text(cos_scores, cur_texts, thresh=0.9):
@@ -108,8 +85,6 @@ def main():
     model_clip = SentenceTransformer('clip-ViT-L-14')
 
     img_folder = "/yuch_ws/views_release"
-    # sub_folder_list = os.listdir(img_folder)
-    # sub_folder_list.sort()
     valid_file = 'valid_merged_paths_r1_4.json'
     with open(valid_file) as f:
         sub_folder_list = json.load(f)
@@ -150,6 +125,9 @@ def main():
         data_dict['style'] = []
         data_dict['poly'] = []
 
+
+        imgs = []
+
         if cur_folder[-4:] != "json":
             for idx in range(12):
                 im_path = os.path.join(img_folder + "/" + cur_folder, '%03d.png' % idx)
@@ -165,45 +143,48 @@ def main():
                 # case when path exist:
                 raw_image = Image.open(im_path).convert("RGB")
                 image = vis_processors["eval"](raw_image).unsqueeze(0).to(device)
-                print(image.shape)
-                image = image.repeat(10,1,1,1)
-                print("image shape after repeat", image.shape)
+                # print(image.shape)
+                imgs.append(image)
 
 
-                cur_prompt = "Question: Can you generate an image caption and ignore the black background. Answer:"
-                caption = filter_text(model.generate({"image": image, "prompt": cur_prompt})[0])
-                data_dict['caption'].append(caption)
 
-                print(caption)
-
-                Q = 'Can you tell me what action is it doing? Please ignore the black background.'
-                cur_prompt = 'Question: ' + Q + ' Answer:'
-                answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['action'].append(answer[0])
-
-                print(answer)
-
-                Q = 'Can you tell me the style of this image? '
-                cur_prompt = 'Question: ' + Q + ' Answer:'
-                answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['style'].append(answer[0])
-
-                print(answer)
-
-                Q = 'This is a rendering image of a 3D asset, Can you tell me whether it is high poly or low poly? '
-                cur_prompt = 'Question: ' + Q + ' Answer:'
-                answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['poly'].append(answer[0])
-
-                print(answer)
-
-                Q = 'Can you tell me whether the object has texture or not? '
-                cur_prompt = 'Question: ' + Q + ' Answer:'
-                answer = model.generate({"image": image, "prompt": cur_prompt})
-                data_dict['texture'].append(answer[0])
-                print(answer)
 
             # after for loop
+            image = torch.cat(imgs,0)
+            print(image.shape)
+
+            cur_prompt = "Question: Can you generate an image caption. Please ignore the black background. Answer:"
+            answer = remove_useless_tail(model.generate({"image": image, "prompt": cur_prompt}))
+            data_dict['caption'] = answer
+            print(answer)
+
+            Q = 'Can you tell me what action is it doing? Please ignore the black background.'
+            cur_prompt = 'Question: ' + Q + ' Answer:'
+            answer = model.generate({"image": image, "prompt": cur_prompt})
+            data_dict['action']= answer
+
+            # print(answer)
+
+            Q = 'Can you tell me the style of this image? '
+            cur_prompt = 'Question: ' + Q + ' Answer:'
+            answer = model.generate({"image": image, "prompt": cur_prompt})
+            data_dict['style']= answer
+
+            # print(answer)
+            #
+            Q = 'This is a rendering image of a 3D asset, Can you tell me whether it is high poly or low poly? '
+            cur_prompt = 'Question: ' + Q + ' Answer:'
+            answer = model.generate({"image": image, "prompt": cur_prompt})
+            data_dict['poly']= answer
+
+            # print(answer)
+
+            Q = 'Can you tell me whether the object has texture or not? '
+            cur_prompt = 'Question: ' + Q + ' Answer:'
+            answer = model.generate({"image": image, "prompt": cur_prompt})
+            data_dict['texture']= answer
+            # print(answer)
+
             text_emb = model_clip.encode(data_dict['caption'])  # 12 x D_embd
             cos_scores = util.cos_sim(text_emb, text_emb)  # 12 x 12
             best_text, count = find_best_text(cos_scores, data_dict['caption'], thresh=0.85)
