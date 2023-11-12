@@ -17,7 +17,7 @@ from PIL import Image
 
 
 
-def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, ddim_steps, guess_mode, strength, scale, seed, eta, low_threshold, high_threshold):
+def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, ddim_steps, guess_mode, strength, scale, seed, eta, low_threshold, high_threshold,folders):
     with torch.no_grad():
         img = resize_image(HWC3(input_image), image_resolution)
         H, W, C = img.shape
@@ -58,6 +58,18 @@ def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resoluti
         x_samples = (einops.rearrange(x_samples, 'b c h w -> b h w c') * 127.5 + 127.5).cpu().numpy().clip(0, 255).astype(np.uint8)
 
         results = [x_samples[i] for i in range(num_samples)]
+
+        output_imgs = []
+        for x_sample in results:
+            output_imgs.append(Image.fromarray(x_sample.astype(np.uint8)))
+        c = 0
+        for img in output_imgs:
+            out_path = prefix + "control_net_" + str(c) + '.png'
+            img.save(out_path)
+            c += 1
+
+
+
     return [255 - detected_map] + results
 
 
@@ -87,14 +99,16 @@ for i in tqdm(range(0, len(folder_list))):
 
     input_image = np.array(raw_im)
     print("*** our shape", input_image.shape)
-
+    # ***ourshape(256, 256, 3)
 
     prompt_path = folders + '/' + folder + '/' + 'BLIP_best_text_v2.txt'
     with open (prompt_path,'r') as f:
         prompt = f.readline()
 
+    prefix = folders + '/' + folder + '/'
 
-    break
+
+    # break
 
     a_prompt= 'best quality, extremely detailed'
     n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
@@ -109,4 +123,4 @@ for i in tqdm(range(0, len(folder_list))):
     low_threshold = 100
     high_threshold = 200
 
-    process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, ddim_steps, guess_mode, strength, scale, seed, eta, low_threshold, high_threshold)
+    process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, ddim_steps, guess_mode, strength, scale, seed, eta, low_threshold, high_threshold,prefix)
