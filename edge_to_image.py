@@ -1,9 +1,8 @@
 from share import *
 import config
 
-import cv2
 import einops
-import gradio as gr
+
 import numpy as np
 import torch
 import random
@@ -83,11 +82,11 @@ for i in tqdm(range(0, len(folder_list))):
     print(i)
     folder = folder_list[i]
 
-    canny_path = folders + '/' + folder + '/' + 'canny.png'
-    raw_im = Image.open(canny_path)
+    img_path = folders + '/' + folder + '/' + 'process.png'
+    raw_im = Image.open(img_path)
 
-    image = np.array(raw_im)
-    print("*** our shape", image.shape)
+    input_image = np.array(raw_im)
+    print("*** our shape", input_image.shape)
 
 
     prompt_path = folders + '/' + folder + '/' + 'BLIP_best_text_v2.txt'
@@ -95,7 +94,7 @@ for i in tqdm(range(0, len(folder_list))):
         prompt = f.readline()
 
 
-
+    break
 
     a_prompt= 'best quality, extremely detailed'
     n_prompt = 'longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality'
