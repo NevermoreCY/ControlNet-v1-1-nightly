@@ -82,7 +82,7 @@ for i in tqdm(range(0, len(folder_list))):
     print(i)
     folder = folder_list[i]
 
-    img_path = folders + '/' + folder + '/' + 'process.png'
+    img_path = folders + '/' + folder + '/' + 'processed_img.png'
     raw_im = Image.open(img_path)
 
     input_image = np.array(raw_im)
