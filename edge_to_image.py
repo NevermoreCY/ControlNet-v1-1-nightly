@@ -118,7 +118,12 @@ for i in tqdm(range(0, len(folder_list))):
     guess_mode = False
     strength = 1
     scale = 9
-    seed = 666
+
+    seed = np.random.randint(0,2147483647)
+    seed_path = folders + '/' + folder + '/' + 'seed.json'
+    with open (seed_path,'w') as f:
+        json.dump([seed], f)
+
     eta = 0
     low_threshold = 100
     high_threshold = 200
