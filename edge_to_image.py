@@ -25,7 +25,7 @@ def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resoluti
         detected_map = apply_canny(img, low_threshold, high_threshold)
         detected_map = HWC3(detected_map)
 
-        Image.fromarray(detected_map).save('test_images/' + prompt +".png")
+        # Image.fromarray(detected_map).save('test_images/' + prompt +".png")
 
         control = torch.from_numpy(detected_map.copy()).float().cuda() / 255.0
         control = torch.stack([control for _ in range(num_samples)], dim=0)
