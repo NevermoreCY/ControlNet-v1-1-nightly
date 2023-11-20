@@ -80,11 +80,11 @@ model.load_state_dict(load_state_dict('./models/control_sd15_canny.pth', locatio
 model = model.cuda()
 ddim_sampler = DDIMSampler(model)
 
-folders = '/yuch_ws/zero123/zero123/views_shape_test'
+folders = '/yuch_ws/zero123/zero123/views_shape'
 # folder_list = os.listdir(folders)
 import json
 
-good_path = 'shapenet_v2_good.json'
+good_path = '/yuch_ws/zero123/zero123/good_samples.json'
 with open(good_path, 'r') as f:
     folder_list = json.load(f)
 
