@@ -80,7 +80,7 @@ model.load_state_dict(load_state_dict('./models/control_sd15_canny.pth', locatio
 model = model.cuda()
 ddim_sampler = DDIMSampler(model)
 
-folders = '/yuch_ws/zero123/zero123/views_shape'
+folders = '/yuch_ws/zero123/objaverse-rendering/views_shape'
 # folder_list = os.listdir(folders)
 import json
 
