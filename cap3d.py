@@ -8,7 +8,7 @@ captions = pd.read_csv(file, header=None)
 import json
 import os
 
-target = 'BLIP2_split_by_count_recheck_tag_V5.json'
+target = 'BLIP2_split_by_count_v4.json'
 
 with open(target, 'r') as f:
     valid = json.load(f)
