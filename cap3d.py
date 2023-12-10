@@ -48,7 +48,7 @@ for item in captions[0]:
     for i in range(4,14):
         if item in data[i]:
             cap3_data[i].append(item)
-        break
+            break
     cap3_data[3].append(item)
     if c %10000 == 0:
         for i in range(3, 14):
