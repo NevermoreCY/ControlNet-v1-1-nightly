@@ -45,10 +45,12 @@ for id in range(len(captions[0])):
         if os.path.isfile(blip_file):
             with open(blip_file,'r') as f:
                 blip_text = f.readline()
-        else:
+        elif os.path.isfile(target_dir + '/BLIP_best_text.txt'):
             blip_file = target_dir + '/BLIP_best_text.txt'
             with open(blip_file,'r') as f:
                 blip_text = f.readline()
+        else:
+            continue
 
         image_file = target_dir+ '/000.png'
 
