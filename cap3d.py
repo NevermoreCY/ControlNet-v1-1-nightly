@@ -50,6 +50,9 @@ for item in captions[0]:
             cap3_data[i].append(item)
         break
     cap3_data[3].append(item)
+    if c %10000 == 0:
+        for i in range(3, 14):
+            print(i, len(cap3_data[i]))
 
 
 for i in range(3,14):
