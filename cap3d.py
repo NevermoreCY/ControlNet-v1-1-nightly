@@ -45,14 +45,18 @@ c = 0
 for item in captions[0]:
     c+=1
     # print(c)
+    not_found = True
     for i in range(4,14):
         if item in data[i]:
             cap3_data[i].append(item)
+            not_found=False
             break
-    cap3_data[3].append(item)
+    if not_found:
+        cap3_data[3].append(item)
+
     if c %10000 == 0:
         for i in range(3, 14):
-            print(i, len(cap3_data[i]))
+            print(c, i, len(cap3_data[i]))
 
 
 for i in range(3,14):
