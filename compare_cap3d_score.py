@@ -56,8 +56,8 @@ for id in range(len(captions[0])):
         text_emb = model.encode([cap3d_text, blip_text])
         cos_scores = util.cos_sim(img_emb, text_emb)
         print('cos score', cos_scores)
-        clip_score_cap3d += cos_scores[0]
-        clip_score_ours += cos_scores[1]
+        clip_score_cap3d += cos_scores[0][0]
+        clip_score_ours += cos_scores[0][1]
         c += 1
 
         print(c, ' cap3d: ',clip_score_cap3d/c, ' Blip2: ',clip_score_ours/c)
