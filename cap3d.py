@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-file = '/yuch_ws/3DGEN/cap3d/' + 'cap3d_objarverse_all.csv'
+file = '/yuch_ws/3DGEN/cap3d/' + 'cap3d_objarverse_hq.csv'
 captions = pd.read_csv(file, header=None)
 
 import json
@@ -44,7 +44,7 @@ for i in range(4,14):
 c = 0
 for item in captions[0]:
     c+=1
-    print(c)
+    # print(c)
     for i in range(4,14):
         if item in data[i]:
             cap3_data[i].append(item)
