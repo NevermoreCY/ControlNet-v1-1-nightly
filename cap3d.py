@@ -8,18 +8,21 @@ captions = pd.read_csv(file, header=None)
 import json
 import os
 
+target = 'BLIP2_split_by_count_recheck_tag_V5.json'
+
+with open(target, 'r') as f:
+    valid = json.load(f)
+
+
 
 data = {}
 
 cap3_data = {}
 cap3_data[3] = []
-for i in range(4,14):
+for i in range(0,14):
 
-    update_path = 'valid_paths_' + str(i) + '.json'
-    with open (update_path,'r') as f:
-        update_data = json.load(f)
-    data[i] = update_data
-    print('data ', i, len(update_data))
+    data[i] = valid[str(i)]
+    print('data ', i, len(data[i] ))
     cap3_data[i] = []
 
 c = 0
@@ -27,20 +30,21 @@ for item in captions[0]:
     c+=1
     # print(c)
     not_found = True
-    for i in range(4,14):
+    for i in range(0,14):
         if item in data[i]:
             cap3_data[i].append(item)
             not_found=  False
+            break
 
     if not_found:
         cap3_data[3].append(item)
 
     if c %10000 == 0:
-        for i in range(3, 14):
+        for i in range(0, 14):
             print(c, i, len(cap3_data[i]))
 
 
-for i in range(3,14):
+for i in range(0,14):
     print(i, len(cap3_data[i]))
 out_path = 'cap3d_distribution.json'
 with open(out_path,'w') as f:
