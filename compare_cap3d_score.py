@@ -1,65 +1,68 @@
 import os
-
 import pandas as pd
+import sys
 
-file = '/yuch_ws/3DGEN/cap3d/' + 'cap3d_objarverse_hq.csv'
+file = '/yuch_ws/3DGEN/cap3d/' + 'cap3d_objarverse_all.csv'
 captions = pd.read_csv(file, header=None)
 
 import json
 import os
+from sentence_transformers import SentenceTransformer, util
+from PIL import Image
 
 
-# shape_path = 'shapenet_v1_good.json'
-# turbo_path = 'turbo_v1.json'
-# turbo_scale = 1
-# shape_scale = 1
-#
-#
-# with open(shape_path, 'r') as f:
-#     shape_data = json.load(f)
-#
-# with open(turbo_path, 'r') as f:
-#     turbo_data = json.load(f)
-#
-# turbo_data = turbo_scale * turbo_data
-# shape_data = shape_scale * shape_data
-#
-#
-# print("turbo data final length: " , len(turbo_data))
-# print("shape data final length: " , len(shape_data))
 
+model = SentenceTransformer('clip-ViT-L-14')
 
 data = {}
+imgs_folder = "/yuch_ws/views_release/"
 
-cap3_data = {}
-cap3_data[3] = []
-for i in range(4,14):
+clip_score_cap3d = 0
+clip_score_ours = 0
 
-    update_path = 'valid_paths_' + str(i) + '.json'
-    with open (update_path,'r') as f:
-        update_data = json.load(f)
-    data[i] = update_data
-    cap3_data[i] = []
+
+#Encode an image:
+# img_emb = model.encode(Image.open('two_dogs_in_snow.jpg'))
+
+#Encode text descriptions
+# text_emb = model.encode(['Two dogs in the snow', 'A cat on a table', 'A picture of London at night'])
+
+#Compute cosine similarities
+
+# print(cos_scores)
 
 c = 0
-for item in captions[0]:
-    c+=1
-    # print(c)
-    for i in range(4,14):
-        if item in data[i]:
-            cap3_data[i].append(item)
-        break
-    cap3_data[3].append(item)
-    if c %10000 == 0:
-        for i in range(3, 14):
-            print(i, len(cap3_data[i]))
+
+for id in range(len(captions[0])):
+    item = captions[0][id]
+    target_dir = imgs_folder + item
+
+    if os.path.isdir(target_dir):
+
+        cap3d_text = captions[1][id]
+
+        blip_file = target_dir+ '/BLIP_best_text_v2.txt'
+        if os.path.isfile(blip_file):
+            with open(blip_file,'r') as f:
+                blip_text = f.readline()
+        else:
+            blip_file = target_dir + '/BLIP_best_text.txt'
+            with open(blip_file,'r') as f:
+                blip_text = f.readline()
+
+        image_file = target_dir+ '/000.png'
+
+        img_emb = model.encode(Image.open(image_file))
+        text_emb = model.encode([cap3d_text, blip_text])
+        cos_scores = util.cos_sim(img_emb, text_emb)
+        print('cos score', cos_scores)
+        clip_score_cap3d += cos_scores[0]
+        clip_score_ours += cos_scores[1]
+        c += 1
+
+        print(c, ' cap3d: ',clip_score_cap3d/c, ' Blip2: ',clip_score_ours/c)
 
 
-for i in range(3,14):
-    print(i, len(cap3_data[i]))
-out_path = 'cap3d_distribution.json'
-with open(out_path,'w') as f:
-    json.dump(out_path)
 
 
 
@@ -67,24 +70,13 @@ with open(out_path,'w') as f:
 
 
 
-## if u want to obtain the caption for specific UID
 
-#
-#
-#
-# for item in captions:
-#     print(item)
-#     # print('cap3d:',captions[captions[0] == item][1].values[0])
-#     data_path = '/home/nev/3DGEN/Results/12_11/cap3D/to_check/' + item + '/BLIP_best_text_v2.txt'
-#     with open(data_path,'r')as f:
-#         text = f.readline()
-#     cap3d = captions[captions[0] == item][1].values[0]
-#     print('cap3d:', cap3d)
-#     print('Our cap:', text)
-#
-#     out_cap3d = '/home/nev/3DGEN/Results/12_11/cap3D/to_check/' + item + '/cap3d_' + cap3d
-#     with open(out_cap3d,'w') as f:
-#         f.write(cap3d)
-#     out_our = '/home/nev/3DGEN/Results/12_11/cap3D/to_check/' + item + '/blip2_' + text
-#     with open(out_our,'w') as f:
-#         f.write(cap3d)
+
+
+
+
+
+
+
+
+
