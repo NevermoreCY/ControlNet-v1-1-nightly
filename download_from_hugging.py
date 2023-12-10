@@ -3,7 +3,8 @@ from huggingface_hub import snapshot_download
 from huggingface_hub import login
 
 
-login()
+hf_token = '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'
+login(token=hf_token)
 
 
 # x = hf_hub_download(repo_id="ShapeNet/ShapeNetCore", filename="04554684.zip")
