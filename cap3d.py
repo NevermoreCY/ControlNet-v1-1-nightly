@@ -9,26 +9,6 @@ import json
 import os
 
 
-# shape_path = 'shapenet_v1_good.json'
-# turbo_path = 'turbo_v1.json'
-# turbo_scale = 1
-# shape_scale = 1
-#
-#
-# with open(shape_path, 'r') as f:
-#     shape_data = json.load(f)
-#
-# with open(turbo_path, 'r') as f:
-#     turbo_data = json.load(f)
-#
-# turbo_data = turbo_scale * turbo_data
-# shape_data = shape_scale * shape_data
-#
-#
-# print("turbo data final length: " , len(turbo_data))
-# print("shape data final length: " , len(shape_data))
-
-
 data = {}
 
 cap3_data = {}
@@ -39,6 +19,7 @@ for i in range(4,14):
     with open (update_path,'r') as f:
         update_data = json.load(f)
     data[i] = update_data
+    print('data ', i, len(update_data))
     cap3_data[i] = []
 
 c = 0
@@ -49,8 +30,8 @@ for item in captions[0]:
     for i in range(4,14):
         if item in data[i]:
             cap3_data[i].append(item)
-            not_found=False
-            break
+            not_found=  False
+
     if not_found:
         cap3_data[3].append(item)
 
