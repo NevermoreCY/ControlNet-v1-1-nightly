@@ -52,7 +52,7 @@ for item in captions[0]:
     cap3_data[3].append(item)
 
 
-for i in range(4,14):
+for i in range(3,14):
     print(i, len(cap3_data[i]))
 out_path = 'cap3d_distribution.json'
 with open(out_path,'w') as f:
