@@ -7,7 +7,7 @@ login()
 
 
 # x = hf_hub_download(repo_id="ShapeNet/ShapeNetCore", filename="04554684.zip")
-x = hf_hub_download(repo_id="tiange/Cap3D", repo_type='dataset',filename="Cap3D_automated_Objaverse_highquality.csv")
+x = hf_hub_download(repo_id="tiange/Cap3D", repo_type='dataset',filename="Cap3D_automated_Objaverse_highquality.csv",local_dir_use_symlinks=False)
 # print(x)
 
 
