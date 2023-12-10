@@ -44,7 +44,7 @@ for i in range(4,14):
 c = 0
 for item in captions[0]:
     c+=1
-    print(c)
+    # print(c)
     for i in range(4,14):
         if item in data[i]:
             cap3_data[i].append(item)
