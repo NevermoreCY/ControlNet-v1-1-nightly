@@ -14,6 +14,14 @@ class DDIMSampler(object):
         self.ddpm_num_timesteps = model.num_timesteps
         self.schedule = schedule
 
+
+    def to(self, device):
+        """Same as to in torch module
+        Don't really underestand why this isn't a module in the first place"""
+        for k, v in self.__dict__.items():
+            if isinstance(v, torch.Tensor):
+                new_v = getattr(self, k).to(device)
+                setattr(self, k, new_v)
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
             if attr.device != torch.device("cuda"):

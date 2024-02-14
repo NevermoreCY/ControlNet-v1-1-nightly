@@ -528,6 +528,7 @@ class LatentDiffusion(DDPM):
     def __init__(self,
                  first_stage_config,
                  cond_stage_config,
+                 cond_stage_image_config,
                  num_timesteps_cond=None,
                  cond_stage_key="image",
                  cond_stage_trainable=False,
@@ -565,6 +566,7 @@ class LatentDiffusion(DDPM):
             self.register_buffer('scale_factor', torch.tensor(scale_factor))
         self.instantiate_first_stage(first_stage_config)
         self.instantiate_cond_stage(cond_stage_config)
+        self.instantiate_cond_stage_image(cond_stage_image_config)
         self.cond_stage_forward = cond_stage_forward
 
         self.clip_denoised = False
@@ -654,6 +656,31 @@ class LatentDiffusion(DDPM):
             model = instantiate_from_config(config)
             self.cond_stage_model = model
 
+    def instantiate_cond_stage_image(self, config):
+        # print("***instantiate_cond_stage")
+        if not self.cond_stage_trainable:
+            # print("*** cond_stage is not trainable ")
+            if config == "__is_first_stage__":
+                # print("Using first stage also as cond stage.")
+                self.cond_stage_model = self.first_stage_model
+            elif config == "__is_unconditional__":
+                print(f"Training {self.__class__.__name__} as an unconditional model.")
+                self.cond_stage_model = None
+                # self.be_unconditional = True
+            else:
+                print("*** else statement")
+                print("config is ", config )
+                model = instantiate_from_config(config)
+                self.cond_stage_image_model = model.eval()
+                self.cond_stage_image_model.train = disabled_train
+                for param in self.cond_stage_image_model.parameters():
+                    param.requires_grad = False
+
+        else:
+            assert config != '__is_first_stage__'
+            assert config != '__is_unconditional__'
+            model = instantiate_from_config(config)
+            self.cond_stage_image_model = model
     def _get_denoise_row_from_list(self, samples, desc='', force_no_decoder_quantization=False):
         denoise_row = []
         for zd in tqdm(samples, desc=desc):
@@ -687,6 +714,23 @@ class LatentDiffusion(DDPM):
             assert hasattr(self.cond_stage_model, self.cond_stage_forward)
             c = getattr(self.cond_stage_model, self.cond_stage_forward)(c)
         return c
+
+    def get_learned_image_conditioning(self, c):
+        if self.cond_stage_forward is None:
+            if hasattr(self.cond_stage_image_model, 'encode') and callable(self.cond_stage_image_model.encode):
+                print("&&&&& case 1 \n\n")
+                c = self.cond_stage_image_model.encode(c)
+                if isinstance(c, DiagonalGaussianDistribution):
+                    c = c.mode()
+            else:
+                print("&&&&& case 2 \n\n")
+                c = self.cond_stage_image_model(c)
+        else:
+            print("&&&&& case 3 \n\n")
+            assert hasattr(self.cond_stage_image_model, self.cond_stage_forward)
+            c = getattr(self.cond_stage_image_model, self.cond_stage_forward)(c)
+        return c
+
 
     def meshgrid(self, h, w):
         y = torch.arange(0, h).view(h, 1, 1).repeat(1, w, 1)

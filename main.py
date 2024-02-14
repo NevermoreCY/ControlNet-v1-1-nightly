@@ -254,7 +254,7 @@ class ObjaverseData(Dataset):
         if validation:
             self.paths = self.paths[math.floor(total_objects / 100. * 99.):]  # used last 1% as validation
         else:
-            self.paths = self.paths[:math.floor(total_objects / 100. * 99.)]  # used first 99% as training
+            self.paths = self.paths[:]  # used all for training since this script is not doing validation, we do it after getting checkpoints
         print('============= length of dataset %d =============' % len(self.paths))
         self.tform = image_transforms
 
@@ -358,7 +358,7 @@ class ObjaverseData(Dataset):
             target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
             cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
             # read prompt from BLIP
-            f = open(os.path.join(filename, "BLIP_best_text.txt") , 'r')
+            f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
             prompt = f.readline()
             # get cond_im and target_im
             cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))

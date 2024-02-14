@@ -56,6 +56,7 @@ with open(data2, 'r') as f:
 out = []
 
 for i in range(5,14):
+    print(data2.keys())
     out.extend(data2[str(i)]['color'])
 
     print('For count ', str(i) , '  grayscale ', len(data2[str(i)]['grayscale']) , ' color count', len(data2[str(i)]['color']))

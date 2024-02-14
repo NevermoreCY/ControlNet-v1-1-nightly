@@ -62,17 +62,17 @@ print("total is ", total)
 print("for count ", -1 ," we have ", len( valid[str(-1)]) , ' samples ' ,len( valid[str(-1)])/total * 100, ' percentage.' )
 for i in range(14):
     print("for count ", i ," we have ", len( valid[str(i)]) , ' samples ' ,len( valid[str(i)])/total * 100, ' percentage.' )
-
-for x in range(3,8):
-    out_path = "valid_paths_" + str(x) +".json"
-    valid_x = []
-
-    for i in range(x,14):
-        valid_x.extend(valid[str(i)])
-
-    print(out_path , "total samples are " , len(valid_x), len(valid_x)/ total)
-    with open(out_path, 'w') as f:
-        json.dump(valid_x, f)
+#
+# for x in range(3,8):
+#     out_path = "valid_paths_" + str(x) +".json"
+#     valid_x = []
+#
+#     for i in range(x,14):
+#         valid_x.extend(valid[str(i)])
+#
+#     print(out_path , "total samples are " , len(valid_x), len(valid_x)/ total)
+#     with open(out_path, 'w') as f:
+#         json.dump(valid_x, f)
 
 
 
