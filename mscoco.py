@@ -4,15 +4,12 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 import os
 
-for i in range(60):
-    if i < 10:
-        name = 0000+ str(i)
-    else:
-        name = 000+ str(i)
+for i in range(32):
+    name = 'views_subdir' + str(i) + '.zip'
 
-    cmd = 'tar xopf ' + name + '.tar'
+    cmd = 'unzip ' + name + ' -d views'
     print(cmd)
-    os.run(cmd)
+    os.system(cmd)
 
 
 
