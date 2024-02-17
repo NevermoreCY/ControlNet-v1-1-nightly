@@ -24,7 +24,7 @@ for item in L:
         name_set.add(idx)
 
 name_list = list(name_set)
-print(len(name_list))
+print(len(name_list) , max(name_list))
 
 out_path = 'mscoco_name_list.json'
 
