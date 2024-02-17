@@ -26,7 +26,8 @@ def get_node_name(name, parent_name):
     return True, name[len(parent_name):]
 
 # new model (MVDream + control)
-model = create_model(config_path='./models/control_3D_sd15.yaml')
+model = create_model(config_path='./base_models/control_3D_sd15.yaml')
+# model = create_model(config_path='./models/yuch_v11p_sd15_canny_full.yaml')
 
 print("model creation done!")
 
@@ -65,7 +66,33 @@ mvd_key = list(pretrained_weights_mvd.keys())
 #     if item not in control_key:
 #         print(item) # None
 
-print(len(control_key) , len(control_key2), len(mvd_key))
+control3D_dict = model.state_dict()
+control3D_key = list(control3D_dict.keys())
+
+print(len(control_key) , len(control_key2), len(mvd_key), len(control3D_dict))
+
+
+print('\n\n\n\n\n\n  in control3d, not in mvd')
+for item in control3D_key:
+    if item not in mvd_key:
+        print(item)
+
+print('\n\n\n\n\n\n  in control3d, not in control')
+for item in control3D_key:
+    if item not in control_key:
+        print(item)
+
+print('\n\n\n\n\n\n  in mvd, not in con3d')
+for item in mvd_key:
+    if item not in control3D_key:
+        print(item)
+
+
+print('\n\n\n\n\n\n  in con, not in con3d')
+for item in control_key:
+    if item not in control3D_key:
+        print(item)
+
 
 # print('\n\n\n\n\n\n  in mvd key, not in control key')
 # for item in mvd_key:
@@ -84,10 +111,10 @@ print(len(control_key) , len(control_key2), len(mvd_key))
 
 
 #
-# scratch_dict = model.state_dict()
-#
+
+
 # target_dict = {}
-# for k in scratch_dict.keys():
+# for k in control3D_dict.keys():
 #     is_control, name = get_node_name(k, 'control_')
 #     if is_control:
 #         copy_k = 'model.diffusion_' + name
@@ -102,3 +129,30 @@ print(len(control_key) , len(control_key2), len(mvd_key))
 # model.load_state_dict(target_dict, strict=True)
 # torch.save(model.state_dict(), output_path)
 # print('Done.')
+
+
+target_dict = {}
+# First copy control net v1.0 parameters
+for k in pretrained_weights_control.keys():
+    target_dict[k] = pretrained_weights_control.clone()
+# second copy control net v1.1 parameters
+for k in pretrained_weights_control2.keys():
+    target_dict[k] = pretrained_weights_control2.clone()
+# copy mvd
+for k in pretrained_weights_mvd.keys():
+    target_dict[k] = pretrained_weights_mvd.clone()
+
+#     is_control, name = get_node_name(k, 'control_')
+#     if is_control:
+#         copy_k = 'model.diffusion_' + name
+#     else:
+#         copy_k = k
+#     if copy_k in pretrained_weights:
+#         target_dict[k] = pretrained_weights[copy_k].clone()
+#     else:
+#         target_dict[k] = scratch_dict[k].clone()
+#         print(f'These weights are newly added: {k}')
+#
+model.load_state_dict(target_dict, strict=True)
+torch.save(model.state_dict(), output_path)
+print('Done.')
