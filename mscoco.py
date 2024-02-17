@@ -18,7 +18,8 @@ L = os.listdir('mscoco/mscoco')
 name_set = set([])
 
 for item in L:
-    idx,x = item.split('.')
+    L = item.split('.')
+    idx = L[0]
     if len(idx) == 9:
         name_set.add(idx)
 
