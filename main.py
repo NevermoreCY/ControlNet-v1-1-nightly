@@ -29,6 +29,9 @@ from packaging import version
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback, LearningRateMonitor
 import time
 from pytorch_lightning.utilities import rank_zero_info
+
+
+DEBUG=True
 @rank_zero_only
 def rank_zero_print(*args):
     print(*args)
@@ -148,9 +151,10 @@ def get_parser(**parser_kwargs):
     return parser
 
 class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
-    def __init__(self, root_dir, batch_size, total_view,  num_workers=4,valid_path='valid_path.json', img_size=256, **kwargs):
+    def __init__(self, root_dir_3d,root_dir_2d, batch_size, total_view,  num_workers=4,valid_path='valid_path.json', img_size=256, **kwargs):
         super().__init__(self)
-        self.root_dir = root_dir
+        self.root_dir_3d = root_dir_3d
+        self.root_dir_2d = root_dir_2d
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.total_view = total_view
@@ -164,7 +168,7 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
     def train_dataloader(self):
         # total_view = 4
         # print("t1 train_data")
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=False, \
+        dataset = ObjaverseData(root_dir_3d=self.root_dir_3d, root_dir_2d=self.root_dir_2d, total_view=self.total_view, validation=False, \
                                 image_transforms=self.image_transforms, image_size=self.image_size,valid_path=self.valid_path)
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False,
@@ -172,7 +176,7 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
 
     def val_dataloader(self):
         # print("t1 val_data")
-        dataset = ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=True, \
+        dataset = ObjaverseData(root_dir_3d=self.root_dir_3d, root_dir_2d=self.root_dir_2d, total_view=self.total_view, validation=True, \
                                 image_transforms=self.image_transforms,image_size=self.image_size,valid_path=self.valid_path)
         sampler = DistributedSampler(dataset)
         return wds.WebLoader(dataset, batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
@@ -180,7 +184,7 @@ class ObjaverseDataModuleFromConfig(pl.LightningDataModule):
     def test_dataloader(self):
         # print("t1 test_data")
         return wds.WebLoader(
-            ObjaverseData(root_dir=self.root_dir, total_view=self.total_view, validation=self.validation,image_size=self.image_size,valid_path=self.valid_path), \
+            ObjaverseData(root_dir_3d=self.root_dir_3d, root_dir_2d=self.root_dir_2d, total_view=self.total_view, validation=self.validation,image_size=self.image_size,valid_path=self.valid_path), \
             batch_size=self.batch_size, num_workers=self.num_workers, shuffle=False)
 
 def auto_canny(image, sigma=0.33):
@@ -212,7 +216,8 @@ def random_canny(image):
 
 class ObjaverseData(Dataset):
     def __init__(self,
-                 root_dir='.objaverse/hf-objaverse-v1/views',
+                 root_dir_3d='.objaverse/hf-objaverse-v1/views',
+                 root_dir_2d='/yuch_ws/ControlNet-v1-1-nightly/mscoco/mscoco',
                  image_transforms=[],
                  ext="png",
                  default_trans=torch.zeros(3),
@@ -227,7 +232,8 @@ class ObjaverseData(Dataset):
         If you pass in a root directory it will be searched for images
         ending in ext (ext can be a list)
         """
-        self.root_dir = Path(root_dir)
+        self.root_dir_3d = Path(root_dir_3d)
+        self.root_dir_2d = Path(root_dir_2d)
         self.default_trans = default_trans
         self.return_paths = return_paths
 
@@ -245,8 +251,33 @@ class ObjaverseData(Dataset):
         # with open(os.path.join(root_dir, 'test_paths.json')) as f:
         #     self.paths = json.load(f)
 
+        # ------------------------3D caption---------------------
+        import pandas as pd
+
+        file = 'Cap3D_automated_Objaverse_full_no3Dword.csv'
+        captions = pd.read_csv(file, header=None)
+
+        cap_data = {}
+
+        for i in range(len(captions)):
+            str_id = captions[0][i]
+            str_cap = captions[1][i]
+            cap_data[str_id] = str_cap
+        # ------------------------3D caption---------------------
+        self.cap_data = cap_data
+
+
         with open(valid_path) as f:
             self.paths = json.load(f)
+
+        # load data id for mscoco
+        mscoco_list = 'mscoco_name_list.json'
+        with open('mscoco_name_list.json') as f:
+            self.mscoco_name_list = json.load(f)
+
+        if DEBUG:
+            print("\n\n\n\n Mscoco name list length should be 591716 , cur is : " , len(self.mscoco_name_list))
+
 
         total_objects = len(self.paths)
 
@@ -301,103 +332,388 @@ class ObjaverseData(Dataset):
         return img
 
     def __getitem__(self, index):
-
         data = {}
-        total_view = self.total_view
-        index_target, index_cond = random.sample(range(total_view), 2)  # without replacement
-        filename = os.path.join(self.root_dir, self.paths[index])
+        data["img"] = []
+        data["hint"] = None
+        data["camera_pose"] = []  # actually the difference between two camera
+        data["txt"] = []
+        # version 1, merge two dataset
+        data_choice = random.random()
 
-        # print(self.paths[index])
+        # case for singe image dataset
+        if data_choice <= 0.3:
 
-        if self.return_paths:
-            data["path"] = str(filename)
+            total_view = self.total_view
+            sample_index = random.randint(0,600000)
+            # sample_id = self.paths[index]
+            # filename = os.path.join(self.root_dir_2d, self.paths[index])
 
-        # color = [1., 1., 1., 1.]
-
-        try:
-            target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
-            cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
-            # read prompt from BLIP
-            f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
+            target_im = cv2.imread(os.path.join(self.root_dir_2d, '%09d.jpg' % sample_index))
+            target_RT = np.load(os.path.join(self.root_dir_2d, 'camera.npy'))
+            f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
             prompt = f.readline()
-            # get cond_im and target_im
-            cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
-            target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
-            # test_im = cv2.imread("test.png")
-
-            # print("*** cond_im.shape", cond_im.shape)
-            # print("*** target_im.shape",target_im.shape)
-            # print("*** test_im.shape",test_im.shape)
-
-            # BGR TO RGB
-            cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
-            target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
-            # print("image size is ", self.image_size)
-            cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+            target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
             target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
 
-            # get canny edge
-            canny_r = random_canny(cond_im)
+            canny_r = random_canny(target_im)
             # print("*** canny_r.shape", canny_r.shape)
-            canny_r = canny_r[:,:,None]
+            canny_r = canny_r[:, :, None]
             canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
             # print("*** canny_r.shape after concatenate", canny_r.shape)
             # normalize
             canny_r = canny_r.astype(np.float32) / 255.0
             canny_r = torch.tensor(canny_r)
-            target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+            target_im = (target_im.astype(np.float32) / 127.5) - 1.0
             target_im = torch.tensor(target_im)
 
+            data["img"] = target_im
+            data["hint"] = canny_r
+            data["camera_pose"] = target_RT # actually the difference between two camera
+            data["txt"] = prompt
 
-        except:
-            if filename not in self.bad_files:
-                self.bad_files.append(filename)
-            print("Bad file encoutered : ", filename)
-            # very hacky solution, sorry about this
-            filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
-            target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
-            cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
-            # read prompt from BLIP
-            f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
-            prompt = f.readline()
-            # get cond_im and target_im
-            cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
-            target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
-            # BGR TO RGB
-            cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
-            target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
-            # resize
-            cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
-            target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
-            # get canny edge
-            canny_r = random_canny(cond_im)
-            canny_r = canny_r[:, :, None]
-            canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
-            # normalize
-            canny_r = canny_r.astype(np.float32) / 255.0
-            target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+        # case for multiview data
+        else: # data_choice > 0.3:
+            data = {}
+            total_view = self.total_view
+            index_target, index_cond = random.sample(range(total_view), 2)  # without replacement
+            filename = os.path.join(self.root_dir, self.paths[index])
+            sample_id = self.paths[index]
 
-            canny_r = torch.tensor(canny_r)
-            target_im = torch.tensor(target_im)
+            if DEBUG:
+                print("\n\n\n sample id is ", sample_id)
 
+            # print(self.paths[index])
+
+            if self.return_paths:
+                data["path"] = str(filename)
+
+            # color = [1., 1., 1., 1.]
+
+            for i in range(4):
+
+                target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                prompt = self.cap_data[sample_id]
+                target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+                target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+                target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
 
 
-        data["img"] = target_im
-        data["hint"] = canny_r
-        data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
-        data["txt"] = prompt
+                # we use first image as control image
+                if i ==0 :
+                    canny_r = random_canny(target_im)
+                    # print("*** canny_r.shape", canny_r.shape)
+                    canny_r = canny_r[:, :, None]
+                    canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+                    # print("*** canny_r.shape after concatenate", canny_r.shape)
+                    # normalize
+                    canny_r = canny_r.astype(np.float32) / 255.0
+                    canny_r = torch.tensor(canny_r)
+                    data["hint"] = canny_r
 
-        # print("test prompt is ", prompt)
-        # print("img shape", target_im.shape, "hint shape", canny_r.shape)
+                target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+                target_im = torch.tensor(target_im)
 
-        if self.postprocess is not None:
-            data = self.postprocess(data)
+
+
+            data["img"].append(target_im)
+            data["camera_pose"].append(target_RT) # actually the difference between two camera
+            data["txt"].append(prompt)
+
+            # print("test prompt is ", prompt)
+            # print("img shape", target_im.shape, "hint shape", canny_r.shape)
+
+            if self.postprocess is not None:
+                data = self.postprocess(data)
 
         return data
 
     def process_im(self, im):
         im = im.convert("RGB")
         return self.tform(im)
+
+
+
+
+# class ObjaverseData_old(Dataset):
+#     def __init__(self,
+#                  root_dir='.objaverse/hf-objaverse-v1/views',
+#                  image_transforms=[],
+#                  ext="png",
+#                  default_trans=torch.zeros(3),
+#                  postprocess=None,
+#                  return_paths=False,
+#                  total_view=12,
+#                  validation=False,
+#                  image_size=256,
+#                  valid_path='valid_path.json'
+#                  ) -> None:
+#         """Create a dataset from a folder of images.
+#         If you pass in a root directory it will be searched for images
+#         ending in ext (ext can be a list)
+#         """
+#         self.root_dir = Path(root_dir)
+#         self.default_trans = default_trans
+#         self.return_paths = return_paths
+#
+#         # if isinstance(postprocess, DictConfig):
+#         #     postprocess = instantiate_from_config(postprocess)
+#         self.postprocess = postprocess
+#         self.total_view = total_view
+#         self.image_size = image_size
+#
+#         self.bad_files = []
+#
+#         # if not isinstance(ext, (tuple, list, ListConfig)):
+#         #     ext = [ext]
+#
+#         # with open(os.path.join(root_dir, 'test_paths.json')) as f:
+#         #     self.paths = json.load(f)
+#
+#         with open(valid_path) as f:
+#             self.paths = json.load(f)
+#
+#         total_objects = len(self.paths)
+#
+#         print("*********number of total objects", total_objects)
+#         if validation:
+#             self.paths = self.paths[math.floor(total_objects / 100. * 99.):]  # used last 1% as validation
+#         else:
+#             self.paths = self.paths[:]  # used all for training since this script is not doing validation, we do it after getting checkpoints
+#         print('============= length of dataset %d =============' % len(self.paths))
+#         self.tform = image_transforms
+#
+#     def __len__(self):
+#         return len(self.paths)
+#
+#     def cartesian_to_spherical(self, xyz):
+#         ptsnew = np.hstack((xyz, np.zeros(xyz.shape)))
+#         xy = xyz[:, 0] ** 2 + xyz[:, 1] ** 2
+#         z = np.sqrt(xy + xyz[:, 2] ** 2)
+#         theta = np.arctan2(np.sqrt(xy), xyz[:, 2])  # for elevation angle defined from Z-axis down
+#         # ptsnew[:,4] = np.arctan2(xyz[:,2], np.sqrt(xy)) # for elevation angle defined from XY-plane up
+#         azimuth = np.arctan2(xyz[:, 1], xyz[:, 0])
+#         return np.array([theta, azimuth, z])
+#
+#     def get_T(self, target_RT, cond_RT):
+#         R, T = target_RT[:3, :3], target_RT[:, -1]
+#         T_target = -R.T @ T
+#
+#         R, T = cond_RT[:3, :3], cond_RT[:, -1]
+#         T_cond = -R.T @ T
+#
+#         theta_cond, azimuth_cond, z_cond = self.cartesian_to_spherical(T_cond[None, :])
+#         theta_target, azimuth_target, z_target = self.cartesian_to_spherical(T_target[None, :])
+#
+#         d_theta = theta_target - theta_cond
+#         d_azimuth = (azimuth_target - azimuth_cond) % (2 * math.pi)
+#         d_z = z_target - z_cond
+#
+#         d_T = torch.tensor([d_theta.item(), math.sin(d_azimuth.item()), math.cos(d_azimuth.item()), d_z.item()])
+#         return d_T
+#
+#     def load_im(self, path, color):
+#         '''
+#         replace background pixel with random color in rendering
+#         '''
+#         try:
+#             img = plt.imread(path)
+#         except:
+#             print(path)
+#             sys.exit()
+#         img[img[:, :, -1] == 0.] = color
+#         img = Image.fromarray(np.uint8(img[:, :, :3] * 255.))
+#         return img
+#
+#     def __getitem__(self, index):
+#
+#
+#         # version 1, merge two dataset
+#         data_choice = random.random()
+#
+#         # case for singe image dataset
+#         if data_choice <= 0.3:
+#             data = {}
+#             total_view = self.total_view
+#             index_target, index_cond = random.sample(range(total_view), 2)  # without replacement
+#             filename = os.path.join(self.root_dir, self.paths[index])
+#
+#             # print(self.paths[index])
+#
+#             if self.return_paths:
+#                 data["path"] = str(filename)
+#
+#             # color = [1., 1., 1., 1.]
+#
+#             try:
+#                 target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
+#                 cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+#                 # read prompt from BLIP
+#                 f = open(os.path.join(filename, "BLIP_best_text_v2.txt"), 'r')
+#                 prompt = f.readline()
+#                 # get cond_im and target_im
+#                 cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
+#                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+#                 # test_im = cv2.imread("test.png")
+#
+#                 # print("*** cond_im.shape", cond_im.shape)
+#                 # print("*** target_im.shape",target_im.shape)
+#                 # print("*** test_im.shape",test_im.shape)
+#
+#                 # BGR TO RGB
+#                 cond_im = cv2.cvtColor(cond_im, cv2.COLOR_BGR2RGB)
+#                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+#                 # print("image size is ", self.image_size)
+#                 cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#
+#                 # get canny edge
+#                 canny_r = random_canny(cond_im)
+#                 # print("*** canny_r.shape", canny_r.shape)
+#                 canny_r = canny_r[:, :, None]
+#                 canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+#                 # print("*** canny_r.shape after concatenate", canny_r.shape)
+#                 # normalize
+#                 canny_r = canny_r.astype(np.float32) / 255.0
+#                 canny_r = torch.tensor(canny_r)
+#                 target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+#                 target_im = torch.tensor(target_im)
+#
+#
+#             except:
+#                 if filename not in self.bad_files:
+#                     self.bad_files.append(filename)
+#                 print("Bad file encoutered : ", filename)
+#                 # very hacky solution, sorry about this
+#                 filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
+#                 target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
+#                 cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+#                 # read prompt from BLIP
+#                 f = open(os.path.join(filename, "BLIP_best_text_v2.txt"), 'r')
+#                 prompt = f.readline()
+#                 # get cond_im and target_im
+#                 cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
+#                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+#                 # BGR TO RGB
+#                 cond_im = cv2.cvtColor(cond_im, cv2.COLOR_BGR2RGB)
+#                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+#                 # resize
+#                 cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 # get canny edge
+#                 canny_r = random_canny(cond_im)
+#                 canny_r = canny_r[:, :, None]
+#                 canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+#                 # normalize
+#                 canny_r = canny_r.astype(np.float32) / 255.0
+#                 target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+#
+#                 canny_r = torch.tensor(canny_r)
+#                 target_im = torch.tensor(target_im)
+#
+#             data["img"] = target_im
+#             data["hint"] = canny_r
+#             data["camera_pose"] = self.get_T(target_RT, cond_RT)  # actually the difference between two camera
+#             data["txt"] = prompt
+#
+#         # case for multiview data
+#         else: # data_choice > 0.3:
+#             data = {}
+#             total_view = self.total_view
+#             index_target, index_cond = random.sample(range(total_view), 2)  # without replacement
+#             filename = os.path.join(self.root_dir, self.paths[index])
+#
+#             # print(self.paths[index])
+#
+#             if self.return_paths:
+#                 data["path"] = str(filename)
+#
+#             # color = [1., 1., 1., 1.]
+#
+#             try:
+#                 target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
+#                 cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+#                 # read prompt from BLIP
+#                 f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
+#                 prompt = f.readline()
+#                 # get cond_im and target_im
+#                 cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
+#                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+#                 # test_im = cv2.imread("test.png")
+#
+#                 # print("*** cond_im.shape", cond_im.shape)
+#                 # print("*** target_im.shape",target_im.shape)
+#                 # print("*** test_im.shape",test_im.shape)
+#
+#                 # BGR TO RGB
+#                 cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
+#                 target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
+#                 # print("image size is ", self.image_size)
+#                 cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#
+#                 # get canny edge
+#                 canny_r = random_canny(cond_im)
+#                 # print("*** canny_r.shape", canny_r.shape)
+#                 canny_r = canny_r[:,:,None]
+#                 canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+#                 # print("*** canny_r.shape after concatenate", canny_r.shape)
+#                 # normalize
+#                 canny_r = canny_r.astype(np.float32) / 255.0
+#                 canny_r = torch.tensor(canny_r)
+#                 target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+#                 target_im = torch.tensor(target_im)
+#
+#
+#             except:
+#                 if filename not in self.bad_files:
+#                     self.bad_files.append(filename)
+#                 print("Bad file encoutered : ", filename)
+#                 # very hacky solution, sorry about this
+#                 filename = os.path.join(self.root_dir, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
+#                 target_RT = np.load(os.path.join(filename, '%03d.npy' % index_target))
+#                 cond_RT = np.load(os.path.join(filename, '%03d.npy' % index_cond))
+#                 # read prompt from BLIP
+#                 f = open(os.path.join(filename, "BLIP_best_text_v2.txt") , 'r')
+#                 prompt = f.readline()
+#                 # get cond_im and target_im
+#                 cond_im = cv2.imread(os.path.join(filename, '%03d.png' % index_cond))
+#                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+#                 # BGR TO RGB
+#                 cond_im  = cv2.cvtColor(cond_im , cv2.COLOR_BGR2RGB)
+#                 target_im  = cv2.cvtColor(target_im , cv2.COLOR_BGR2RGB)
+#                 # resize
+#                 cond_im = cv2.resize(cond_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+#                 # get canny edge
+#                 canny_r = random_canny(cond_im)
+#                 canny_r = canny_r[:, :, None]
+#                 canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+#                 # normalize
+#                 canny_r = canny_r.astype(np.float32) / 255.0
+#                 target_im  = (target_im .astype(np.float32) / 127.5) - 1.0
+#
+#                 canny_r = torch.tensor(canny_r)
+#                 target_im = torch.tensor(target_im)
+#
+#
+#
+#             data["img"] = target_im
+#             data["hint"] = canny_r
+#             data["camera_pose"] = self.get_T(target_RT, cond_RT) # actually the difference between two camera
+#             data["txt"] = prompt
+#
+#             # print("test prompt is ", prompt)
+#             # print("img shape", target_im.shape, "hint shape", canny_r.shape)
+#
+#             if self.postprocess is not None:
+#                 data = self.postprocess(data)
+#
+#         return data
+#
+#     def process_im(self, im):
+#         im = im.convert("RGB")
+#         return self.tform(im)
+
 
 def nondefault_trainer_args(opt):
     parser = argparse.ArgumentParser()
@@ -1119,11 +1435,12 @@ if __name__ == "__main__":
         total_view = config.data['params']['total_view']
         num_workers = config.data['params']['num_workers']
         batch_size = config.data['params']['batch_size']
-        root_dir = config.data['params']['root_dir']
+        root_dir_3d = config.data['params']['root_dir_3d']
+        root_dir_2d = config.data['params']['root_dir_2d']
         valid_path = config.data['params']['valid_path']
         img_size = config.data['params']['image_size']
 
-        data = ObjaverseDataModuleFromConfig(root_dir, batch_size, total_view, num_workers,valid_path,img_size)
+        data = ObjaverseDataModuleFromConfig(root_dir_3d,root_dir_2d, batch_size, total_view, num_workers,valid_path,img_size)
         data.prepare_data()
 
         data.setup()
