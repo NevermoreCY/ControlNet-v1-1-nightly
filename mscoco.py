@@ -8,7 +8,7 @@ import json
 for i in range(32):
     name = 'views_subdir' + str(i)
     path = '/yuch_ws/views_valid5/objaverse/control3D/' + name + '/*'
-    cmd = 'mv ' + name + ' views'
+    cmd = 'mv ' + path + ' views'
     print(cmd)
     os.system(cmd)
 
