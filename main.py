@@ -333,10 +333,10 @@ class ObjaverseData(Dataset):
 
     def __getitem__(self, index):
         data = {}
-        data["img"] = []
-        data["hint"] = None
-        data["camera_pose"] = []  # actually the difference between two camera
-        data["txt"] = []
+        # data["img"] = []
+        # data["hint"] = None
+        # data["camera_pose"] = []  # actually the difference between two camera
+        # data["txt"] = []
         # version 1, merge two dataset
         data_choice = random.random()
 
@@ -368,15 +368,20 @@ class ObjaverseData(Dataset):
             target_im = (target_im.astype(np.float32) / 127.5) - 1.0
             target_im = torch.tensor(target_im)
 
-            if DEBUG:
-                print("\n\n\n sample_name is ", sample_name)
-                print("\n target_im shape is ", target_im.shape) # []
-                print("\n canny_r shape is ", canny_r.shape)
-                print("\n prompt is ", prompt)
-                print("\n target_im sum is ", torch.sum(target_im))
-                print('\n ')
+            data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
 
-            data["img"] = target_im
+            if DEBUG:
+                print("\n\n\n sample_name is ", sample_name)  # 000020026
+                print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
+                print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
+                print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
+                print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
+                print('\n camera shape is :', type(target_RT), target_RT.shape)
+                print('\n data_img shape is :',  data_img.shape)
+
+
+
+            data["img"] = data_img
             data["hint"] = canny_r
             data["camera_pose"] = target_RT # actually the difference between two camera
             data["txt"] = prompt
