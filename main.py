@@ -340,15 +340,17 @@ class ObjaverseData(Dataset):
         # version 1, merge two dataset
         data_choice = random.random()
 
+        # first test single image
+        data_choice = 0.1
+
         # case for singe image dataset
         if data_choice <= 0.3:
 
-            total_view = self.total_view
-            sample_index = random.randint(0,600000)
-            # sample_id = self.paths[index]
+            sample_index = random.randint(0,len(self.mscoco_name_list)-1)
+            sample_name = self.mscoco_name_list[sample_index]
             # filename = os.path.join(self.root_dir_2d, self.paths[index])
 
-            target_im = cv2.imread(os.path.join(self.root_dir_2d, '%09d.jpg' % sample_index))
+            target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
             target_RT = np.load(os.path.join(self.root_dir_2d, 'camera.npy'))
             f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
             prompt = f.readline()
@@ -365,6 +367,12 @@ class ObjaverseData(Dataset):
             canny_r = torch.tensor(canny_r)
             target_im = (target_im.astype(np.float32) / 127.5) - 1.0
             target_im = torch.tensor(target_im)
+
+            if DEBUG:
+                print("\n\n\n target_im shape is ", target_im.shape)
+                print("\n canny_r shape is ", target_im)
+                print("\n target_im shape is ", target_im)
+                print("\n target_im shape is ", target_im)
 
             data["img"] = target_im
             data["hint"] = canny_r
