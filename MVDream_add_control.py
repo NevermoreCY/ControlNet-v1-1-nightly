@@ -1,5 +1,3 @@
-import sys
-import os
 
 # assert len(sys.argv) == 3, 'Args are wrong.'
 
@@ -13,7 +11,7 @@ output_path = 'base_models/mvcontrol_base.pt'
 # assert os.path.exists(os.path.dirname(output_path)), 'Output path is not valid.'
 
 import torch
-from share import *
+# from share import *
 from cldm.model import create_model
 
 
