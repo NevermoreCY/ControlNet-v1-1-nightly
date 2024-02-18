@@ -132,15 +132,18 @@ for item in control_key:
 
 
 target_dict = {}
+# 0th step copy original weights
+for k in control3D_dict.keys():
+    target_dict[k] = control3D_dict[k].clone()
 # First copy control net v1.0 parameters
 for k in pretrained_weights_control.keys():
-    target_dict[k] = pretrained_weights_control.clone()
+    target_dict[k] = pretrained_weights_control[k].clone()
 # second copy control net v1.1 parameters
 for k in pretrained_weights_control2.keys():
-    target_dict[k] = pretrained_weights_control2.clone()
+    target_dict[k] = pretrained_weights_control2[k].clone()
 # copy mvd
 for k in pretrained_weights_mvd.keys():
-    target_dict[k] = pretrained_weights_mvd.clone()
+    target_dict[k] = pretrained_weights_mvd[k].clone()
 
 #     is_control, name = get_node_name(k, 'control_')
 #     if is_control:
