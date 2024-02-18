@@ -351,7 +351,7 @@ class ObjaverseData(Dataset):
             # filename = os.path.join(self.root_dir_2d, self.paths[index])
 
             target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
-            target_RT = np.load(os.path.join(self.root_dir_2d, 'camera.npy'))
+            target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
             f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
             prompt = f.readline()
             target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
