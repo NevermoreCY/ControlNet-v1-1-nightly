@@ -368,15 +368,18 @@ class ObjaverseData(Dataset):
             target_im = (target_im.astype(np.float32) / 127.5) - 1.0
             target_im = torch.tensor(target_im)
 
-            data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
+            target_RT = torch.tensor(target_RT)
 
+            data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
+            data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
             if DEBUG:
                 print("\n\n\n sample_name is ", sample_name)  # 000020026
                 print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
                 print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
                 print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
                 print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
-                print('\n camera shape is :', type(target_RT), target_RT.shape)
+                print('\n camera shape is :', target_RT.shape)
+                print('\n data camera shape is :', data_camera.shape)
                 print('\n data_img shape is :',  data_img.shape)
 
 
