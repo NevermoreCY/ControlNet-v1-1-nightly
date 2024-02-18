@@ -369,10 +369,12 @@ class ObjaverseData(Dataset):
             target_im = torch.tensor(target_im)
 
             if DEBUG:
-                print("\n\n\n target_im shape is ", target_im.shape)
-                print("\n canny_r shape is ", target_im)
-                print("\n target_im shape is ", target_im)
-                print("\n target_im shape is ", target_im)
+                print("\n\n\n sample_name is ", sample_name)
+                print("\n target_im shape is ", target_im.shape) # []
+                print("\n canny_r shape is ", canny_r.shape)
+                print("\n prompt is ", prompt)
+                print("\n target_im sum is ", torch.sum(target_im))
+                print('\n ')
 
             data["img"] = target_im
             data["hint"] = canny_r
