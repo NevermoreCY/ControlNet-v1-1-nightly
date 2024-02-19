@@ -31,7 +31,7 @@ from ldm.models.diffusion.ddim import DDIMSampler
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
                          'adm': 'y'}
-
+DEBUG =True
 
 def disabled_train(self, mode=True):
     """Overwrite model.train with this function to make sure train/eval mode
@@ -421,6 +421,13 @@ class DDPM(pl.LightningModule):
         x = batch[k]
         if len(x.shape) == 3:
             x = x[..., None]
+        if DEBUG:
+            print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+
+        x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
+        if DEBUG:
+            print("after rearrange, x shape is ", x.shape)
+
         x = rearrange(x, 'b h w c -> b c h w')
         x = x.to(memory_format=torch.contiguous_format).float()
         return x
