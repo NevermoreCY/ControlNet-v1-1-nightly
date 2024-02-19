@@ -30,6 +30,7 @@ for key in our_data:
         print(c/len(our_data))
     if key not in cap_key_list:
         bad_files.append(key)
+        print(key )
     else:
         to_save.append(key)
 
