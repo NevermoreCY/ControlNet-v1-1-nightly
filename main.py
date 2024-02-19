@@ -333,15 +333,11 @@ class ObjaverseData(Dataset):
 
     def __getitem__(self, index):
         data = {}
-        # data["img"] = []
-        # data["hint"] = None
-        # data["camera_pose"] = []  # actually the difference between two camera
-        # data["txt"] = []
         # version 1, merge two dataset
         data_choice = random.random()
 
         # first test single image
-        data_choice = 0.1
+        data_choice = 0.31
 
         # case for singe image dataset
         if data_choice <= 0.3:
@@ -378,9 +374,10 @@ class ObjaverseData(Dataset):
                 print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
                 print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
                 print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
-                print('\n camera shape is :', target_RT.shape)
-                print('\n data camera shape is :', data_camera.shape)
-                print('\n data_img shape is :',  data_img.shape)
+                print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
+                print('\n data camera shape is :', data_camera.shape) # torch.Size([4, 3, 4])
+                print('\n data_img shape is :',  data_img.shape) # torch.Size([4, 256, 256, 3])
+
 
 
 
@@ -392,26 +389,22 @@ class ObjaverseData(Dataset):
         # case for multiview data
         else: # data_choice > 0.3:
             data = {}
+            # data["img"] = []
+            # data["camera_pose"] = []  # actually the difference between two camera
+            # data["txt"] = []
+            img_list =[]
+            camera_list = []
+            text_list = []
+
             total_view = self.total_view
-            index_target, index_cond = random.sample(range(total_view), 2)  # without replacement
             filename = os.path.join(self.root_dir, self.paths[index])
             sample_id = self.paths[index]
 
-            if DEBUG:
-                print("\n\n\n sample id is ", sample_id)
-
-            # print(self.paths[index])
-
-            if self.return_paths:
-                data["path"] = str(filename)
-
-            # color = [1., 1., 1., 1.]
-
-            for i in range(4):
+            for i in range(total_view):
 
                 target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
                 prompt = self.cap_data[sample_id]
-                target_im = cv2.imread(os.path.join(filename, '%03d.png' % index_target))
+                target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
 
@@ -431,11 +424,25 @@ class ObjaverseData(Dataset):
                 target_im = (target_im.astype(np.float32) / 127.5) - 1.0
                 target_im = torch.tensor(target_im)
 
+                img_list.append(target_im)
+                camera_list.append(target_RT)
+                text_list.append(prompt)
 
 
-            data["img"].append(target_im)
-            data["camera_pose"].append(target_RT) # actually the difference between two camera
-            data["txt"].append(prompt)
+            data["img"] = torch.stack(img_list, dim=0)
+            data["camera_pose"] =  torch.stack(camera_list, dim=0)
+            data["txt"] = prompt
+
+            if DEBUG:
+                print("\n\n\n sample_name is ", sample_id)  # 000020026
+                print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
+                print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
+                print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
+                print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
+                print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
+                print('\n data camera shape is :', data['camera_pose'].shape) # torch.Size([4, 3, 4])
+                print('\n data_img shape is :',  data['img'].shape) # torch.Size([4, 256, 256, 3])
+
 
             # print("test prompt is ", prompt)
             # print("img shape", target_im.shape, "hint shape", canny_r.shape)
