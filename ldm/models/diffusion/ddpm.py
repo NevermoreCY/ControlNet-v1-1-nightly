@@ -423,7 +423,7 @@ class DDPM(pl.LightningModule):
             x = x[..., None]
         if DEBUG:
 
-            print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+            print("before rearrange, x shape is ", x.shape )
 
         x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
         if DEBUG:
