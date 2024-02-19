@@ -397,7 +397,7 @@ class ObjaverseData(Dataset):
             text_list = []
 
             total_view = self.total_view
-            filename = os.path.join(self.root_dir, self.paths[index])
+            filename = os.path.join(self.root_dir_3d, self.paths[index])
             sample_id = self.paths[index]
 
             for i in range(total_view):
