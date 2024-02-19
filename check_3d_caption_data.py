@@ -25,7 +25,7 @@ to_save = []
 cap_key_list = list(cap_data.keys())
 
 c = 0
-for key in our_data
+for key in our_data:
     c+=1
     if c % 1000:
         print(c/len(our_data))
