@@ -846,6 +846,10 @@ class LatentDiffusion(DDPM):
         x = x.to(self.device)
         T = T.to(self.device)
 
+        if DEBUG:
+            print("\n\n\n Before rearrange: x shape is ", x.shape )
+            print("\n ")
+
         # print("*** T shape is ", T.shape)
         # 10 , 4
         # print("*** T[:,NOne.] shape" ,  T[:, None, :].shape)
