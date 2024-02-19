@@ -403,6 +403,7 @@ class ObjaverseData(Dataset):
             for i in range(total_view):
 
                 target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                target_RT = torch.tensor(target_RT)
                 prompt = self.cap_data[sample_id]
                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
