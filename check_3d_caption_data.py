@@ -23,7 +23,11 @@ with open(our_data,'r') as f:
 bad_files = []
 to_save = []
 cap_key_list = list(cap_data.keys())
+
+c = 0
 for key in our_data:
+    if c % 1000:
+        print(c/len(our_data))
     if key not in cap_key_list:
         bad_files.append(key)
     else:
