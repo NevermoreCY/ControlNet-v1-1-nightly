@@ -337,7 +337,7 @@ class ObjaverseData(Dataset):
         data_choice = random.random()
 
         # first test single image
-        data_choice = 0.31
+        data_choice = 0.3
 
         # case for singe image dataset
         if data_choice <= 0.3:
@@ -348,6 +348,7 @@ class ObjaverseData(Dataset):
 
             target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
             target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
+            target_RT = torch.tensor(target_RT)
             f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
             prompt = f.readline()
             target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
@@ -364,10 +365,12 @@ class ObjaverseData(Dataset):
             target_im = (target_im.astype(np.float32) / 127.5) - 1.0
             target_im = torch.tensor(target_im)
 
-            target_RT = torch.tensor(target_RT)
+
 
             data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
             data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+
+            DEBUG =False
             if DEBUG:
                 print("\n\n\n sample_name is ", sample_name)  # 000020026
                 print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
@@ -389,9 +392,6 @@ class ObjaverseData(Dataset):
         # case for multiview data
         else: # data_choice > 0.3:
             data = {}
-            # data["img"] = []
-            # data["camera_pose"] = []  # actually the difference between two camera
-            # data["txt"] = []
             img_list =[]
             camera_list = []
             text_list = []
@@ -435,7 +435,7 @@ class ObjaverseData(Dataset):
             data["txt"] = prompt
 
             if DEBUG:
-                print("\n\n\n sample_name is ", sample_id)  # 000020026
+                print("\n\n\n sample_name is ", sample_id)  # 7bd3a1e89fc943f39d3218db958abac6
                 print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
                 print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
                 print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
@@ -443,13 +443,6 @@ class ObjaverseData(Dataset):
                 print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
                 print('\n data camera shape is :', data['camera_pose'].shape) # torch.Size([4, 3, 4])
                 print('\n data_img shape is :',  data['img'].shape) # torch.Size([4, 256, 256, 3])
-
-
-            # print("test prompt is ", prompt)
-            # print("img shape", target_im.shape, "hint shape", canny_r.shape)
-
-            if self.postprocess is not None:
-                data = self.postprocess(data)
 
         return data
 
