@@ -18,7 +18,7 @@ from ldm.models.diffusion.ddpm import LatentDiffusion
 from ldm.util import log_txt_as_img, exists, instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
-
+DEBUG =True
 class ControlledUnetModel(UNetModel):
     def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, **kwargs):
         hs = []
@@ -605,6 +605,15 @@ class ControlLDM(LatentDiffusion):
 
         # print("* args and **kwargs should be None!" , "*args are" , *args, "**kwargs are", **kwargs)
         x, c = super().get_input(batch, self.first_stage_key, *args, **kwargs)
+
+        if DEBUG:
+            print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+
+        x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
+
+        if DEBUG:
+            print("after rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+
         # print("control LDM extract data from batch, key is :" , self.control_key)
         control = batch[self.control_key]
         if bs is not None:
