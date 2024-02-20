@@ -345,7 +345,7 @@ class BasicTransformerBlock3D(BasicTransformerBlock):
         return checkpoint(self._forward, (x, context, num_frames), self.parameters(), self.checkpoint)
 
     def _forward(self, x, context=None, num_frames=1):
-        print('\n\n\n num_frames : ', num_frames)
+        print('\n\n\n num_frames : ', num_frames , x.shape)
         print('\n x shape : ', x.shape)
         x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
         x = self.attn1(self.norm1(x), context=context if self.disable_self_attn else None) + x
