@@ -388,7 +388,7 @@ class ObjaverseData(Dataset):
             data["img"] = data_img
             data["hint"] = data_canny
             data["camera_pose"] = data_camera# actually the difference between two camera
-            data["txt"] = [prompt]*4
+            data["txt"] = prompt
 
         # case for multiview data
         else: # data_choice > 0.3:
@@ -435,7 +435,7 @@ class ObjaverseData(Dataset):
 
             data["img"] = torch.stack(img_list, dim=0)
             data["camera_pose"] =  torch.stack(camera_list, dim=0)
-            data["txt"] = [prompt]*4
+            data["txt"] = prompt
 
             DEBUG=False
             if DEBUG:
