@@ -346,8 +346,10 @@ class BasicTransformerBlock3D(BasicTransformerBlock):
 
     def _forward(self, x, context=None, num_frames=1):
         print('\n\n\n num_frames : ', num_frames)
+        print('\n x shape : ', x.shape)
         x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
         x = self.attn1(self.norm1(x), context=context if self.disable_self_attn else None) + x
+        print('\n x shape after attention : ', x.shape )
         x = rearrange(x, "b (f l) c -> (b f) l c", f=num_frames).contiguous()
         x = self.attn2(self.norm2(x), context=context) + x
         x = self.ff(self.norm3(x)) + x
