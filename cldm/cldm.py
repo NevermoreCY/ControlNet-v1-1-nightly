@@ -669,10 +669,10 @@ class ControlLDM(LatentDiffusion):
         if DEBUG:
             print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
 
-        x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
+        # x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
 
-        if DEBUG:
-            print("after rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+        # if DEBUG:
+        #     print("after rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
 
         # print("control LDM extract data from batch, key is :" , self.control_key)
 
