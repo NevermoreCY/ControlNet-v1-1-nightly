@@ -854,6 +854,7 @@ class LatentDiffusion(DDPM):
                     for text in xc:
                         for f_num in range(4):
                             xc_ext.append(text)
+                    xc = xc_ext
 
                 elif cond_key in ['class_label', 'cls']:
                     xc = batch
