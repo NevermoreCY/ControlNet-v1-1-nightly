@@ -625,6 +625,9 @@ class MultiViewControlNet(nn.Module):
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)
 
+        if DEBUG:
+            print("\n\n\n hint original shape: " , hint.shape)
+
         guided_hint = self.input_hint_block(hint, emb, context)
 
         if DEBUG:
