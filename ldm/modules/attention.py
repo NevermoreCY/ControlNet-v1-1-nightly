@@ -348,11 +348,13 @@ class BasicTransformerBlock3D(BasicTransformerBlock):
         print('\n\n\n num_frames : ', num_frames , x.shape)
         print('\n x shape : ', x.shape)
         x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
-        print('\n x shape after rearrange : ', x.shape)
+        print('\n x shape after rearrange1 : ', x.shape)
         x = self.attn1(self.norm1(x), context=context if self.disable_self_attn else None) + x
-        print('\n x shape after attention : ', x.shape )
+        print('\n x shape after attention1 : ', x.shape )
         x = rearrange(x, "b (f l) c -> (b f) l c", f=num_frames).contiguous()
+        print('\n x shape after rearrange2 : ', x.shape , 'context shape is ', context.shape)
         x = self.attn2(self.norm2(x), context=context) + x
+        print('\n x shape after attention2 : ', x.shape)
         x = self.ff(self.norm3(x)) + x
         return x
 
