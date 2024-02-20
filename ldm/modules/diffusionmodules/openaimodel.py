@@ -927,6 +927,11 @@ class MultiViewUNetModel(nn.Module):
 
         if camera_dim is not None:
             time_embed_dim = model_channels * 4
+
+            self.camera_embed_pre = nn.Sequential(
+                linear(12, camera_dim),
+            )
+
             self.camera_embed = nn.Sequential(
                 linear(camera_dim, time_embed_dim),
                 nn.SiLU(),
