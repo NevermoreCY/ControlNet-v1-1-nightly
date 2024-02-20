@@ -849,12 +849,18 @@ class LatentDiffusion(DDPM):
                 if cond_key in ['caption', 'coordinates_bbox', "txt", "camera_pose"]:
                     # print("we should have text prompt for condition, cond_key is ", cond_key)
                     xc = batch[cond_key]
+
+                    xc_ext = []
+                    for text in xc:
+                        xc_ext.append()
                 elif cond_key in ['class_label', 'cls']:
                     xc = batch
                 else:
                     xc = super().get_input(batch, cond_key).to(self.device)
             else:
                 xc = x
+
+
 
             if not self.cond_stage_trainable or force_c_encode:
                 # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
@@ -906,7 +912,7 @@ class LatentDiffusion(DDPM):
                 pos_x, pos_y = self.compute_latent_shifts(batch)
                 c = {'pos_x': pos_x, 'pos_y': pos_y}
         # output is usually (target image in latent space , test prompt embedding)
-        c= [c,T]
+        # c= [c,T]
         out = [z, c]
 
         if return_first_stage_outputs:
