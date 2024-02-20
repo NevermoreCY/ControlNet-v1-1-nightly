@@ -615,10 +615,30 @@ class ControlLDM(LatentDiffusion):
             print("after rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
 
         # print("control LDM extract data from batch, key is :" , self.control_key)
+
+        # get control image
         control = batch[self.control_key]
+        # get camera info
+        T = batch['camera_pose'].to(memory_format=torch.contiguous_format).float()
+
+        if DEBUG:
+            print("\n\n\n Before rearrange: x shape is ", x.shape )  # torch.Size([160, 3, 256, 256])
+            print("\n shape of T is ", T.shape)     # torch.Size([40,4, 3, 4])
+
+        T = rearrange(T, "b f h w -> (b f) (hw)").contiguous()
+
+        if DEBUG:
+            print("\n\n\n after rearrange: x shape is ", x.shape )
+            print("\n shape of T is ", T.shape)
+
+
         if bs is not None:
             control = control[:bs]
+            T = T[:bs]
+
+        T = T.to(self.device)
         control = control.to(self.device)
+
         control = einops.rearrange(control, 'b h w c -> b c h w')
         control = control.to(memory_format=torch.contiguous_format).float()
         return x, dict(c_crossattn=[c], c_concat=[control])
