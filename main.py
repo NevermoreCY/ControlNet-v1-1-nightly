@@ -369,6 +369,7 @@ class ObjaverseData(Dataset):
 
             data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
             data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+            data_canny= torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
 
             DEBUG =False
             if DEBUG:
@@ -385,9 +386,9 @@ class ObjaverseData(Dataset):
 
 
             data["img"] = data_img
-            data["hint"] = canny_r
+            data["hint"] = data_canny
             data["camera_pose"] = data_camera# actually the difference between two camera
-            data["txt"] = prompt
+            data["txt"] = [prompt]*4
 
         # case for multiview data
         else: # data_choice > 0.3:
@@ -399,12 +400,13 @@ class ObjaverseData(Dataset):
             total_view = self.total_view
             filename = os.path.join(self.root_dir_3d, self.paths[index])
             sample_id = self.paths[index]
+            prompt = self.cap_data[sample_id]
 
             for i in range(total_view):
 
                 target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
                 target_RT = torch.tensor(target_RT)
-                prompt = self.cap_data[sample_id]
+
                 target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
                 target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
@@ -420,7 +422,8 @@ class ObjaverseData(Dataset):
                     # normalize
                     canny_r = canny_r.astype(np.float32) / 255.0
                     canny_r = torch.tensor(canny_r)
-                    data["hint"] = canny_r
+                    data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
+                    data["hint"] = data_canny
 
                 target_im = (target_im.astype(np.float32) / 127.5) - 1.0
                 target_im = torch.tensor(target_im)
@@ -432,8 +435,9 @@ class ObjaverseData(Dataset):
 
             data["img"] = torch.stack(img_list, dim=0)
             data["camera_pose"] =  torch.stack(camera_list, dim=0)
-            data["txt"] = prompt
+            data["txt"] = [prompt]*4
 
+            DEBUG=False
             if DEBUG:
                 print("\n\n\n sample_name is ", sample_id)  # 7bd3a1e89fc943f39d3218db958abac6
                 print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
