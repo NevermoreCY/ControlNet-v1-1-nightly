@@ -839,6 +839,11 @@ class LatentDiffusion(DDPM):
         # add extra input for camera pose difference
         T = batch['camera_pose'].to(memory_format=torch.contiguous_format).float()
 
+
+        if DEBUG:
+            print("\n\n\n Before BS: x shape is ", x.shape )
+            print("\n shape of T is ", T.shape)
+
         if bs is not None:
             x = x[:bs]
             T = T[:bs]
@@ -848,7 +853,7 @@ class LatentDiffusion(DDPM):
 
         if DEBUG:
             print("\n\n\n Before rearrange: x shape is ", x.shape )
-            print("\n ")
+            print("\n shape of T is ", T.shape)
 
         # print("*** T shape is ", T.shape)
         # 10 , 4
