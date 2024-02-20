@@ -386,7 +386,7 @@ class ObjaverseData(Dataset):
 
             data["img"] = data_img
             data["hint"] = canny_r
-            data["camera_pose"] = target_RT # actually the difference between two camera
+            data["camera_pose"] = data_camera# actually the difference between two camera
             data["txt"] = prompt
 
         # case for multiview data
