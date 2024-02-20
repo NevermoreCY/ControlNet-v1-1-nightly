@@ -859,6 +859,8 @@ class LatentDiffusion(DDPM):
             if not self.cond_stage_trainable or force_c_encode:
                 # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
                 if isinstance(xc, dict) or isinstance(xc, list):
+
+                    print("\n\n\n , xc is ", xc )
                     c = self.get_learned_conditioning(xc)
 
                     if DEBUG:
