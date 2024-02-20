@@ -833,43 +833,16 @@ class LatentDiffusion(DDPM):
     def get_input(self, batch, k, return_first_stage_outputs=False, force_c_encode=False,
                   cond_key=None, return_original_cond=False, bs=None, return_x=False, uncond=0.05):
 
-        # print("latent diffsuion call super model DDPM on key : " , k )
         x = super().get_input(batch, k)
-
         # add extra input for camera pose difference
-        T = batch['camera_pose'].to(memory_format=torch.contiguous_format).float()
-
-
-        if DEBUG:
-            print("\n\n\n Before BS: x shape is ", x.shape )  # torch.Size([160, 3, 256, 256])
-            print("\n shape of T is ", T.shape)     # torch.Size([40, 3, 4])
-
-
         if bs is not None:
             x = x[:bs]
-            T = T[:bs]
-
         x = x.to(self.device)
-        T = T.to(self.device)
-
-        if DEBUG:
-            print("\n\n\n Before rearrange: x shape is ", x.shape )
-            print("\n shape of T is ", T.shape)
-
-        # print("*** T shape is ", T.shape)
-        # 10 , 4
-        # print("*** T[:,NOne.] shape" ,  T[:, None, :].shape)
-        # 10,1,4
-        T = T[:, None, :].repeat(1,77,1)
-        # print("**** T shape after repeat " , T.shape)
-
         # here we use AutoencoderKL to encode the target image into latent space
         encoder_posterior = self.encode_first_stage(x)
         z = self.get_first_stage_encoding(encoder_posterior).detach()
-        # print("shape of latent target image is : ", z.shape)
 
         if self.model.conditioning_key is not None and not self.force_null_conditioning:
-            # print("should be true since model.conditioning_key is hypered.", self.model.conditioning_key)
             if cond_key is None:
                 cond_key = self.cond_stage_key
             if cond_key != self.first_stage_key:
@@ -882,21 +855,6 @@ class LatentDiffusion(DDPM):
                     xc = super().get_input(batch, cond_key).to(self.device)
             else:
                 xc = x
-            # so basically xc is the text prompt, here we use CLIP to encode the text prompt to latent space
-            # which is c
-            # print("***testing clip encoder")
-            # xc = ["a hedgehog drinking a whiskey", "der mond ist aufgegangen",
-            #              "Ein Satz mit vielen Sonderzeichen: äöü ß ?! : 'xx-y/@s'"]
-
-            # if bs is not None:
-            #     print("*** bs is ", bs)
-            #     xc = xc[:bs]
-            # cond = {}
-
-            # To support classifier-free guidance, randomly drop out only text conditioning 5%, only image conditioning 5%, and both 5%.
-            # random = torch.rand(x.size(0), device=x.device)
-            # prompt_mask = rearrange(random < 2 * uncond, "n -> n 1 1")
-            # input_mask = 1 - rearrange((random >= uncond).float() * (random < 3 * uncond).float(), "n -> n 1 1 1")
 
             if not self.cond_stage_trainable or force_c_encode:
                 # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
@@ -943,6 +901,7 @@ class LatentDiffusion(DDPM):
                 pos_x, pos_y = self.compute_latent_shifts(batch)
                 c = {'pos_x': pos_x, 'pos_y': pos_y}
         # output is usually (target image in latent space , test prompt embedding)
+        c= [c,T]
         out = [z, c]
 
         if return_first_stage_outputs:
