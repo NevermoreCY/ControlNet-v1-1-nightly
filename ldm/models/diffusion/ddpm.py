@@ -841,8 +841,9 @@ class LatentDiffusion(DDPM):
 
 
         if DEBUG:
-            print("\n\n\n Before BS: x shape is ", x.shape )
-            print("\n shape of T is ", T.shape)
+            print("\n\n\n Before BS: x shape is ", x.shape )  # torch.Size([160, 3, 256, 256])
+            print("\n shape of T is ", T.shape)     # torch.Size([40, 3, 4])
+
 
         if bs is not None:
             x = x[:bs]
