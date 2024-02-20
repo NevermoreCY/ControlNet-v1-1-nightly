@@ -666,15 +666,10 @@ class ControlLDM(LatentDiffusion):
         # print("* args and **kwargs should be None!" , "*args are" , *args, "**kwargs are", **kwargs)
         x, c = super().get_input(batch, self.first_stage_key, *args, **kwargs)
 
-        if DEBUG:
-            print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
-
-        # x = rearrange(x, "b f h w c -> (b f) h w c").contiguous()
-
         # if DEBUG:
-        #     print("after rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+        #     print("before rearrange, x shape is ", x.shape , ' c shape is ', c.shape )
+            #before rearrange, x shape is  torch.Size([160, 4, 32, 32])  c shape is  torch.Size([160, 77, 768])
 
-        # print("control LDM extract data from batch, key is :" , self.control_key)
 
         # get control image
         control = batch[self.control_key]
@@ -685,7 +680,7 @@ class ControlLDM(LatentDiffusion):
             print("\n\n\n Before rearrange: x shape is ", x.shape )  # torch.Size([160, 3, 256, 256])
             print("\n shape of T is ", T.shape)     # torch.Size([40,4, 3, 4])
 
-        T = rearrange(T, "b f h w -> (b f) (hw)").contiguous()
+        T = rearrange(T, "b f h w -> (b f) (h w)").contiguous()
 
         if DEBUG:
             print("\n\n\n after rearrange: x shape is ", x.shape )
