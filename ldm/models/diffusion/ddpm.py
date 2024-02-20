@@ -860,11 +860,14 @@ class LatentDiffusion(DDPM):
                 # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
                 if isinstance(xc, dict) or isinstance(xc, list):
                     c = self.get_learned_conditioning(xc)
+
+                    if DEBUG:
+                        print("\n\n\n text cond embding shape", c.shape)
                     # print("*** text clip embedding shape is ", c.shape , c.type)
 
-                    clip_camera = torch.concat([c,T], dim=-1)
+                    # clip_camera = torch.concat([c,T], dim=-1)
                     # print("*** after concate camerapose into c, shape is ", clip_camera.shape)
-                    c = self.cc_projection(clip_camera)
+                    # c = self.cc_projection(clip_camera)
                     # print("*** after cc projection, shape is ", c.shape)
                     #torch.save(c, 'text_clip_output.pt')
                 else:
