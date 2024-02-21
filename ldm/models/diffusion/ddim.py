@@ -81,8 +81,8 @@ class DDIMSampler(object):
                log_every_t=100,
                unconditional_guidance_scale=1.,
                unconditional_conditioning=None, # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
-               dynamic_threshold=None,
-               ucg_schedule=None,
+               dynamic_threshold=None,  # DIF
+               ucg_schedule=None, # DIF
                **kwargs
                ):
         if conditioning is not None:
@@ -151,7 +151,7 @@ class DDIMSampler(object):
         intermediates = {'x_inter': [img], 'pred_x0': [img]}
         time_range = reversed(range(0,timesteps)) if ddim_use_original_steps else np.flip(timesteps)
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
-        print(f"Running DDIM Sampling with {total_steps} timesteps")
+        print(f"Running DDIM Sampling with {total_steps} timesteps")  # DIF
 
         iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
 
@@ -205,7 +205,7 @@ class DDIMSampler(object):
                         c_in[k] = [torch.cat([
                             unconditional_conditioning[k][i],
                             c[k][i]]) for i in range(len(c[k]))]
-                    else:
+                    else:  # dif SHOULD BE tensor
                         c_in[k] = torch.cat([
                                 unconditional_conditioning[k],
                                 c[k]])
