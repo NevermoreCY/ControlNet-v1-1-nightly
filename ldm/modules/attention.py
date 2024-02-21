@@ -341,10 +341,10 @@ class SpatialTransformer(nn.Module):
 
 class BasicTransformerBlock3D(BasicTransformerBlock):
 
-    def forward(self, x, context=None, num_frames=1):
+    def forward(self, x, context=None, num_frames=4):
         return checkpoint(self._forward, (x, context, num_frames), self.parameters(), self.checkpoint)
 
-    def _forward(self, x, context=None, num_frames=1):
+    def _forward(self, x, context=None, num_frames=4):
         # print('\n\n\n num_frames : ', num_frames , x.shape) #  num_frames :  4 torch.Size([120, 1024, 320])
         # print('\n context is ', context)
         x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
