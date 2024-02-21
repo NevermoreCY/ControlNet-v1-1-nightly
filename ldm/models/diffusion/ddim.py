@@ -216,6 +216,12 @@ class DDIMSampler(object):
                     c_in.append(torch.cat([unconditional_conditioning[i], c[i]]))
             else:
                 c_in = torch.cat([unconditional_conditioning, c])
+            print('\n\n\n line 199 model.apply_model , c_in : ', type(c_in), ' t_in : ',t_in.shape, 'x_in', x_in.shape )
+            for key in c_in:
+                if type(c_in[key]) == int:
+                    print(key, c_in[key])
+                else:
+                    print(key, c_in[key].shape)
             model_uncond, model_t = self.model.apply_model(x_in, t_in, c_in).chunk(2)
             model_output = model_uncond + unconditional_guidance_scale * (model_t - model_uncond)
 
