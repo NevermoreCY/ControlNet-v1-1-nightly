@@ -1401,9 +1401,9 @@ class LatentDiffusion(DDPM):
             print('Diffusion model optimizing logvar')
             params.append(self.logvar)
         print("*** parameters to optimize is ", params)
-        # opt = torch.optim.AdamW(params, lr=lr)
-        opt = torch.optim.AdamW([{"params": self.model.parameters(), "lr": lr},
-                                 {"params": self.cc_projection.parameters(), "lr": 10. * lr}], lr=lr)
+        opt = torch.optim.AdamW(params, lr=lr)
+        # opt = torch.optim.AdamW([{"params": self.model.parameters(), "lr": lr},
+        #                          {"params": self.cc_projection.parameters(), "lr": 10. * lr}], lr=lr)
 
         if self.use_scheduler:
             assert 'target' in self.scheduler_config
