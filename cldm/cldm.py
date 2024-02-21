@@ -697,7 +697,7 @@ class MultiViewControlNet(nn.Module):
         print("\n emb add 1 dim : ", emb.shape)
         emb = emb.repeat(1,self.model_channels,1)
         print("\n emb repeat 320 times : ", emb.shape)
-        emb = rearrange(emb, "b c l -> b c h w", h=self.image_size,w=self.image_size).contiguous()
+        emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
         print("\n emb rearrange to match image size  : ", emb.shape)
         cond_with_camera_t = guided_hint + emb
 
