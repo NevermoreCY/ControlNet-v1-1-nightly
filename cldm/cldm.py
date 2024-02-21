@@ -18,7 +18,7 @@ from ldm.models.diffusion.ddpm import LatentDiffusion
 from ldm.util import log_txt_as_img, exists, instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
-DEBUG =True
+DEBUG =False
 class ControlledUnetModel(UNetModel):
     def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, **kwargs):
         hs = []
@@ -687,17 +687,17 @@ class MultiViewControlNet(nn.Module):
             camera = self.camera_embed_pre(camera)
             emb = emb + self.camera_embed(camera)
 
-        print("\n camera + t  embedding shape is : ", emb.shape)
+        # print("\n camera + t  embedding shape is : ", emb.shape)
         # camera + t  embedding shape is :  torch.Size([120, 1280])
 
         emb = self.zero_mlp1(emb)
 
-        print("\n zero mlp1 emb : ", emb.shape)
+        # print("\n zero mlp1 emb : ", emb.shape)
 
         # gh0,gh1,gh2,gh3 = guided_hint.shape
         emb = rearrange(emb, "b (c h w) -> b c h w", c=256,h=self.image_size,w=self.image_size).contiguous()
 
-        print("\n zero mlp1 emb after rearrange : ", emb.shape)
+        # print("\n zero mlp1 emb after rearrange : ", emb.shape)
 
         # V2 repeat emb for num_channel times
 
@@ -709,17 +709,17 @@ class MultiViewControlNet(nn.Module):
         # print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
         # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
         global_emb = self.zero_mlp2(global_emb)
 
-        print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
+        # print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
 
 
 
@@ -727,14 +727,14 @@ class MultiViewControlNet(nn.Module):
 
         h = x.type(self.dtype)
 
-        print("\n h shape is : ", h.shape)
-        print("\n Context shape is : ", context.shape)
+        # print("\n h shape is : ", h.shape)
+        # print("\n Context shape is : ", context.shape)
 
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
             if cond_with_camera_t is not None:
                 h = module(h, global_emb, context)
 
-                print('\n after first module, h shape is : ', h.shape)
+                # print('\n after first module, h shape is : ', h.shape)
                 h += cond_with_camera_t
                 cond_with_camera_t = None
             else:
@@ -807,18 +807,18 @@ class ControlLDM(LatentDiffusion):
         if cond['c_concat'] is None:
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
-            print('\n ~~~~yeah~')
+            # print('\n ~~~~yeah~')
             control , global_emb = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=camera)
             control = [c * scale for c, scale in zip(control, self.control_scales)]
 
-            print('\n\n ***** control model finished!')
+            # print('\n\n ***** control model finished!')
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
 
-            print("\n diffsuion model start!")
-            print("\n\n Input global_emb shape : " ,global_emb.shape)
+            # print("\n diffsuion model start!")
+            # print("\n\n Input global_emb shape : " ,global_emb.shape)
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control , global_emb=global_emb)
-            print("\n diffusion model ends!")
+            # print("\n diffusion model ends!")
         return eps
 
     @torch.no_grad()
@@ -835,12 +835,13 @@ class ControlLDM(LatentDiffusion):
 
         log = dict()
         z, c = self.get_input(batch, self.first_stage_key, bs=N)
-
-        print('\n\n\n  !!camera: ', c['camera'])
+        if DEBUG:
+            print('\n\n\n  !!camera: ', c['camera'])
 
         c_cat, c ,camera = c["c_concat"][0][:N], c["c_crossattn"][0][:N] ,c["camera"][0][:N]
 
-        print("\n\n c_cat : " , c_cat.shape , 'c_cross : ' , c.shape , "camera : " ,  camera.shape)
+        if DEBUG:
+            print("\n\n c_cat : " , c_cat.shape , 'c_cross : ' , c.shape , "camera : " ,  camera.shape)
 
 
         N = min(z.shape[0], N)
@@ -879,7 +880,8 @@ class ControlLDM(LatentDiffusion):
                 log["denoise_row"] = denoise_grid
 
         if unconditional_guidance_scale > 1.0:
-            print("\n\n\n unconditional_guidance_scale > 1.0:")
+            if DEBUG:
+                print("\n\n\n unconditional_guidance_scale > 1.0:")
             uc_cross = self.get_unconditional_conditioning(N)
             uc_cat = c_cat  # torch.zeros_like(c_cat)
             uc_full = {"c_concat": [uc_cat], "c_crossattn": [uc_cross] , 'camera':[camera]}
