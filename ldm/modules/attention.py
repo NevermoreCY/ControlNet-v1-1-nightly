@@ -346,7 +346,7 @@ class BasicTransformerBlock3D(BasicTransformerBlock):
 
     def _forward(self, x, context=None, num_frames=1):
         print('\n\n\n num_frames : ', num_frames , x.shape) #  num_frames :  4 torch.Size([120, 1024, 320])
-        print('\n context is ', context)
+        # print('\n context is ', context)
         x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
         print('\n x shape after rearrange1 : ', x.shape)
         x = self.attn1(self.norm1(x), context=context if self.disable_self_attn else None) + x
