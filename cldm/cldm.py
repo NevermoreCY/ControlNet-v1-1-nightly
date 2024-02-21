@@ -46,11 +46,12 @@ class ControlledUnetModel(UNetModel):
 
 
 class MultiViewControlledUnetModel(MultiViewUNetModel):
-    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, **kwargs):
+    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_embd=False, **kwargs):
         hs = []
         with torch.no_grad():
-            t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
-            emb = self.time_embed(t_emb)
+            # t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
+            # emb = self.time_embed(t_emb)
+            emb = global_embd
             h = x.type(self.dtype)
             for module in self.input_blocks:
                 h = module(h, emb, context)
@@ -70,60 +71,57 @@ class MultiViewControlledUnetModel(MultiViewUNetModel):
         h = h.type(x.dtype)
         return self.out(h)
 
-    # def forward_ex(self, x, timesteps=None, context=None, y=None, camera=None, num_frames=1, **kwargs):
-    #     """
-    #     Apply the model to an input batch.
-    #     :param x: an [(N x F) x C x ...] Tensor of inputs. F is the number of frames (views).
-    #     :param timesteps: a 1-D batch of timesteps.
-    #     :param context: conditioning plugged in via crossattn
-    #     :param y: an [N] Tensor of labels, if class-conditional.
-    #     :param num_frames: a integer indicating number of frames for tensor reshaping.
-    #     :return: an [(N x F) x C x ...] Tensor of outputs. F is the number of frames (views).
-    #     """
-    #
-    #
-    #
-    #
-    #     assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
-    #     assert (y is not None) == (
-    #         self.num_classes is not None
-    #     ), "must specify y if and only if the model is class-conditional"
-    #     hs = []
-    #     t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
-    #     emb = self.time_embed(t_emb)
-    #
-    #     if self.num_classes is not None:  # Is None
-    #         assert y.shape[0] == x.shape[0]
-    #         emb = emb + self.label_emb(y)
-    #
-    #     # Add camera embeddings
-    #     if camera is not None:
-    #         assert camera.shape[0] == emb.shape[0]
-    #         emb = emb + self.camera_embed(camera)
-    #
-    #     DEBUG =False
-    #     if DEBUG:
-    #         print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)  # [8,4,32,32]
-    #         print("\n  camera shape", camera.shape)  # [8,16]
-    #         print("\n  timesteps shape", timesteps.shape)  # [8]
-    #         print("\n  t_emb shape", t_emb.shape)  # [8, 320]
-    #         print("\n  y ", y )  # None
-    #         print("\n  emb shape", emb.shape)  #  [8,1280]
-    #         print("\n  context shape", context.shape)  # [8,77,1024]
-    #
-    #     h = x.type(self.dtype)
-    #     for module in self.input_blocks:
-    #         h = module(h, emb, context, num_frames=num_frames)
-    #         hs.append(h)
-    #     h = self.middle_block(h, emb, context, num_frames=num_frames)
-    #     for module in self.output_blocks:
-    #         h = th.cat([h, hs.pop()], dim=1)
-    #         h = module(h, emb, context, num_frames=num_frames)
-    #     h = h.type(x.dtype)
-    #     if self.predict_codebook_ids:
-    #         return self.id_predictor(h)
-    #     else:
-    #         return self.out(h)
+    def forward_ex(self, x, timesteps=None, context=None, y=None, camera=None, num_frames=1, **kwargs):
+        """
+        Apply the model to an input batch.
+        :param x: an [(N x F) x C x ...] Tensor of inputs. F is the number of frames (views).
+        :param timesteps: a 1-D batch of timesteps.
+        :param context: conditioning plugged in via crossattn
+        :param y: an [N] Tensor of labels, if class-conditional.
+        :param num_frames: a integer indicating number of frames for tensor reshaping.
+        :return: an [(N x F) x C x ...] Tensor of outputs. F is the number of frames (views).
+        """
+
+        assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
+        assert (y is not None) == (
+            self.num_classes is not None
+        ), "must specify y if and only if the model is class-conditional"
+        hs = []
+        t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
+        emb = self.time_embed(t_emb)
+
+        if self.num_classes is not None:  # Is None
+            assert y.shape[0] == x.shape[0]
+            emb = emb + self.label_emb(y)
+
+        # Add camera embeddings
+        if camera is not None:
+            assert camera.shape[0] == emb.shape[0]
+            emb = emb + self.camera_embed(camera)
+
+        DEBUG =False
+        if DEBUG:
+            print("\n\n\n\n\n forward of multiview unet, x shape", x.shape)  # [8,4,32,32]
+            print("\n  camera shape", camera.shape)  # [8,16]
+            print("\n  timesteps shape", timesteps.shape)  # [8]
+            print("\n  t_emb shape", t_emb.shape)  # [8, 320]
+            print("\n  y ", y )  # None
+            print("\n  emb shape", emb.shape)  #  [8,1280]
+            print("\n  context shape", context.shape)  # [8,77,1024]
+
+        h = x.type(self.dtype)
+        for module in self.input_blocks:
+            h = module(h, emb, context, num_frames=num_frames)
+            hs.append(h)
+        h = self.middle_block(h, emb, context, num_frames=num_frames)
+        for module in self.output_blocks:
+            h = th.cat([h, hs.pop()], dim=1)
+            h = module(h, emb, context, num_frames=num_frames)
+        h = h.type(x.dtype)
+        if self.predict_codebook_ids:
+            return self.id_predictor(h)
+        else:
+            return self.out(h)
 
 class ControlNet(nn.Module):
     def __init__(
@@ -813,8 +811,9 @@ class ControlLDM(LatentDiffusion):
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
 
-            eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
-
+            print("\n diffsuion model start!")
+            eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control , global_emb=global_emb)
+            print("\n diffusion model ends!")
         return eps
 
     @torch.no_grad()
