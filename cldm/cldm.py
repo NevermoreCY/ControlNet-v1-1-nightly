@@ -709,7 +709,7 @@ class MultiViewControlNet(nn.Module):
         cond_with_camera_t = guided_hint + emb
         print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
-        cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t)
+        cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
         print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
 
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
