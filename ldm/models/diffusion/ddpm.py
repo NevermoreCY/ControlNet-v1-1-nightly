@@ -31,7 +31,7 @@ from ldm.models.diffusion.ddim import DDIMSampler
 __conditioning_keys__ = {'concat': 'c_concat',
                          'crossattn': 'c_crossattn',
                          'adm': 'y'}
-DEBUG =True
+DEBUG =False
 
 def disabled_train(self, mode=True):
     """Overwrite model.train with this function to make sure train/eval mode
@@ -869,7 +869,7 @@ class LatentDiffusion(DDPM):
                 # print("***cond_stage_trainable :" , self.cond_stage_trainable, "force_c_encode", force_c_encode)
                 if isinstance(xc, dict) or isinstance(xc, list):
 
-                    print("\n\n\n , xc is ", xc )
+                    # print("\n\n\n , xc is ", xc )
                     c = self.get_learned_conditioning(xc)
 
                     if DEBUG:
