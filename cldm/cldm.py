@@ -840,6 +840,8 @@ class ControlLDM(LatentDiffusion):
 
         c_cat, c ,camera = c["c_concat"][0][:N], c["c_crossattn"][0][:N] ,c["camera"][0][:N]
 
+        print("\n\n c_cat : " , c_cat.shape , 'c_cross : ' , c.shape , "camera : " ,  camera.shape)
+
 
         N = min(z.shape[0], N)
         n_row = min(z.shape[0], n_row)
