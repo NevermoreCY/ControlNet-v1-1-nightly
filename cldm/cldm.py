@@ -52,7 +52,7 @@ class MultiViewControlledUnetModel(MultiViewUNetModel):
             # t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
             # emb = self.time_embed(t_emb)
 
-            print("global embd is ", global_emb)
+            # print("global embd is ", global_emb)
             emb = global_emb
             h = x.type(self.dtype)
 
