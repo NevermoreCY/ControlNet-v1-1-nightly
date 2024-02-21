@@ -76,14 +76,14 @@ class TimestepEmbedSequential(nn.Sequential, TimestepBlock):
     support it as an extra input.
     """
 
-    def forward(self, x, emb, context=None, num_frames=4):
+    def forward(self, x, emb, context=None):
         for layer in self:
             if isinstance(layer, TimestepBlock):
                 x = layer(x, emb)
             elif isinstance(layer, SpatialTransformer):
                 x = layer(x, context)
             elif isinstance(layer, SpatialTransformer3D):
-                x = layer(x, context, num_frames=num_frames)
+                x = layer(x, context)
             else:
                 x = layer(x)
         return x
@@ -1212,7 +1212,7 @@ class MultiViewUNetModel(nn.Module):
         self.middle_block.apply(convert_module_to_f32)
         self.output_blocks.apply(convert_module_to_f32)
 
-    def forward(self, x, timesteps=None, context=None, y=None, camera=None, num_frames=1, **kwargs):
+    def forward(self, x, timesteps=None, context=None, y=None, camera=None,  **kwargs):  # num_frame
         """
         Apply the model to an input batch.
         :param x: an [(N x F) x C x ...] Tensor of inputs. F is the number of frames (views).
@@ -1226,7 +1226,7 @@ class MultiViewUNetModel(nn.Module):
 
 
 
-        assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
+        # assert x.shape[0] % num_frames == 0, "[UNet] input batch size must be dividable by num_frames!"
         assert (y is not None) == (
             self.num_classes is not None
         ), "must specify y if and only if the model is class-conditional"
@@ -1255,12 +1255,12 @@ class MultiViewUNetModel(nn.Module):
 
         h = x.type(self.dtype)
         for module in self.input_blocks:
-            h = module(h, emb, context, num_frames=num_frames)
+            h = module(h, emb, context)  # num_frame
             hs.append(h)
-        h = self.middle_block(h, emb, context, num_frames=num_frames)
+        h = self.middle_block(h, emb, context)  # num_frame
         for module in self.output_blocks:
             h = th.cat([h, hs.pop()], dim=1)
-            h = module(h, emb, context, num_frames=num_frames)
+            h = module(h, emb, context)  # num_frame
         h = h.type(x.dtype)
         if self.predict_codebook_ids:
             return self.id_predictor(h)
