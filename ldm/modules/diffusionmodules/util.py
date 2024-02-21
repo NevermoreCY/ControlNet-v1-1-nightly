@@ -132,13 +132,16 @@ class CheckpointFunction(torch.autograd.Function):
     @staticmethod
     def backward(ctx, *output_grads):
 
+        ctx_l = []
         for x in ctx.input_tensors:
             if type(x) == int:
                 print('\n\n\n !! Found int item : ', x )
             else:
-                print('\n\n\n ctx items: ' , x.shape ,x)
+                print('\n\n\n ctx items: ' , x.shape)
+                ctx_l.append( x.detach().requires_grad_(True)   )
 
-        ctx.input_tensors = [x.detach().requires_grad_(True) for x in ctx.input_tensors]
+
+        # ctx.input_tensors = [x.detach().requires_grad_(True) for x in ctx.input_tensors]
         with torch.enable_grad(), \
                 torch.cuda.amp.autocast(**ctx.gpu_autocast_kwargs):
             # Fixes a bug where the first op in run_function modifies the
