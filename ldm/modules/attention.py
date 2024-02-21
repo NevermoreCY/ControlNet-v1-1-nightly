@@ -341,17 +341,18 @@ class SpatialTransformer(nn.Module):
 
 class BasicTransformerBlock3D(BasicTransformerBlock):
 
-    def forward(self, x, context=None, num_frames=4):
-        return checkpoint(self._forward, (x, context, num_frames), self.parameters(), self.checkpoint)
+    def forward(self, x, context=None):
+        return checkpoint(self._forward, (x, context), self.parameters(), self.checkpoint)
 
-    def _forward(self, x, context=None, num_frames=4):
-        print('\n\n\n num_frames : ', num_frames , x.shape) #  num_frames :  4 torch.Size([120, 1024, 320])
-        print('\n context is ', context)
-        x = rearrange(x, "(b f) l c -> b (f l) c", f=num_frames).contiguous()
+    def _forward(self, x, context=None):
+        # num_frames = 4
+        # print('\n\n\n num_frames : ', num_frames , x.shape) #  num_frames :  4 torch.Size([120, 1024, 320])
+        # print('\n context is ', context)
+        x = rearrange(x, "(b f) l c -> b (f l) c", f=4).contiguous()
         # print('\n x shape after rearrange1 : ', x.shape)
         x = self.attn1(self.norm1(x), context=context if self.disable_self_attn else None) + x
         # print('\n x shape after attention1 : ', x.shape )
-        x = rearrange(x, "b (f l) c -> (b f) l c", f=num_frames).contiguous()
+        x = rearrange(x, "b (f l) c -> (b f) l c", f=4).contiguous()
         # print('\n x shape after rearrange2 : ', x.shape , 'context shape is ', context.shape)
         x = self.attn2(self.norm2(x), context=context) + x
         # print('\n x shape after attention2 : ', x.shape)
@@ -395,7 +396,7 @@ class SpatialTransformer3D(nn.Module):
             self.proj_out = zero_module(nn.Linear(in_channels, inner_dim))
         self.use_linear = use_linear
 
-    def forward(self, x, context=None, num_frames=4):
+    def forward(self, x, context=None):
         # note: if no context is given, cross-attention defaults to self-attention
         if not isinstance(context, list):
             context = [context]
@@ -408,7 +409,7 @@ class SpatialTransformer3D(nn.Module):
         if self.use_linear:
             x = self.proj_in(x)
         for i, block in enumerate(self.transformer_blocks):
-            x = block(x, context=context[i], num_frames=num_frames)
+            x = block(x, context=context[i])
         if self.use_linear:
             x = self.proj_out(x)
         x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w).contiguous()
