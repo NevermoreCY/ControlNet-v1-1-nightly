@@ -635,7 +635,7 @@ class MultiViewControlNet(nn.Module):
     def make_zero_conv(self, channels):
         return TimestepEmbedSequential(zero_module(conv_nd(self.dims, channels, channels, 1, padding=0)))
 
-    def forward(self, x, hint, timesteps, context, **kwargs):
+    def forward(self, x, hint, timesteps, context,camera=None, num_frames=4, **kwargs):
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)
 
@@ -649,6 +649,13 @@ class MultiViewControlNet(nn.Module):
 
         # hint original shape:  torch.Size([160, 3, 256, 256])
         #  Guided_hint shape:  torch.Size([160, 320, 32, 32])
+
+        if camera is not None:
+            # check batch size
+            assert camera.shape[0] == emb.shape[0]
+            emb = emb + self.camera_embed(camera)
+
+        print("\n camera + t  embedding shape is : ", emb.shape)
 
         outs = []
 
