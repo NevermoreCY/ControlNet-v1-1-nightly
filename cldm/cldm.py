@@ -46,15 +46,17 @@ class ControlledUnetModel(UNetModel):
 
 
 class MultiViewControlledUnetModel(MultiViewUNetModel):
-    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_embd=False, **kwargs):
+    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_embd=None, **kwargs):
         hs = []
         with torch.no_grad():
             # t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
             # emb = self.time_embed(t_emb)
+
+            print("global embd is ", global_embd)
             emb = global_embd
             h = x.type(self.dtype)
 
-            print('\n\n\n h shape', h.shape , 'emb : ' , emb.shape , 'context : ', context.shape )
+            print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
             for module in self.input_blocks:
                 h = module(h, emb, context)
                 hs.append(h)
@@ -814,6 +816,7 @@ class ControlLDM(LatentDiffusion):
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
 
             print("\n diffsuion model start!")
+            print("\n\n Input global_emb shape : " ,global_emb.shape)
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control , global_emb=global_emb)
             print("\n diffusion model ends!")
         return eps
