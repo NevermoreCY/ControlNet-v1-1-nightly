@@ -805,8 +805,10 @@ class ControlLDM(LatentDiffusion):
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
             print('\n ~~~~yeah~')
-            control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=camera)
+            control , global_emb = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=camera)
             control = [c * scale for c, scale in zip(control, self.control_scales)]
+
+            print('\n\n  control model finished!')
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control)
