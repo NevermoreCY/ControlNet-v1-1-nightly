@@ -136,6 +136,7 @@ class CheckpointFunction(torch.autograd.Function):
         for x in ctx.input_tensors:
             if type(x) == int:
                 print('\n\n\n !! Found int item : ', x )
+                ctx_l.append(torch.tensor(x))
             else:
                 print('\n\n\n ctx items: ' , x.shape)
                 ctx_l.append( x.detach().requires_grad_(True)   )
