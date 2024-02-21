@@ -476,6 +476,20 @@ class MultiViewControlNet(nn.Module):
             linear(time_embed_dim, time_embed_dim),
         )
 
+        control_dim = image_size*image_size*model_channels
+        print("mlp1 size: ", control_dim)
+        self.zero_mlp1 = nn.Sequential(
+            linear(time_embed_dim, control_dim),
+            nn.SiLU(),
+        )
+
+        print("mlp2 size: ", image_size * image_size * model_channels)
+        self.zero_mlp2 =  nn.Sequential(
+            linear(control_dim, time_embed_dim),
+            nn.SiLU(),
+            linear(time_embed_dim, time_embed_dim),
+        )
+
         # add camera embd
         if camera_dim is not None:
             self.camera_embed_pre = nn.Sequential(
@@ -656,6 +670,24 @@ class MultiViewControlNet(nn.Module):
             emb = emb + self.camera_embed(camera)
 
         print("\n camera + t  embedding shape is : ", emb.shape)
+        # camera + t  embedding shape is :  torch.Size([120, 1280])
+
+        emb = self.zero_mlp1(emb)
+
+        print("\n zero mlp1 emb : ", emb.shape)
+
+        gh0,gh1,gh2,gh3 = guided_hint.shape
+        emb = rearrange(emb, "b c -> b c h w", c=gh1,h=gh2,w=gh3).contiguous()
+
+        print("\n zero mlp1 emb after rearrange : ", emb.shape)
+
+        cond_with_camera_t = guided_hint + emb
+
+        global_emb = self.zero_mlp2(cond_with_camera_t)
+
+        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+
 
         outs = []
 
@@ -740,7 +772,7 @@ class ControlLDM(LatentDiffusion):
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
             print('\n ~~~~yeah~')
-            control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt)
+            control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=cond['camera'])
             control = [c * scale for c, scale in zip(control, self.control_scales)]
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
