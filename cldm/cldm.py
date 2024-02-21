@@ -739,7 +739,7 @@ class MultiViewControlNet(nn.Module):
                 h = module(h, global_emb, context)
             outs.append(zero_conv(h, global_emb, context))
 
-        h = self.middle_block(h, emb, context)
+        h = self.middle_block(h, global_emb, context)
         outs.append(self.middle_block_out(h, global_emb, context))
 
         return outs , global_emb
