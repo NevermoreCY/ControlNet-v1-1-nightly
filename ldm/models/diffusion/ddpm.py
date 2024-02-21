@@ -650,8 +650,8 @@ class LatentDiffusion(DDPM):
                 self.cond_stage_model = None
                 # self.be_unconditional = True
             else:
-                # print("*** else statement")
-                # print("config is ", config )
+                print("\n\n\n ******* else statement cond stage")
+                print("config is ", config )
                 model = instantiate_from_config(config)
                 self.cond_stage_model = model.eval()
                 self.cond_stage_model.train = disabled_train
@@ -664,7 +664,7 @@ class LatentDiffusion(DDPM):
             model = instantiate_from_config(config)
             self.cond_stage_model = model
 
-    def instantiate_cond_stage_image(self, config):
+    def instantiate_cond_stage_image(self, config): # FrozenCLIPEmbedder
         # print("***instantiate_cond_stage")
         if not self.cond_stage_trainable:
             # print("*** cond_stage is not trainable ")
@@ -676,7 +676,7 @@ class LatentDiffusion(DDPM):
                 self.cond_stage_model = None
                 # self.be_unconditional = True
             else:
-                print("*** else statement")
+                print("\n\n\n\n*** else statement cond stage image")
                 print("config is ", config )
                 model = instantiate_from_config(config)
                 self.cond_stage_image_model = model.eval()
