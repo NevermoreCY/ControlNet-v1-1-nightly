@@ -131,6 +131,10 @@ class CheckpointFunction(torch.autograd.Function):
 
     @staticmethod
     def backward(ctx, *output_grads):
+
+        for x in ctx.input_tensors:
+            print('\n\n\n ctx items: ' , x.shape ,x)
+
         ctx.input_tensors = [x.detach().requires_grad_(True) for x in ctx.input_tensors]
         with torch.enable_grad(), \
                 torch.cuda.amp.autocast(**ctx.gpu_autocast_kwargs):
