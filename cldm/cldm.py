@@ -483,12 +483,21 @@ class MultiViewControlNet(nn.Module):
             nn.SiLU(),
         )
 
+        # # v2
+        # control_dim = image_size * image_size
+        # self.zero_mlp1 = nn.Sequential(
+        #     linear(time_embed_dim, control_dim),
+        #     nn.SiLU(),
+        #     linear(control_dim, control_dim),
+        # )
+
         print("mlp2 size: ", image_size * image_size * model_channels)
         self.zero_mlp2 =  nn.Sequential(
             linear(control_dim, time_embed_dim),
             nn.SiLU(),
             linear(time_embed_dim, time_embed_dim),
         )
+
 
         # add camera embd
         if camera_dim is not None:
@@ -680,6 +689,10 @@ class MultiViewControlNet(nn.Module):
         emb = rearrange(emb, "b c -> b c h w", c=gh1,h=gh2,w=gh3).contiguous()
 
         print("\n zero mlp1 emb after rearrange : ", emb.shape)
+
+        # V2 repeat emb for num_channel times
+
+        # emb = repeat()
 
         cond_with_camera_t = guided_hint + emb
 
