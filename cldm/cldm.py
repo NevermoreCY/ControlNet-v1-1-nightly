@@ -539,6 +539,12 @@ class MultiViewControlNet(nn.Module):
             zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
         )
 
+        self.hint_mixed_conv_out = TimestepEmbedSequential(
+            zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+        )
+
+
+
         self._feature_size = model_channels
         input_block_chans = [model_channels]
         ch = model_channels
@@ -703,11 +709,14 @@ class MultiViewControlNet(nn.Module):
         cond_with_camera_t = guided_hint + emb
         print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
+        cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t)
+        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
         print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
         global_emb = self.zero_mlp2(global_emb)
 
-        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
 
 
 
@@ -719,19 +728,19 @@ class MultiViewControlNet(nn.Module):
 
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
             if guided_hint is not None:
-                h = module(h, emb, context)
+                h = module(h, global_emb, context)
 
                 print('\n after first module, h shape is : ', h.shape)
                 h += guided_hint
                 guided_hint = None
             else:
-                h = module(h, emb, context)
-            outs.append(zero_conv(h, emb, context))
+                h = module(h, global_emb, context)
+            outs.append(zero_conv(h, global_emb, context))
 
         h = self.middle_block(h, emb, context)
-        outs.append(self.middle_block_out(h, emb, context))
+        outs.append(self.middle_block_out(h, global_emb, context))
 
-        return outs
+        return outs , global_emb
 
 class ControlLDM(LatentDiffusion):
 
