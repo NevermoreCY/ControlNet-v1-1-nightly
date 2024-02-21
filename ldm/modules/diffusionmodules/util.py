@@ -133,7 +133,10 @@ class CheckpointFunction(torch.autograd.Function):
     def backward(ctx, *output_grads):
 
         for x in ctx.input_tensors:
-            print('\n\n\n ctx items: ' , x.shape ,x)
+            if type(x) == int:
+                print('\n\n\n !! Found int item : ', x )
+            else:
+                print('\n\n\n ctx items: ' , x.shape ,x)
 
         ctx.input_tensors = [x.detach().requires_grad_(True) for x in ctx.input_tensors]
         with torch.enable_grad(), \
