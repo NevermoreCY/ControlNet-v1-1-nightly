@@ -838,7 +838,7 @@ class ControlLDM(LatentDiffusion):
 
         print('\n\n\n  !!camera: ', c['camera'])
 
-        c_cat, c = c["c_concat"][0][:N], c["c_crossattn"][0][:N]
+        c_cat, c ,camera = c["c_concat"][0][:N], c["c_crossattn"][0][:N] ,c["camera"][0][:N]
 
 
         N = min(z.shape[0], N)
