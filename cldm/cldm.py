@@ -692,8 +692,12 @@ class MultiViewControlNet(nn.Module):
 
         # V2 repeat emb for num_channel times
 
-        # emb = repeat()
-
+        emb = emb[:,None,:]
+        print("\n emb add 1 dim : ", emb.shape)
+        emb = emb.repeat(1,self.model_channels,1)
+        print("\n emb repeat 320 times : ", emb.shape)
+        emb = rearrange(emb, "b c l -> b c h w", h=self.image_size,w=self.image_size).contiguous()
+        print("\n emb rearrange to match image size  : ", emb.shape)
         cond_with_camera_t = guided_hint + emb
 
         global_emb = self.zero_mlp2(cond_with_camera_t)
@@ -778,6 +782,7 @@ class ControlLDM(LatentDiffusion):
         diffusion_model = self.model.diffusion_model
 
         cond_txt = torch.cat(cond['c_crossattn'], 1)
+        camera = cond['camera'][0]
         if DEBUG:
             print('\n cond_txt shape : ' ,cond_txt.shape)
 
@@ -785,7 +790,7 @@ class ControlLDM(LatentDiffusion):
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=None, only_mid_control=self.only_mid_control)
         else:
             print('\n ~~~~yeah~')
-            control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=cond['camera'])
+            control = self.control_model(x=x_noisy, hint=torch.cat(cond['c_concat'], 1), timesteps=t, context=cond_txt, camera=camera)
             control = [c * scale for c, scale in zip(control, self.control_scales)]
             if self.global_average_pooling:
                 control = [torch.mean(c, dim=(2, 3), keepdim=True) for c in control]
