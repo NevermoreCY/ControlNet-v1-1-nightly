@@ -491,7 +491,7 @@ class MultiViewControlNet(nn.Module):
             linear(control_dim, control_dim),
         )
 
-        print("mlp2 size: ", image_size * image_size * model_channels)
+        print("mlp2 size: ", control_dim)
         self.zero_mlp2 =  nn.Sequential(
             linear(control_dim, time_embed_dim),
             nn.SiLU(),
@@ -676,6 +676,7 @@ class MultiViewControlNet(nn.Module):
         if camera is not None:
             # check batch size
             assert camera.shape[0] == emb.shape[0]
+            camera = self.camera_embed_pre(camera)
             emb = emb + self.camera_embed(camera)
 
         print("\n camera + t  embedding shape is : ", emb.shape)
