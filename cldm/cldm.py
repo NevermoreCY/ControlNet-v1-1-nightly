@@ -758,7 +758,7 @@ class ControlLDM(LatentDiffusion):
 
         control = einops.rearrange(control, 'b h w c -> b c h w')
         control = control.to(memory_format=torch.contiguous_format).float()
-        return x, dict(c_crossattn=[c], c_concat=[control],c_camera=[T])
+        return x, dict(c_crossattn=[c], c_concat=[control],camera=[T])
 
     def apply_model(self, x_noisy, t, cond, *args, **kwargs):
         assert isinstance(cond, dict)
