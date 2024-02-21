@@ -46,14 +46,14 @@ class ControlledUnetModel(UNetModel):
 
 
 class MultiViewControlledUnetModel(MultiViewUNetModel):
-    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_embd=None, **kwargs):
+    def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_emb=None, **kwargs):
         hs = []
         with torch.no_grad():
             # t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
             # emb = self.time_embed(t_emb)
 
-            print("global embd is ", global_embd)
-            emb = global_embd
+            print("global embd is ", global_emb)
+            emb = global_emb
             h = x.type(self.dtype)
 
             print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
