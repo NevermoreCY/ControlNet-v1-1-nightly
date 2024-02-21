@@ -56,7 +56,7 @@ class MultiViewControlledUnetModel(MultiViewUNetModel):
             emb = global_emb
             h = x.type(self.dtype)
 
-            print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
+            # print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
             for module in self.input_blocks:
                 h = module(h, emb, context)
                 hs.append(h)
