@@ -337,7 +337,7 @@ class ObjaverseData(Dataset):
         data_choice = random.random()
 
         # first test single image
-        data_choice = 0.3
+        data_choice = 0.4
 
         # case for singe image dataset
         if data_choice <= 0.3:
