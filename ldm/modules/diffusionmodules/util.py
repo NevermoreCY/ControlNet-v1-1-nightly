@@ -140,6 +140,7 @@ class CheckpointFunction(torch.autograd.Function):
                 print('\n\n\n ctx items: ' , x.shape)
                 ctx_l.append( x.detach().requires_grad_(True)   )
 
+        ctx.input_tensors = ctx_l
 
         # ctx.input_tensors = [x.detach().requires_grad_(True) for x in ctx.input_tensors]
         with torch.enable_grad(), \
