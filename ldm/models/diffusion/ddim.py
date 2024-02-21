@@ -220,6 +220,8 @@ class DDIMSampler(object):
             for key in c_in:
                 if type(c_in[key]) == int:
                     print(key, c_in[key])
+                elif type(c_in[key]) == list:
+                    print(key, c_in[key])
                 else:
                     print(key, c_in[key].shape)
             model_uncond, model_t = self.model.apply_model(x_in, t_in, c_in).chunk(2)
