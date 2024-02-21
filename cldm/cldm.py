@@ -726,6 +726,7 @@ class MultiViewControlNet(nn.Module):
         h = x.type(self.dtype)
 
         print("\n h shape is : ", h.shape)
+        print("\n Context shape is : ", context.shape)
 
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
             if cond_with_camera_t is not None:
