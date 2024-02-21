@@ -710,7 +710,8 @@ class MultiViewControlNet(nn.Module):
         print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
         print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
@@ -727,12 +728,12 @@ class MultiViewControlNet(nn.Module):
         print("\n h shape is : ", h.shape)
 
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
-            if guided_hint is not None:
+            if cond_with_camera_t is not None:
                 h = module(h, global_emb, context)
 
                 print('\n after first module, h shape is : ', h.shape)
-                h += guided_hint
-                guided_hint = None
+                h += cond_with_camera_t
+                cond_with_camera_t = None
             else:
                 h = module(h, global_emb, context)
             outs.append(zero_conv(h, global_emb, context))
