@@ -476,7 +476,7 @@ class MultiViewControlNet(nn.Module):
             linear(time_embed_dim, time_embed_dim),
         )
 
-        control_dim = image_size*image_size*model_channels
+        control_dim = 256 * 32 * 32
         print("mlp1 size: ", control_dim)
         self.zero_mlp1 = nn.Sequential(
             linear(time_embed_dim, control_dim),
@@ -536,7 +536,7 @@ class MultiViewControlNet(nn.Module):
             nn.SiLU(),
             conv_nd(dims, 96, 256, 3, padding=1, stride=2),
             nn.SiLU(),
-            zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+            # zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
         )
 
         self.hint_mixed_conv_out = TimestepEmbedSequential(
@@ -693,7 +693,7 @@ class MultiViewControlNet(nn.Module):
         print("\n zero mlp1 emb : ", emb.shape)
 
         # gh0,gh1,gh2,gh3 = guided_hint.shape
-        emb = rearrange(emb, "b (c h w) -> b c h w", c=self.model_channels,h=self.image_size,w=self.image_size).contiguous()
+        emb = rearrange(emb, "b (c h w) -> b c h w", c=256,h=self.image_size,w=self.image_size).contiguous()
 
         print("\n zero mlp1 emb after rearrange : ", emb.shape)
 
