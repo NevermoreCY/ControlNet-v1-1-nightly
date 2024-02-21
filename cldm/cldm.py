@@ -12,7 +12,7 @@ from ldm.modules.diffusionmodules.util import (
 
 from einops import rearrange, repeat
 from torchvision.utils import make_grid
-from ldm.modules.attention import SpatialTransformer
+from ldm.modules.attention import SpatialTransformer, SpatialTransformer3D
 from ldm.modules.diffusionmodules.openaimodel import UNetModel,  TimestepEmbedSequential, ResBlock, Downsample, AttentionBlock , MultiViewUNetModel
 from ldm.models.diffusion.ddpm import LatentDiffusion
 from ldm.util import log_txt_as_img, exists, instantiate_from_config
@@ -415,6 +415,7 @@ class MultiViewControlNet(nn.Module):
             num_attention_blocks=None,
             disable_middle_self_attn=False,
             use_linear_in_transformer=False,
+            camera_dim = None,
     ):
         super().__init__()
         if use_spatial_transformer:
@@ -474,6 +475,19 @@ class MultiViewControlNet(nn.Module):
             nn.SiLU(),
             linear(time_embed_dim, time_embed_dim),
         )
+
+        # add camera embd
+        if camera_dim is not None:
+            self.camera_embed_pre = nn.Sequential(
+                linear(12, camera_dim),
+            )
+
+            self.camera_embed = nn.Sequential(
+                linear(camera_dim, time_embed_dim),
+                nn.SiLU(),
+                linear(time_embed_dim, time_embed_dim),
+            )
+
 
         self.input_blocks = nn.ModuleList(
             [
@@ -542,14 +556,14 @@ class MultiViewControlNet(nn.Module):
                                 num_heads=num_heads,
                                 num_head_channels=dim_head,
                                 use_new_attention_order=use_new_attention_order,
-                            ) if not use_spatial_transformer else SpatialTransformer(
+                            ) if not use_spatial_transformer else SpatialTransformer3D(
                                 ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
                                 disable_self_attn=disabled_sa, use_linear=use_linear_in_transformer,
                                 use_checkpoint=use_checkpoint
                             )
                         )
                 self.input_blocks.append(TimestepEmbedSequential(*layers))
-                self.zero_convs.append(self.make_zero_conv(ch))
+                self.zero_convs.append(self.make_zero_conv(ch)) # extra zero conv
                 self._feature_size += ch
                 input_block_chans.append(ch)
             if level != len(channel_mult) - 1:
@@ -601,7 +615,7 @@ class MultiViewControlNet(nn.Module):
                 num_heads=num_heads,
                 num_head_channels=dim_head,
                 use_new_attention_order=use_new_attention_order,
-            ) if not use_spatial_transformer else SpatialTransformer(  # always uses a self-attn
+            ) if not use_spatial_transformer else SpatialTransformer3D(  # always uses a self-attn
                 ch, num_heads, dim_head, depth=transformer_depth, context_dim=context_dim,
                 disable_self_attn=disable_middle_self_attn, use_linear=use_linear_in_transformer,
                 use_checkpoint=use_checkpoint
