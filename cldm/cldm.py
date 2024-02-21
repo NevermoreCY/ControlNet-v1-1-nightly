@@ -645,14 +645,22 @@ class MultiViewControlNet(nn.Module):
         guided_hint = self.input_hint_block(hint, emb, context)
 
         if DEBUG:
-            print("\n\n\n Guided_hint shape: " , guided_hint.shape)
+            print("\n Guided_hint shape: " , guided_hint.shape)
+
+        # hint original shape:  torch.Size([160, 3, 256, 256])
+        #  Guided_hint shape:  torch.Size([160, 320, 32, 32])
 
         outs = []
 
         h = x.type(self.dtype)
+
+        print("\n h shape is : ", h.shape)
+
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
             if guided_hint is not None:
                 h = module(h, emb, context)
+
+                print('\n after first module, h shape is : ', h.shape)
                 h += guided_hint
                 guided_hint = None
             else:
