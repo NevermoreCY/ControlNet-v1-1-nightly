@@ -705,7 +705,7 @@ class MultiViewControlNet(nn.Module):
 
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
         print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
-        global_emb = self.zero_mlp2(cond_with_camera_t)
+        global_emb = self.zero_mlp2(global_emb)
 
         print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
 
