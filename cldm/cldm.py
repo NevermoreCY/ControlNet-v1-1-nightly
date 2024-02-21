@@ -835,9 +835,12 @@ class ControlLDM(LatentDiffusion):
 
         log = dict()
         z, c = self.get_input(batch, self.first_stage_key, bs=N)
+
+        print('\n\n\n  !!camera: ', c['camera'])
+
         c_cat, c = c["c_concat"][0][:N], c["c_crossattn"][0][:N]
 
-        print('\n\n\n  !!camera: ' ,c['camera'])
+
         N = min(z.shape[0], N)
         n_row = min(z.shape[0], n_row)
         log["reconstruction"] = self.decode_first_stage(z)
