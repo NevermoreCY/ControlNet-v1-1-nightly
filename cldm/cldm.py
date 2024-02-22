@@ -913,6 +913,14 @@ class ControlLDM(LatentDiffusion):
         opt = torch.optim.AdamW(params, lr=lr)
         return opt
 
+    # need lock camera embed in control model
+    # control_model.camera_embed_pre.0.weight
+    # control_model.camera_embed_pre.0.bias
+    # control_model.camera_embed.0.weight
+    # control_model.camera_embed.0.bias
+    # control_model.camera_embed.2.weight
+    # control_model.camera_embed.2.bias
+
     def low_vram_shift(self, is_diffusing):
         if is_diffusing:
             self.model = self.model.cuda()
