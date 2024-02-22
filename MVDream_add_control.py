@@ -75,6 +75,25 @@ for item in control3D_key:
     if item not in mvd_key:
         print(item)
 
+# need to copy to :
+
+# control_model.camera_embed_pre.0.weight
+# control_model.camera_embed_pre.0.bias
+# control_model.camera_embed.0.weight
+# control_model.camera_embed.0.bias
+# control_model.camera_embed.2.weight
+# control_model.camera_embed.2.bias
+#
+# control_model.time_embed.0.weight
+# control_model.time_embed.0.bias
+# control_model.time_embed.2.weight
+# control_model.time_embed.2.bias
+# control_model.zero_mlp1.0.weight
+
+
+# need to
+
+
 print('\n\n\n\n\n\n  in control3d, not in control')
 for item in control3D_key:
     if item not in control_key:
