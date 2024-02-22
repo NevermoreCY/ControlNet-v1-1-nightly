@@ -916,6 +916,8 @@ class ControlLDM(LatentDiffusion):
                 print('\n Found camera model ')
                 model_dict[k].requires_grad = False
 
+                print(model_dict[k])
+
             else:
                 params.append(model_dict[k])
 
