@@ -911,6 +911,7 @@ class ControlLDM(LatentDiffusion):
         params = []
 
         for k in model_dict.keys():
+            print('\n',k)
             if 'control_model.camera_embed.' in k:
                 print('\n Found camera model ')
                 model_dict[k].requires_grad = False
