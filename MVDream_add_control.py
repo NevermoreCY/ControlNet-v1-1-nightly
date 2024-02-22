@@ -75,15 +75,22 @@ for item in control3D_key:
     if item not in mvd_key:
         print(item)
 
-# need to copy to :
+# need to copy from : MVD
+# model.diffusion_model.camera_embed.0.weight
+# model.diffusion_model.camera_embed.0.bias
+# model.diffusion_model.camera_embed.2.weight
+# model.diffusion_model.camera_embed.2.bias
+# model.diffusion_model.time_embed.0.weight
+# model.diffusion_model.time_embed.0.bias
+# model.diffusion_model.time_embed.2.weight
+# model.diffusion_model.time_embed.2.bias
 
-# control_model.camera_embed_pre.0.weight
-# control_model.camera_embed_pre.0.bias
+#to
+
 # control_model.camera_embed.0.weight
 # control_model.camera_embed.0.bias
 # control_model.camera_embed.2.weight
 # control_model.camera_embed.2.bias
-#
 # control_model.time_embed.0.weight
 # control_model.time_embed.0.bias
 # control_model.time_embed.2.weight
@@ -91,7 +98,13 @@ for item in control3D_key:
 # control_model.zero_mlp1.0.weight
 
 
-# need to
+# From control net
+# control_model.input_hint_block.14.weight
+# control_model.input_hint_block.14.bias
+# to
+# control_model.hint_mixed_conv_out.0.weight
+# control_model.hint_mixed_conv_out.0.bias
+
 
 
 print('\n\n\n\n\n\n  in control3d, not in control')
@@ -111,61 +124,57 @@ for item in control_key:
         print(item)
 
 
-# print('\n\n\n\n\n\n  in mvd key, not in control key')
-# for item in mvd_key:
-#     if item not in control_key:
-#         print(item)
-# model.diffusion_model.camera_embed.0.weight
-# model.diffusion_model.camera_embed.0.bias
-# model.diffusion_model.camera_embed.2.weight
-# model.diffusion_model.camera_embed.2.bias
+target_dict = {}
+# 0th step copy original weights, these are all the keys we nedd
+for k in control3D_dict.keys():
+    target_dict[k] = control3D_dict[k].clone()
+# First copy control net v1.0 parameters
+for k in pretrained_weights_control.keys():
+    target_dict[k] = pretrained_weights_control[k].clone()
+# second copy control net v1.1 parameters
+for k in pretrained_weights_control2.keys():
+    if 'control_model.input_hint_block.14.' in k:
+        print("hint block 14 in control net V 1.1!, copy it")
+        prefix_l = len('control_model.input_hint_block.14.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.hint_mixed_conv_out.0.'
+        target_key = target_pre + sufix
+        target_dict[target_key] = pretrained_weights_control2[k].clone()
+    else:
+        target_dict[k] = pretrained_weights_control2[k].clone()
+# copy mvd
+for k in pretrained_weights_mvd.keys():
 
-# for item in control_key:
-#     if item not in mvd_key:
-#         print(item)
-
-    # control_model.xxx
-
-
-#
-
-
-# target_dict = {}
-# for k in control3D_dict.keys():
-#     is_control, name = get_node_name(k, 'control_')
-#     if is_control:
-#         copy_k = 'model.diffusion_' + name
-#     else:
-#         copy_k = k
-#     if copy_k in pretrained_weights:
-#         target_dict[k] = pretrained_weights[copy_k].clone()
-#     else:
-#         target_dict[k] = scratch_dict[k].clone()
-#         print(f'These weights are newly added: {k}')
-#
-# model.load_state_dict(target_dict, strict=True)
-# torch.save(model.state_dict(), output_path)
-# print('Done.')
+    if ('model.diffusion_model.time_embed.' in k):
+        print("time in MVD!, copy it")
+        prefix_l = len('model.diffusion_model.time_embed.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.time_embed.'
+        target_key = target_pre + sufix
+        print("TO : " , target_key)
+        target_dict[target_key] = pretrained_weights_control2[k].clone()
+    elif ('model.diffusion_model.camera_embed.' in k):
+        print("camera in MVD!, copy it")
+        prefix_l = len('model.diffusion_model.camera_embed.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.camera_embed.'
+        target_key = target_pre + sufix
+        print("TO : ", target_key)
+        target_dict[target_key] = pretrained_weights_control2[k].clone()
 
 
-# target_dict = {}
-# # 0th step copy original weights
-# for k in control3D_dict.keys():
-#     target_dict[k] = control3D_dict[k].clone()
-# # First copy control net v1.0 parameters
-# for k in pretrained_weights_control.keys():
-#     target_dict[k] = pretrained_weights_control[k].clone()
-# # second copy control net v1.1 parameters
-# for k in pretrained_weights_control2.keys():
-#     target_dict[k] = pretrained_weights_control2[k].clone()
-# # copy mvd
-# for k in pretrained_weights_mvd.keys():
-#     target_dict[k] = pretrained_weights_mvd[k].clone()
-#
-#
-# model.load_state_dict(target_dict, strict=True)
-# torch.save(model.state_dict(), output_path)
-# print('Done.')
+    else:
+        target_dict[k] = pretrained_weights_mvd[k].clone()
+
+
+
+
+model.load_state_dict(target_dict, strict=True)
+torch.save(model.state_dict(), output_path)
+print('Done.')
 
 
 
