@@ -171,7 +171,9 @@ for k in pretrained_weights_mvd.keys():
         target_dict[k] = pretrained_weights_mvd[k].clone()
 
 
-
+to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_model.time_embed.0.bias", "model.diffusion_model.time_embed.2.weight", "model.diffusion_model.time_embed.2.bias", "control_model.input_hint_block.14.weight", "control_model.input_hint_block.14.bias"]
+for k in to_discard:
+    target_dict.pop(k,None)
 
 model.load_state_dict(target_dict, strict=True)
 torch.save(model.state_dict(), output_path)
