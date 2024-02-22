@@ -907,6 +907,12 @@ class ControlLDM(LatentDiffusion):
     def configure_optimizers(self):
         lr = self.learning_rate
         params = list(self.control_model.parameters())
+        DEBUG = True
+        if DEBUG:
+            print("\n\n\n check optimizing parameters")
+            for item in params:
+                print("\n\n\n" , item)
+
         if not self.sd_locked:
             params += list(self.model.diffusion_model.output_blocks.parameters())
             params += list(self.model.diffusion_model.out.parameters())
