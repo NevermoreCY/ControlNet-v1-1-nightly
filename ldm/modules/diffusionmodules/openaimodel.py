@@ -921,24 +921,27 @@ class MultiViewUNetModel(nn.Module):
         self.predict_codebook_ids = n_embed is not None  # None?
 
         time_embed_dim = model_channels * 4  # 320 *4 = 1280
-        self.time_embed = nn.Sequential(
-            linear(model_channels, time_embed_dim),   # 320 -> 1280
-            nn.SiLU(),
-            linear(time_embed_dim, time_embed_dim),  # 1280 -> 1280
-        )
 
-        if camera_dim is not None:
-            time_embed_dim = model_channels * 4
+        self.time_embed = None
+        self.camera_embed =None
+        # self.time_embed = nn.Sequential(
+        #     linear(model_channels, time_embed_dim),   # 320 -> 1280
+        #     nn.SiLU(),
+        #     linear(time_embed_dim, time_embed_dim),  # 1280 -> 1280
+        # )
 
-            self.camera_embed_pre = nn.Sequential(
-                linear(12, camera_dim),
-            )
-
-            self.camera_embed = nn.Sequential(
-                linear(camera_dim, time_embed_dim),
-                nn.SiLU(),
-                linear(time_embed_dim, time_embed_dim),
-            )
+        # if camera_dim is not None:
+        #     time_embed_dim = model_channels * 4
+        #
+        #     self.camera_embed_pre = nn.Sequential(
+        #         linear(12, camera_dim),
+        #     )
+        #
+        #     self.camera_embed = nn.Sequential(
+        #         linear(camera_dim, time_embed_dim),
+        #         nn.SiLU(),
+        #         linear(time_embed_dim, time_embed_dim),
+        #     )
 
         if self.num_classes is not None:  # None
             if isinstance(self.num_classes, int):
