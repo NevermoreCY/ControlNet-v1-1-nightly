@@ -140,6 +140,7 @@ for k in pretrained_weights_control2.keys():
         print('sufix:', sufix)
         target_pre = 'control_model.hint_mixed_conv_out.0.'
         target_key = target_pre + sufix
+        print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_control2[k].clone()
     else:
         target_dict[k] = pretrained_weights_control2[k].clone()
@@ -154,7 +155,7 @@ for k in pretrained_weights_mvd.keys():
         target_pre = 'control_model.time_embed.'
         target_key = target_pre + sufix
         print("TO : " , target_key)
-        target_dict[target_key] = pretrained_weights_control2[k].clone()
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
     elif ('model.diffusion_model.camera_embed.' in k):
         print("camera in MVD!, copy it")
         prefix_l = len('model.diffusion_model.camera_embed.')
@@ -163,7 +164,7 @@ for k in pretrained_weights_mvd.keys():
         target_pre = 'control_model.camera_embed.'
         target_key = target_pre + sufix
         print("TO : ", target_key)
-        target_dict[target_key] = pretrained_weights_control2[k].clone()
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
 
 
     else:
