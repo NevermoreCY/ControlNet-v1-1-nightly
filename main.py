@@ -338,7 +338,7 @@ class ObjaverseData(Dataset):
 
         # first test single image
         # data_choice = 0.4
-        print("d_c: ", data_choice)
+        # print("d_c: ", data_choice)
         # case for singe image dataset
         if data_choice <= 0.3:
 
