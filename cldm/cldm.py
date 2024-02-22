@@ -921,10 +921,10 @@ class ControlLDM(LatentDiffusion):
         print(len(params) , len(params1))
 
         DEBUG = True
-        if DEBUG:
-            print("\n\n\n check optimizing parameters")
-            for item in params:
-                print("\n\n\n" , item)
+        # if DEBUG:
+        #     print("\n\n\n check optimizing parameters")
+        #     for item in params:
+        #         print("\n\n\n" , item)
         print("\n\n\n\n")
         if not self.sd_locked:
             params += list(self.model.diffusion_model.output_blocks.parameters())
