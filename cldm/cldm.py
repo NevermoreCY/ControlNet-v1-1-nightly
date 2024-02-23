@@ -504,16 +504,24 @@ class MultiViewControlNet(nn.Module):
 
         # v4:
         self.global_emb_conv = nn.Sequential(
-            conv_nd(dims, 320, 160, 3, padding=1),
+            conv_nd(dims, 320, 200, 3, padding=1),
             nn.SiLU(),
-            conv_nd(dims, 160, 160, 3, padding=1, stride=2),
+            conv_nd(dims, 200, 200, 3, padding=1, stride=2),
             nn.SiLU(),
-            conv_nd(dims, 160, 80, 3, padding=1),
+            conv_nd(dims, 200, 100, 3, padding=1),
+            nn.SiLU(),
+            conv_nd(dims, 100, 100, 3, padding=1, stride=2),
+            nn.SiLU(),
+            conv_nd(dims, 100, 80, 3, padding=1),
             nn.SiLU(),
             conv_nd(dims, 80, 80, 3, padding=1, stride=2),
             nn.SiLU(),
-            zero_module(conv_nd(dims, 80, 80, 3, padding=1))
+            conv_nd(dims, 80, 80, 3, padding=1),
+            nn.SiLU(),
         )
+
+        self.global_emb_zero_mlp = zero_module(linear(time_embed_dim, time_embed_dim))
+
 
 
 
@@ -742,12 +750,14 @@ class MultiViewControlNet(nn.Module):
         global_emb = self.global_emb_conv(cond_with_camera_t)
 
         # global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
         # global_emb = self.zero_mlp2(global_emb)
 
         # v4
         global_emb = rearrange(global_emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
+        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        global_emb = self.global_emb_zero_mlp(global_emb)
+        print("\n glob  emb after mlp2 : ", global_emb.shape)
 
 
 
