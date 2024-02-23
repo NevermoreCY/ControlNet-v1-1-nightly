@@ -175,8 +175,12 @@ to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_mode
 for k in to_discard:
     target_dict.pop(k,None)
 
-model.load_state_dict(target_dict, strict=True)
-torch.save(model.state_dict(), output_path)
-print('Done.')
+# for k in target_dict:
+#     print(k)
+
+
+# model.load_state_dict(target_dict, strict=True)
+# torch.save(model.state_dict(), output_path)
+# print('Done.')
 
 
