@@ -695,10 +695,12 @@ class MultiViewControlNet(nn.Module):
 
         print("\n zero mlp1 emb : ", emb.shape)
 
+        #--------------v2------------------
         # gh0,gh1,gh2,gh3 = guided_hint.shape
-        emb = rearrange(emb, "b (c h w) -> b c h w", c=256,h=self.image_size,w=self.image_size).contiguous()
+        # emb = rearrange(emb, "b (c h w) -> b c h w", c=256,h=self.image_size,w=self.image_size).contiguous()
+        # print("\n zero mlp1 emb after rearrange : ", emb.shape)
+        #-------------v2---------------
 
-        print("\n zero mlp1 emb after rearrange : ", emb.shape)
 
         # V3 repeat emb for num_channel times
 
