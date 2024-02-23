@@ -494,13 +494,27 @@ class MultiViewControlNet(nn.Module):
             zero_module(linear(control_dim, control_dim)),
         )
 
-        # print("mlp2 size: ", control_dim)
-        control_dim_v3 = image_size * image_size * 256
-        self.zero_mlp2 =  nn.Sequential(
-            zero_module(linear(control_dim_v3, time_embed_dim)),
+        # V3
+        # control_dim_v3 = image_size * image_size * 256
+        # self.zero_mlp2 =  nn.Sequential(
+        #     zero_module(linear(control_dim_v3, time_embed_dim)),
+        #     nn.SiLU(),
+        #     zero_module(linear(time_embed_dim, time_embed_dim)),
+        # )
+
+        # v4:
+        self.global_emb_conv = nn.Sequential(
+            conv_nd(dims, 320, 160, 3, padding=1),
             nn.SiLU(),
-            zero_module(linear(time_embed_dim, time_embed_dim)),
+            conv_nd(dims, 160, 160, 3, padding=1, stride=2),
+            nn.SiLU(),
+            conv_nd(dims, 160, 80, 3, padding=1),
+            nn.SiLU(),
+            conv_nd(dims, 80, 80, 3, padding=1, stride=2),
+            nn.SiLU(),
+            zero_module(conv_nd(dims, 80, 80, 3, padding=1))
         )
+
 
 
         # add camera embd
@@ -712,24 +726,28 @@ class MultiViewControlNet(nn.Module):
         repeat_shape = 256
 
         emb = emb[:,None,:]
-        # print("\n emb add 1 dim : ", emb.shape)
+        print("\n emb add 1 dim : ", emb.shape)
         emb = emb.repeat(1,repeat_shape,1)
-        # print("\n emb repeat 256 times : ", emb.shape)
+        print("\n emb repeat 256 times : ", emb.shape)
         emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
-        # print("\n emb rearrange to match image size  : ", emb.shape)
+        print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
-        global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
-        global_emb = self.zero_mlp2(global_emb)
+        global_emb = self.global_emb_conv(cond_with_camera_t)
 
-        # print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
+        # global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
+        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        # global_emb = self.zero_mlp2(global_emb)
+
+        # v4
+        global_emb = rearrange(global_emb, "b c h w -> b (c h w)").contiguous()
+        print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
 
 
 
