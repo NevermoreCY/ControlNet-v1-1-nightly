@@ -582,10 +582,11 @@ class LatentDiffusion(DDPM):
         self.bbox_tokenizer = None
 
         # Here we add extra MLP for concatenating image CLIP embedding, transfer them back to 768 size.
-        self.cc_projection = nn.Linear(772, 768)
-        nn.init.eye_(list(self.cc_projection.parameters())[0][:768, :768])
-        nn.init.zeros_(list(self.cc_projection.parameters())[1])
-        self.cc_projection.requires_grad_(True)
+        if cond_stage_image_config:
+            self.cc_projection = nn.Linear(772, 768)
+            nn.init.eye_(list(self.cc_projection.parameters())[0][:768, :768])
+            nn.init.zeros_(list(self.cc_projection.parameters())[1])
+            self.cc_projection.requires_grad_(True)
 
         self.restarted_from_ckpt = False
         if ckpt_path is not None:
