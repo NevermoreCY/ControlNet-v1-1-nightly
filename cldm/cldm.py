@@ -503,19 +503,15 @@ class MultiViewControlNet(nn.Module):
 
         # v4:
         self.global_emb_conv = nn.Sequential(
-            conv_nd(dims, 320, 200, 3, padding=1),
+            conv_nd(dims, 320, 160, 3, padding=1),
             nn.SiLU(),
-            conv_nd(dims, 200, 200, 3, padding=1, stride=2),
+            conv_nd(dims, 160, 160, 3, padding=1, stride=4),
             nn.SiLU(),
-            conv_nd(dims, 200, 100, 3, padding=1),
-            nn.SiLU(),
-            conv_nd(dims, 100, 100, 3, padding=1, stride=2),
-            nn.SiLU(),
-            conv_nd(dims, 100, 80, 3, padding=1),
+            conv_nd(dims, 160, 80, 3, padding=1),
             nn.SiLU(),
             conv_nd(dims, 80, 80, 3, padding=1, stride=2),
             nn.SiLU(),
-            conv_nd(dims, 80, 80, 3, padding=1),
+            zero_module(conv_nd(dims, 80, 80, 3, padding=1)),
             nn.SiLU(),
         )
 
