@@ -716,7 +716,7 @@ class MultiViewControlNet(nn.Module):
 
         emb = self.zero_mlp1(emb)
 
-        print("\n zero mlp1 emb : ", emb.shape)
+        # print("\n zero mlp1 emb : ", emb.shape)
 
         #--------------v2------------------
         # gh0,gh1,gh2,gh3 = guided_hint.shape
