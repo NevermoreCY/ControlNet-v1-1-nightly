@@ -704,10 +704,12 @@ class MultiViewControlNet(nn.Module):
 
         # V3 repeat emb for num_channel times
 
+        repeat_shape = 256
+
         emb = emb[:,None,:]
         print("\n emb add 1 dim : ", emb.shape)
-        emb = emb.repeat(1,self.model_channels,1)
-        print("\n emb repeat 320 times : ", emb.shape)
+        emb = emb.repeat(1,repeat_shape,1)
+        print("\n emb repeat 256 times : ", emb.shape)
         emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
         print("\n emb rearrange to match image size  : ", emb.shape)
 
