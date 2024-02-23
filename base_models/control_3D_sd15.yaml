@@ -83,8 +83,8 @@ model:
     cond_stage_config:
       target: ldm.modules.encoders.modules.FrozenCLIPEmbedder
 
-    cond_stage_image_config:
-      target: ldm.modules.encoders.modules.FrozenCLIPImageEmbedder
+#    cond_stage_image_config:
+#      target: ldm.modules.encoders.modules.FrozenCLIPImageEmbedder
 
 
 
