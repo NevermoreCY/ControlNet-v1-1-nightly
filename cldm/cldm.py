@@ -491,6 +491,7 @@ class MultiViewControlNet(nn.Module):
         self.zero_mlp1 = nn.Sequential(
             zero_module(linear(time_embed_dim, control_dim)),
             nn.SiLU(),
+            zero_module(linear(control_dim, control_dim)),
         )
 
         # V3
@@ -515,7 +516,7 @@ class MultiViewControlNet(nn.Module):
             nn.SiLU(),
         )
 
-        # self.global_emb_zero_mlp = zero_module(linear(time_embed_dim, time_embed_dim))
+        self.global_emb_zero_mlp = zero_module(linear(time_embed_dim, time_embed_dim))
 
 
 
@@ -729,29 +730,29 @@ class MultiViewControlNet(nn.Module):
         repeat_shape = 256
 
         emb = emb[:,None,:]
-        print("\n emb add 1 dim : ", emb.shape)
+        # print("\n emb add 1 dim : ", emb.shape)
         emb = emb.repeat(1,repeat_shape,1)
-        print("\n emb repeat 256 times : ", emb.shape)
+        # print("\n emb repeat 256 times : ", emb.shape)
         emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
-        print("\n emb rearrange to match image size  : ", emb.shape)
+        # print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
         global_emb = self.global_emb_conv(cond_with_camera_t)
 
         # global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
+        # print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
         # global_emb = self.zero_mlp2(global_emb)
 
         # v4
         global_emb = rearrange(global_emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
-        # global_emb = self.global_emb_zero_mlp(global_emb)
+        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        global_emb = self.global_emb_zero_mlp(global_emb)
         # print("\n glob  emb after mlp2 : ", global_emb.shape)
 
 
