@@ -478,26 +478,27 @@ class MultiViewControlNet(nn.Module):
             linear(time_embed_dim, time_embed_dim),
         )
 
-        control_dim = 256 * 32 * 32
-        print("mlp1 size: ", control_dim)
-        self.zero_mlp1 = nn.Sequential(
-            linear(time_embed_dim, control_dim),
-            nn.SiLU(),
-        )
-
-        # v2
-        # control_dim = image_size * image_size
+        # v1
+        # control_dim = 256 * 32 * 32
+        # print("mlp1 size: ", control_dim)
         # self.zero_mlp1 = nn.Sequential(
         #     linear(time_embed_dim, control_dim),
         #     nn.SiLU(),
-        #     linear(control_dim, control_dim),
         # )
+
+        # v3
+        control_dim = image_size * image_size
+        self.zero_mlp1 = nn.Sequential(
+            zero_module(linear(time_embed_dim, control_dim)),
+            nn.SiLU(),
+            zero_module(linear(control_dim, control_dim)),
+        )
 
         # print("mlp2 size: ", control_dim)
         self.zero_mlp2 =  nn.Sequential(
-            linear(control_dim, time_embed_dim),
+            zero_module(linear(control_dim, time_embed_dim)),
             nn.SiLU(),
-            linear(time_embed_dim, time_embed_dim),
+            zero_module(linear(time_embed_dim, time_embed_dim)),
         )
 
 
@@ -692,34 +693,34 @@ class MultiViewControlNet(nn.Module):
 
         emb = self.zero_mlp1(emb)
 
-        # print("\n zero mlp1 emb : ", emb.shape)
+        print("\n zero mlp1 emb : ", emb.shape)
 
         # gh0,gh1,gh2,gh3 = guided_hint.shape
         emb = rearrange(emb, "b (c h w) -> b c h w", c=256,h=self.image_size,w=self.image_size).contiguous()
 
-        # print("\n zero mlp1 emb after rearrange : ", emb.shape)
+        print("\n zero mlp1 emb after rearrange : ", emb.shape)
 
-        # V2 repeat emb for num_channel times
+        # V3 repeat emb for num_channel times
 
-        # emb = emb[:,None,:]
-        # print("\n emb add 1 dim : ", emb.shape)
-        # emb = emb.repeat(1,self.model_channels,1)
-        # print("\n emb repeat 320 times : ", emb.shape)
-        # emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
-        # print("\n emb rearrange to match image size  : ", emb.shape)
+        emb = emb[:,None,:]
+        print("\n emb add 1 dim : ", emb.shape)
+        emb = emb.repeat(1,self.model_channels,1)
+        print("\n emb repeat 320 times : ", emb.shape)
+        emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
+        print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
         global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
         global_emb = self.zero_mlp2(global_emb)
 
-        # print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
+        print("\n zero mlp2 emb after mlp2 : ", global_emb.shape)
 
 
 
