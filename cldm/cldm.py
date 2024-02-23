@@ -495,8 +495,9 @@ class MultiViewControlNet(nn.Module):
         )
 
         # print("mlp2 size: ", control_dim)
+        control_dim_v3 = image_size * image_size * 256
         self.zero_mlp2 =  nn.Sequential(
-            zero_module(linear(control_dim, time_embed_dim)),
+            zero_module(linear(control_dim_v3, time_embed_dim)),
             nn.SiLU(),
             zero_module(linear(time_embed_dim, time_embed_dim)),
         )
@@ -545,6 +546,10 @@ class MultiViewControlNet(nn.Module):
         self.hint_mixed_conv_out = TimestepEmbedSequential(
             zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
         )
+
+        # self.channel_compress = TimestepEmbedSequential(
+        #     zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+        # )
 
 
 
