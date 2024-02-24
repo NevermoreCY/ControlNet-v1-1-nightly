@@ -392,50 +392,102 @@ class ObjaverseData(Dataset):
 
         # case for multiview data
         else: # data_choice > 0.3:
-            data = {}
-            img_list =[]
-            camera_list = []
-            text_list = []
 
-            total_view = self.total_view
-            filename = os.path.join(self.root_dir_3d, self.paths[index])
-            sample_id = self.paths[index]
-            prompt = self.cap_data[sample_id]
-
-            for i in range(total_view):
-
-                target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
-                target_RT = torch.tensor(target_RT)
-
-                target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
-                target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
-                target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+            try:
+                data = {}
+                img_list = []
+                camera_list = []
+                text_list = []
 
 
-                # we use first image as control image
-                if i ==0 :
-                    canny_r = random_canny(target_im)
-                    # print("*** canny_r.shape", canny_r.shape)
-                    canny_r = canny_r[:, :, None]
-                    canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
-                    # print("*** canny_r.shape after concatenate", canny_r.shape)
-                    # normalize
-                    canny_r = canny_r.astype(np.float32) / 255.0
-                    canny_r = torch.tensor(canny_r)
-                    data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
-                    data["hint"] = data_canny
-
-                target_im = (target_im.astype(np.float32) / 127.5) - 1.0
-                target_im = torch.tensor(target_im)
-
-                img_list.append(target_im)
-                camera_list.append(target_RT)
-                text_list.append(prompt)
+                total_view = self.total_view
+                filename = os.path.join(self.root_dir_3d, self.paths[index])
+                sample_id = self.paths[index]
+                prompt = self.cap_data[sample_id]
 
 
-            data["img"] = torch.stack(img_list, dim=0)
-            data["camera_pose"] =  torch.stack(camera_list, dim=0)
-            data["txt"] = prompt
+
+                for i in range(total_view):
+
+                    target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                    target_RT = torch.tensor(target_RT)
+
+                    target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
+                    target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+                    target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+
+
+                    # we use first image as control image
+                    if i ==0 :
+                        canny_r = random_canny(target_im)
+                        # print("*** canny_r.shape", canny_r.shape)
+                        canny_r = canny_r[:, :, None]
+                        canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+                        # print("*** canny_r.shape after concatenate", canny_r.shape)
+                        # normalize
+                        canny_r = canny_r.astype(np.float32) / 255.0
+                        canny_r = torch.tensor(canny_r)
+                        data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
+                        data["hint"] = data_canny
+
+                    target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+                    target_im = torch.tensor(target_im)
+
+                    img_list.append(target_im)
+                    camera_list.append(target_RT)
+                    text_list.append(prompt)
+
+
+                data["img"] = torch.stack(img_list, dim=0)
+                data["camera_pose"] =  torch.stack(camera_list, dim=0)
+                data["txt"] = prompt
+            except:
+
+                print("\n encounter bad samples : " , self.paths[index])
+                data = {}
+                img_list = []
+                camera_list = []
+                text_list = []
+
+                total_view = self.total_view
+                # filename = os.path.join(self.root_dir_3d, self.paths[index])
+                filename = os.path.join(self.root_dir_3d, '0a0b504f51a94d95a2d492d3c372ebe5')  # this one we know is valid
+
+                sample_id = self.paths[index]
+                prompt = self.cap_data[sample_id]
+
+                for i in range(total_view):
+
+                    target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                    target_RT = torch.tensor(target_RT)
+
+                    target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
+                    target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+                    target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+
+                    # we use first image as control image
+                    if i == 0:
+                        canny_r = random_canny(target_im)
+                        # print("*** canny_r.shape", canny_r.shape)
+                        canny_r = canny_r[:, :, None]
+                        canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+                        # print("*** canny_r.shape after concatenate", canny_r.shape)
+                        # normalize
+                        canny_r = canny_r.astype(np.float32) / 255.0
+                        canny_r = torch.tensor(canny_r)
+                        data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
+                        data["hint"] = data_canny
+
+                    target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+                    target_im = torch.tensor(target_im)
+
+                    img_list.append(target_im)
+                    camera_list.append(target_RT)
+                    text_list.append(prompt)
+
+                data["img"] = torch.stack(img_list, dim=0)
+                data["camera_pose"] = torch.stack(camera_list, dim=0)
+                data["txt"] = prompt
 
             DEBUG=False
             if DEBUG:
