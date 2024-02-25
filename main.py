@@ -346,7 +346,7 @@ class ObjaverseData(Dataset):
                 sample_index = random.randint(0,len(self.mscoco_name_list)-1)
                 sample_name = self.mscoco_name_list[sample_index]
                 # filename = os.path.join(self.root_dir_2d, self.paths[index])
-                sample_name = '000092031'
+                sample_name = 92031
 
                 target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
                 target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
