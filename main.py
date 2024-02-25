@@ -342,53 +342,101 @@ class ObjaverseData(Dataset):
         # case for singe image dataset
         if data_choice <= 0.3:
 
-            sample_index = random.randint(0,len(self.mscoco_name_list)-1)
-            sample_name = self.mscoco_name_list[sample_index]
-            # filename = os.path.join(self.root_dir_2d, self.paths[index])
+            try:
+                sample_index = random.randint(0,len(self.mscoco_name_list)-1)
+                sample_name = self.mscoco_name_list[sample_index]
+                # filename = os.path.join(self.root_dir_2d, self.paths[index])
 
-            target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
-            target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
-            target_RT = torch.tensor(target_RT)
-            f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
-            prompt = f.readline()
-            target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
-            target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+                target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
+                target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
+                target_RT = torch.tensor(target_RT)
+                f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
+                prompt = f.readline()
+                target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+                target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
 
-            canny_r = random_canny(target_im)
-            # print("*** canny_r.shape", canny_r.shape)
-            canny_r = canny_r[:, :, None]
-            canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
-            # print("*** canny_r.shape after concatenate", canny_r.shape)
-            # normalize
-            canny_r = canny_r.astype(np.float32) / 255.0
-            canny_r = torch.tensor(canny_r)
-            target_im = (target_im.astype(np.float32) / 127.5) - 1.0
-            target_im = torch.tensor(target_im)
-
-
-
-            data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
-            data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
-            data_canny= torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
-
-            DEBUG =False
-            if DEBUG:
-                print("\n\n\n sample_name is ", sample_name)  # 000020026
-                print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
-                print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
-                print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
-                print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
-                print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
-                print('\n data camera shape is :', data_camera.shape) # torch.Size([4, 3, 4])
-                print('\n data_img shape is :',  data_img.shape) # torch.Size([4, 256, 256, 3])
+                canny_r = random_canny(target_im)
+                # print("*** canny_r.shape", canny_r.shape)
+                canny_r = canny_r[:, :, None]
+                canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+                # print("*** canny_r.shape after concatenate", canny_r.shape)
+                # normalize
+                canny_r = canny_r.astype(np.float32) / 255.0
+                canny_r = torch.tensor(canny_r)
+                target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+                target_im = torch.tensor(target_im)
 
 
 
+                data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
+                data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+                data_canny= torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
 
-            data["img"] = data_img
-            data["hint"] = data_canny
-            data["camera_pose"] = data_camera# actually the difference between two camera
-            data["txt"] = prompt
+                DEBUG =False
+                if DEBUG:
+                    print("\n\n\n sample_name is ", sample_name)  # 000020026
+                    print("\n target_im shape is ", target_im.shape) # torch.Size([256, 256, 3])
+                    print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
+                    print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
+                    print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
+                    print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
+                    print('\n data camera shape is :', data_camera.shape) # torch.Size([4, 3, 4])
+                    print('\n data_img shape is :',  data_img.shape) # torch.Size([4, 256, 256, 3])
+
+
+
+
+                data["img"] = data_img
+                data["hint"] = data_canny
+                data["camera_pose"] = data_camera# actually the difference between two camera
+                data["txt"] = prompt
+
+            except:
+                print("\n encounter bad samples : ", self.mscoco_name_list[sample_index])
+                #sample_index = random.randint(0, len(self.mscoco_name_list) - 1)
+                sample_index = 0
+                sample_name = self.mscoco_name_list[sample_index]
+                # filename = os.path.join(self.root_dir_2d, self.paths[index])
+
+                target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name + '.jpg'))
+                target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
+                target_RT = torch.tensor(target_RT)
+                f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
+                prompt = f.readline()
+                target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
+                target_im = cv2.resize(target_im, (self.image_size, self.image_size), interpolation=cv2.INTER_AREA)
+
+                canny_r = random_canny(target_im)
+                # print("*** canny_r.shape", canny_r.shape)
+                canny_r = canny_r[:, :, None]
+                canny_r = np.concatenate([canny_r, canny_r, canny_r], axis=2)
+                # print("*** canny_r.shape after concatenate", canny_r.shape)
+                # normalize
+                canny_r = canny_r.astype(np.float32) / 255.0
+                canny_r = torch.tensor(canny_r)
+                target_im = (target_im.astype(np.float32) / 127.5) - 1.0
+                target_im = torch.tensor(target_im)
+
+                data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
+                data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+                data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
+
+                DEBUG = False
+                if DEBUG:
+                    print("\n\n\n sample_name is ", sample_name)  # 000020026
+                    print("\n target_im shape is ", target_im.shape)  # torch.Size([256, 256, 3])
+                    print("\n canny_r shape is ", canny_r.shape)  # torch.Size([256, 256, 3])
+                    print("\n prompt is ", prompt)  # An elephant with tusks stands in some tall brush.
+                    print("\n target_im sum is ", torch.sum(target_im))  # target_im sum is  tensor(50502.2266)
+                    print('\n camera shape is :', target_RT.shape)  # torch.Size([3, 4])
+                    print('\n data camera shape is :', data_camera.shape)  # torch.Size([4, 3, 4])
+                    print('\n data_img shape is :', data_img.shape)  # torch.Size([4, 256, 256, 3])
+
+                data["img"] = data_img
+                data["hint"] = data_canny
+                data["camera_pose"] = data_camera  # actually the difference between two camera
+                data["txt"] = prompt
+
 
         # case for multiview data
         else: # data_choice > 0.3:
