@@ -869,6 +869,10 @@ class ControlLDM(LatentDiffusion):
 
         log = dict()
         z, c = self.get_input(batch, self.first_stage_key, bs=N)
+
+
+        DEBUG = True
+
         if DEBUG:
             print('\n\n\n  !!camera: ', c['camera'])
 
