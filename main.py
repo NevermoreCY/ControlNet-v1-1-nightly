@@ -390,7 +390,7 @@ class ObjaverseData(Dataset):
 
 
                 data_camera = get_camera_2d(4, elevation=30)
-                print("\n data_camera 2d shape is : " , data_camera.shape, data_camera)
+                # print("\n data_camera 2d shape is : " , data_camera.shape, data_camera)
                 data["img"] = data_img
                 data["hint"] = data_canny
                 data["camera_pose"] = data_camera# actually the difference between two camera
@@ -438,7 +438,7 @@ class ObjaverseData(Dataset):
                     print('\n data_img shape is :', data_img.shape)  # torch.Size([4, 256, 256, 3])
 
                 data_camera = get_camera_2d(4, elevation=30)
-                print("\n data_camera 2d shape is : ", data_camera.shape , data_camera)
+                # print("\n data_camera 2d shape is : ", data_camera.shape , data_camera)
 
                 data["img"] = data_img
                 data["hint"] = data_canny
@@ -494,7 +494,7 @@ class ObjaverseData(Dataset):
                     text_list.append(prompt)
 
                 data_camera = get_camera(4, elevation=30)
-                print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
+                # print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
                 data["img"] = torch.stack(img_list, dim=0)
                 data["camera_pose"] =  data_camera
                 data["txt"] = prompt
@@ -543,7 +543,7 @@ class ObjaverseData(Dataset):
                     text_list.append(prompt)
 
                 data_camera = get_camera(4, elevation=30)
-                print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
+                # print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
                 data["img"] = torch.stack(img_list, dim=0)
                 data["camera_pose"] = data_camera
                 data["txt"] = prompt
