@@ -708,7 +708,7 @@ class MultiViewControlNet(nn.Module):
         emb = self.time_embed(t_emb)
 
 
-        DEBUG = True
+        # DEBUG = True
 
         if DEBUG:
             print("\n\n\n hint original shape: " , hint.shape)
