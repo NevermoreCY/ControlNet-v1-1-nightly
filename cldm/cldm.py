@@ -487,12 +487,12 @@ class MultiViewControlNet(nn.Module):
         # )
 
         # v3
-        control_dim = image_size * image_size
-        self.zero_mlp1 = nn.Sequential(
-            zero_module(linear(time_embed_dim, control_dim)),
-            nn.SiLU(),
-            zero_module(linear(control_dim, control_dim)),
-        )
+        # control_dim = image_size * image_size
+        # self.zero_mlp1 = nn.Sequential(
+        #     zero_module(linear(time_embed_dim, control_dim)),
+        #     nn.SiLU(),
+        #     zero_module(linear(control_dim, control_dim)),
+        # )
 
         # V3
         # control_dim_v3 = image_size * image_size * 256
@@ -503,29 +503,40 @@ class MultiViewControlNet(nn.Module):
         # )
 
         # v4:
-        self.global_emb_conv = nn.Sequential(
-            conv_nd(dims, 320, 160, 3, padding=1),
-            nn.SiLU(),
-            conv_nd(dims, 160, 160, 3, padding=1, stride=4),
-            nn.SiLU(),
-            conv_nd(dims, 160, 80, 3, padding=1),
-            nn.SiLU(),
-            conv_nd(dims, 80, 80, 3, padding=1, stride=2),
-            nn.SiLU(),
-            zero_module(conv_nd(dims, 80, 80, 3, padding=1)),
-            nn.SiLU(),
-        )
+        # self.global_emb_conv = nn.Sequential(
+        #     conv_nd(dims, 320, 160, 3, padding=1),
+        #     nn.SiLU(),
+        #     conv_nd(dims, 160, 160, 3, padding=1, stride=4),
+        #     nn.SiLU(),
+        #     conv_nd(dims, 160, 80, 3, padding=1),
+        #     nn.SiLU(),
+        #     conv_nd(dims, 80, 80, 3, padding=1, stride=2),
+        #     nn.SiLU(),
+        #     zero_module(conv_nd(dims, 80, 80, 3, padding=1)),
+        #     nn.SiLU(),
+        # )
 
-        self.global_emb_zero_mlp = zero_module(linear(time_embed_dim, time_embed_dim))
+        # version proposed by author
+        #  mlp1
+        self.zero_mlp1 = zero_module(linear(time_embed_dim, model_channels))
+
+        #  mlp2
+
+        conv_1x1 = nn.Sequential(
+            nn.Conv2d(model_channels, time_embed_dim , kernel_size=1),
+            nn.SiLU(),
+            nn.Conv2d(time_embed_dim, time_embed_dim, kernel_size=1),
+        )
+        self.zero_mlp2 = zero_module(conv_1x1)
 
 
 
 
         # add camera embd
         if camera_dim is not None:
-            self.camera_embed_pre = nn.Sequential(
-                linear(12, camera_dim),
-            )
+            # self.camera_embed_pre = nn.Sequential(
+            #     linear(12, camera_dim),
+            # )
 
             self.camera_embed = nn.Sequential(
                 linear(camera_dim, time_embed_dim),
@@ -558,8 +569,10 @@ class MultiViewControlNet(nn.Module):
             nn.SiLU(),
             conv_nd(dims, 96, 256, 3, padding=1, stride=2),
             nn.SiLU(),
-            # zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+            zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
         )
+
+        # B , 320 , 32 , 32
 
         self.hint_mixed_conv_out = TimestepEmbedSequential(
             zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
@@ -694,6 +707,9 @@ class MultiViewControlNet(nn.Module):
         t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
         emb = self.time_embed(t_emb)
 
+
+        DEBUG = True
+
         if DEBUG:
             print("\n\n\n hint original shape: " , hint.shape)
 
@@ -708,7 +724,7 @@ class MultiViewControlNet(nn.Module):
         if camera is not None:
             # check batch size
             assert camera.shape[0] == emb.shape[0]
-            camera = self.camera_embed_pre(camera)
+            # camera = self.camera_embed_pre(camera)
             emb = emb + self.camera_embed(camera)
 
         # print("\n camera + t  embedding shape is : ", emb.shape)
@@ -716,7 +732,7 @@ class MultiViewControlNet(nn.Module):
 
         emb = self.zero_mlp1(emb)
 
-        # print("\n zero mlp1 emb : ", emb.shape)
+        print("\n zero mlp1 emb : ", emb.shape)
 
         #--------------v2------------------
         # gh0,gh1,gh2,gh3 = guided_hint.shape
@@ -727,12 +743,12 @@ class MultiViewControlNet(nn.Module):
 
         # V3 repeat emb for num_channel times
 
-        repeat_shape = 256
 
-        emb = emb[:,None,:]
-        # print("\n emb add 1 dim : ", emb.shape)
-        emb = emb.repeat(1,repeat_shape,1)
-        # print("\n emb repeat 256 times : ", emb.shape)
+
+        emb = emb[:,:,None,None]
+        print("\n emb add 2 dim : ", emb.shape)
+        emb = emb.repeat(1,1,self.model_channels,self.model_channels)
+        print("\n emb repeat model channels times : ", emb.shape)
         emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
         # print("\n emb rearrange to match image size  : ", emb.shape)
 
