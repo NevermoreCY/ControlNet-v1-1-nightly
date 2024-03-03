@@ -252,7 +252,7 @@ class BasicTransformerBlock(nn.Module):
                  disable_self_attn=False):
         super().__init__()
         attn_mode = "softmax-xformers" if XFORMERS_IS_AVAILBLE else "softmax"
-        print("XFORMER IS AVAILABLE ？ : " ,XFORMERS_IS_AVAILBLE)
+        # print("XFORMER IS AVAILABLE ？ : " ,XFORMERS_IS_AVAILBLE)
         assert attn_mode in self.ATTENTION_MODES
         attn_cls = self.ATTENTION_MODES[attn_mode]
         self.disable_self_attn = disable_self_attn
