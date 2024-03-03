@@ -732,7 +732,7 @@ class MultiViewControlNet(nn.Module):
 
         emb = self.zero_mlp1(emb)
 
-        print("\n zero mlp1 emb : ", emb.shape)
+        # print("\n zero mlp1 emb : ", emb.shape)
 
         #--------------v2------------------
         # gh0,gh1,gh2,gh3 = guided_hint.shape
@@ -746,17 +746,17 @@ class MultiViewControlNet(nn.Module):
 
 
         emb = emb[:,:,None,None]
-        print("\n emb add 2 dim : ", emb.shape)
+        # print("\n emb add 2 dim : ", emb.shape)
         emb = emb.repeat(1,1,self.image_size,self.image_size)
-        print("\n emb repeat model channels times : ", emb.shape)
+        # print("\n emb repeat model channels times : ", emb.shape)
         # emb = rearrange(emb, "b c (h w) -> b c h w", h=self.image_size,w=self.image_size).contiguous()
         # print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
         local_emb = cond_with_camera_t
@@ -766,14 +766,14 @@ class MultiViewControlNet(nn.Module):
         global_emb = self.zero_mlp2(cond_with_camera_t)
 
         # global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
+        # print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
         # global_emb = self.zero_mlp2(global_emb)
 
         # v4
         global_emb = rearrange(global_emb, "b c h w -> b c (h w)").contiguous()
-        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
         global_emb = torch.sum(global_emb, dim=2)
-        print("\n glob  emb after sum up : ", global_emb.shape)
+        # print("\n glob  emb after sum up : ", global_emb.shape)
 
 
 
