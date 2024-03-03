@@ -133,17 +133,8 @@ for k in pretrained_weights_control.keys():
     target_dict[k] = pretrained_weights_control[k].clone()
 # second copy control net v1.1 parameters
 for k in pretrained_weights_control2.keys():
-    if 'control_model.input_hint_block.14.' in k:
-        print("hint block 14 in control net V 1.1!, copy it")
-        prefix_l = len('control_model.input_hint_block.14.')
-        sufix = k[prefix_l:]
-        print('sufix:', sufix)
-        target_pre = 'control_model.hint_mixed_conv_out.0.'
-        target_key = target_pre + sufix
-        print("TO : ", target_key)
-        target_dict[target_key] = pretrained_weights_control2[k].clone()
-    else:
-        target_dict[k] = pretrained_weights_control2[k].clone()
+    target_dict[k] = pretrained_weights_control2[k].clone()
+
 # copy mvd
 for k in pretrained_weights_mvd.keys():
 
