@@ -812,7 +812,7 @@ class ControlLDM(LatentDiffusion):
             print("\n\n\n Before rearrange: control shape is ", control.shape )  # torch.Size([160, 3, 256, 256])
             print("\n shape of T is ", T.shape)     # torch.Size([40,4, 3, 4])
 
-        T = rearrange(T, "b f h w -> (b f) (h w)").contiguous()
+        T = rearrange(T, "b f x -> (b f) x").contiguous()
         control = rearrange(control, "b f h w c -> (b f) h w c").contiguous()
 
         if DEBUG:
