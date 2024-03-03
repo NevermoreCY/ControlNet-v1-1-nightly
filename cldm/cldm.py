@@ -575,7 +575,7 @@ class MultiViewControlNet(nn.Module):
         # B , 320 , 32 , 32
 
         self.hint_mixed_conv_out = TimestepEmbedSequential(
-            zero_module(conv_nd(dims, 256, model_channels, 3, padding=1))
+            zero_module(conv_nd(dims, model_channels, model_channels, 3, padding=1))
         )
 
         # self.channel_compress = TimestepEmbedSequential(
@@ -753,23 +753,27 @@ class MultiViewControlNet(nn.Module):
         # print("\n emb rearrange to match image size  : ", emb.shape)
 
         cond_with_camera_t = guided_hint + emb
-        # print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
+        print("\n cond_with_camera_t rearrange : ", cond_with_camera_t.shape)
 
         cond_with_camera_t = self.hint_mixed_conv_out(cond_with_camera_t,emb,context)
-        # print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
+        print("\n ~~cond_with_camera_t conv out : ", cond_with_camera_t.shape)
         #  ~~cond_with_camera_t conv out :  torch.Size([120, 320, 32, 32])
 
-        global_emb = self.global_emb_conv(cond_with_camera_t)
+        local_emb = cond_with_camera_t
+
+        # global_emb = self.global_emb_conv(cond_with_camera_t)
+
+        global_emb = self.zero_mlp2(cond_with_camera_t)
 
         # global_emb = rearrange(emb, "b c h w -> b (c h w)").contiguous()
-        # print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
+        print("\n zero mlp2 emb after global emb conv: ", global_emb.shape)
         # global_emb = self.zero_mlp2(global_emb)
 
         # v4
-        global_emb = rearrange(global_emb, "b c h w -> b (c h w)").contiguous()
-        # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
-        global_emb = self.global_emb_zero_mlp(global_emb)
-        # print("\n glob  emb after mlp2 : ", global_emb.shape)
+        global_emb = rearrange(global_emb, "b c h w -> b c (h w)").contiguous()
+        print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
+        global_emb = torch.sum(global_emb, dim=2)
+        print("\n glob  emb after sum up : ", global_emb.shape)
 
 
 
@@ -781,12 +785,12 @@ class MultiViewControlNet(nn.Module):
         # print("\n Context shape is : ", context.shape)
 
         for module, zero_conv in zip(self.input_blocks, self.zero_convs):
-            if cond_with_camera_t is not None:
+            if local_emb is not None:
                 h = module(h, global_emb, context)
 
                 # print('\n after first module, h shape is : ', h.shape)
-                h += cond_with_camera_t
-                cond_with_camera_t = None
+                h += local_emb
+                local_emb = None
             else:
                 h = module(h, global_emb, context)
             outs.append(zero_conv(h, global_emb, context))
