@@ -29,7 +29,7 @@ from packaging import version
 from pytorch_lightning.callbacks import ModelCheckpoint, Callback, LearningRateMonitor
 import time
 from pytorch_lightning.utilities import rank_zero_info
-
+from camera_utils import get_camera, get_camera_2d
 
 DEBUG=True
 @rank_zero_only
@@ -336,6 +336,9 @@ class ObjaverseData(Dataset):
         # version 1, merge two dataset
         data_choice = random.random()
 
+
+
+
         # first test single image
         # data_choice = 0.4
         # print("d_c: ", data_choice)
@@ -349,8 +352,8 @@ class ObjaverseData(Dataset):
                 #sample_name = 92031
 
                 target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name+'.jpg' ))
-                target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
-                target_RT = torch.tensor(target_RT)
+                # target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
+                # target_RT = torch.tensor(target_RT)
                 f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
                 prompt = f.readline()
                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
@@ -370,7 +373,7 @@ class ObjaverseData(Dataset):
 
 
                 data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
-                data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+                # data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
                 data_canny= torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
 
                 DEBUG =False
@@ -380,13 +383,14 @@ class ObjaverseData(Dataset):
                     print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
                     print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
                     print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
-                    print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
-                    print('\n data camera shape is :', data_camera.shape) # torch.Size([4, 3, 4])
+                    # print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
+                    # print('\n data camera shape is :', data_camera.shape) # torch.Size([4, 3, 4])
                     print('\n data_img shape is :',  data_img.shape) # torch.Size([4, 256, 256, 3])
 
 
 
-
+                data_camera = get_camera_2d(4, elevation=30)
+                print("\n data_camera 2d shape is : " , data_camera.shape, data_camera)
                 data["img"] = data_img
                 data["hint"] = data_canny
                 data["camera_pose"] = data_camera# actually the difference between two camera
@@ -400,8 +404,8 @@ class ObjaverseData(Dataset):
                 # filename = os.path.join(self.root_dir_2d, self.paths[index])
 
                 target_im = cv2.imread(os.path.join(self.root_dir_2d, sample_name + '.jpg'))
-                target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
-                target_RT = torch.tensor(target_RT)
+                # target_RT = np.load(os.path.join(self.root_dir_2d, 'fixed_camera.npy'))
+                # target_RT = torch.tensor(target_RT)
                 f = open(os.path.join(self.root_dir_2d, '%09d.txt' % sample_index), 'r')
                 prompt = f.readline()
                 target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
@@ -419,7 +423,7 @@ class ObjaverseData(Dataset):
                 target_im = torch.tensor(target_im)
 
                 data_img = torch.stack((target_im, target_im, target_im, target_im), dim=0)
-                data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
+                # data_camera = torch.stack((target_RT, target_RT, target_RT, target_RT), dim=0)
                 data_canny = torch.stack((canny_r, canny_r, canny_r, canny_r), dim=0)
 
                 DEBUG = False
@@ -429,9 +433,12 @@ class ObjaverseData(Dataset):
                     print("\n canny_r shape is ", canny_r.shape)  # torch.Size([256, 256, 3])
                     print("\n prompt is ", prompt)  # An elephant with tusks stands in some tall brush.
                     print("\n target_im sum is ", torch.sum(target_im))  # target_im sum is  tensor(50502.2266)
-                    print('\n camera shape is :', target_RT.shape)  # torch.Size([3, 4])
-                    print('\n data camera shape is :', data_camera.shape)  # torch.Size([4, 3, 4])
+                    # print('\n camera shape is :', target_RT.shape)  # torch.Size([3, 4])
+                    # print('\n data camera shape is :', data_camera.shape)  # torch.Size([4, 3, 4])
                     print('\n data_img shape is :', data_img.shape)  # torch.Size([4, 256, 256, 3])
+
+                data_camera = get_camera_2d(4, elevation=30)
+                print("\n data_camera 2d shape is : ", data_camera.shape , data_camera)
 
                 data["img"] = data_img
                 data["hint"] = data_canny
@@ -458,8 +465,8 @@ class ObjaverseData(Dataset):
 
                 for i in range(total_view):
 
-                    target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
-                    target_RT = torch.tensor(target_RT)
+                    # target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                    # target_RT = torch.tensor(target_RT)
 
                     target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
                     target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
@@ -483,12 +490,13 @@ class ObjaverseData(Dataset):
                     target_im = torch.tensor(target_im)
 
                     img_list.append(target_im)
-                    camera_list.append(target_RT)
+                    # camera_list.append(target_RT)
                     text_list.append(prompt)
 
-
+                data_camera = get_camera(4, elevation=30)
+                print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
                 data["img"] = torch.stack(img_list, dim=0)
-                data["camera_pose"] =  torch.stack(camera_list, dim=0)
+                data["camera_pose"] =  data_camera
                 data["txt"] = prompt
             except:
 
@@ -507,8 +515,8 @@ class ObjaverseData(Dataset):
 
                 for i in range(total_view):
 
-                    target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
-                    target_RT = torch.tensor(target_RT)
+                    # target_RT = np.load(os.path.join(filename, '%03d.npy' % i))
+                    # target_RT = torch.tensor(target_RT)
 
                     target_im = cv2.imread(os.path.join(filename, '%03d.png' % i))
                     target_im = cv2.cvtColor(target_im, cv2.COLOR_BGR2RGB)
@@ -531,11 +539,13 @@ class ObjaverseData(Dataset):
                     target_im = torch.tensor(target_im)
 
                     img_list.append(target_im)
-                    camera_list.append(target_RT)
+                    # camera_list.append(target_RT)
                     text_list.append(prompt)
 
+                data_camera = get_camera(4, elevation=30)
+                print("\n data_camera 3d shape is : ", data_camera.shape, data_camera)
                 data["img"] = torch.stack(img_list, dim=0)
-                data["camera_pose"] = torch.stack(camera_list, dim=0)
+                data["camera_pose"] = data_camera
                 data["txt"] = prompt
 
             DEBUG=False
@@ -545,8 +555,8 @@ class ObjaverseData(Dataset):
                 print("\n canny_r shape is ", canny_r.shape) #  torch.Size([256, 256, 3])
                 print("\n prompt is ", prompt)   # An elephant with tusks stands in some tall brush.
                 print("\n target_im sum is ", torch.sum(target_im)) # target_im sum is  tensor(50502.2266)
-                print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
-                print('\n data camera shape is :', data['camera_pose'].shape) # torch.Size([4, 3, 4])
+                # print('\n camera shape is :', target_RT.shape) # torch.Size([3, 4])
+                # print('\n data camera shape is :', data['camera_pose'].shape) # torch.Size([4, 3, 4])
                 print('\n data_img shape is :',  data['img'].shape) # torch.Size([4, 256, 256, 3])
 
         return data
