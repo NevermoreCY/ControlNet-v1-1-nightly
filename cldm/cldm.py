@@ -806,6 +806,8 @@ class ControlLDM(LatentDiffusion):
         # get camera info
         T = batch['camera_pose'].to(memory_format=torch.contiguous_format).float()
 
+        DEBUG=True
+
         if DEBUG:
             print("\n\n\n Before rearrange: control shape is ", control.shape )  # torch.Size([160, 3, 256, 256])
             print("\n shape of T is ", T.shape)     # torch.Size([40,4, 3, 4])
