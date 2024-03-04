@@ -70,105 +70,79 @@ control3D_key = list(control3D_dict.keys())
 print(len(control_key) , len(control_key2), len(mvd_key), len(control3D_dict))
 
 
+print('\n\n\n\n\n\n  in mvd, not in con3d')
+for item in mvd_key:
+    print(item, pretrained_weights_mvd[item].shape)
+
 print('\n\n\n\n\n\n  in control3d, not in mvd')
 for item in control3D_key:
     if item not in mvd_key:
-        print(item)
-
-# need to copy from : MVD
-# model.diffusion_model.camera_embed.0.weight
-# model.diffusion_model.camera_embed.0.bias
-# model.diffusion_model.camera_embed.2.weight
-# model.diffusion_model.camera_embed.2.bias
-# model.diffusion_model.time_embed.0.weight
-# model.diffusion_model.time_embed.0.bias
-# model.diffusion_model.time_embed.2.weight
-# model.diffusion_model.time_embed.2.bias
-
-#to
-
-# control_model.camera_embed.0.weight
-# control_model.camera_embed.0.bias
-# control_model.camera_embed.2.weight
-# control_model.camera_embed.2.bias
-# control_model.time_embed.0.weight
-# control_model.time_embed.0.bias
-# control_model.time_embed.2.weight
-# control_model.time_embed.2.bias
-# control_model.zero_mlp1.0.weight
-
-
-# From control net
-# control_model.input_hint_block.14.weight
-# control_model.input_hint_block.14.bias
-# to
-# control_model.hint_mixed_conv_out.0.weight
-# control_model.hint_mixed_conv_out.0.bias
-
-
+        print(item, control3D_dict[item].shape)
 
 print('\n\n\n\n\n\n  in control3d, not in control')
 for item in control3D_key:
     if item not in control_key:
-        print(item)
+        print(item, control3D_dict[item].shape )
 
 print('\n\n\n\n\n\n  in mvd, not in con3d')
 for item in mvd_key:
     if item not in control3D_key:
-        print(item)
+        print(item, pretrained_weights_mvd[item].shape)
 
 
 print('\n\n\n\n\n\n  in con, not in con3d')
 for item in control_key:
     if item not in control3D_key:
-        print(item)
+        print(item, pretrained_weights_control[item].shape)
 
 
-target_dict = {}
-# 0th step copy original weights, these are all the keys we nedd
-for k in control3D_dict.keys():
-    target_dict[k] = control3D_dict[k].clone()
-# First copy control net v1.0 parameters
-for k in pretrained_weights_control.keys():
-    target_dict[k] = pretrained_weights_control[k].clone()
-# second copy control net v1.1 parameters
-for k in pretrained_weights_control2.keys():
-    target_dict[k] = pretrained_weights_control2[k].clone()
+
+
+# target_dict = {}
+# # 0th step copy original weights, these are all the keys we nedd
+# for k in control3D_dict.keys():
+#     target_dict[k] = control3D_dict[k].clone()
+# # First copy control net v1.0 parameters
+# for k in pretrained_weights_control.keys():
+#     target_dict[k] = pretrained_weights_control[k].clone()
+# # second copy control net v1.1 parameters
+# for k in pretrained_weights_control2.keys():
+#     target_dict[k] = pretrained_weights_control2[k].clone()
 
 # copy mvd
-for k in pretrained_weights_mvd.keys():
+# for k in pretrained_weights_mvd.keys():
+#
+#     if ('model.diffusion_model.time_embed.' in k):
+#         print("time in MVD!, copy it")
+#         prefix_l = len('model.diffusion_model.time_embed.')
+#         sufix = k[prefix_l:]
+#         print('sufix:', sufix)
+#         target_pre = 'control_model.time_embed.'
+#         target_key = target_pre + sufix
+#         print("TO : " , target_key)
+#         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+#     elif ('model.diffusion_model.camera_embed.' in k):
+#         print("camera in MVD!, copy it")
+#         prefix_l = len('model.diffusion_model.camera_embed.')
+#         sufix = k[prefix_l:]
+#         print('sufix:', sufix)
+#         target_pre = 'control_model.camera_embed.'
+#         target_key = target_pre + sufix
+#         print("TO : ", target_key)
+#         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+#
+#
+#     else:
+#         target_dict[k] = pretrained_weights_mvd[k].clone()
+#
+#
+# to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_model.time_embed.0.bias", "model.diffusion_model.time_embed.2.weight", "model.diffusion_model.time_embed.2.bias"]
+# for k in to_discard:
+#     target_dict.pop(k,None)
 
-    if ('model.diffusion_model.time_embed.' in k):
-        print("time in MVD!, copy it")
-        prefix_l = len('model.diffusion_model.time_embed.')
-        sufix = k[prefix_l:]
-        print('sufix:', sufix)
-        target_pre = 'control_model.time_embed.'
-        target_key = target_pre + sufix
-        print("TO : " , target_key)
-        target_dict[target_key] = pretrained_weights_mvd[k].clone()
-    elif ('model.diffusion_model.camera_embed.' in k):
-        print("camera in MVD!, copy it")
-        prefix_l = len('model.diffusion_model.camera_embed.')
-        sufix = k[prefix_l:]
-        print('sufix:', sufix)
-        target_pre = 'control_model.camera_embed.'
-        target_key = target_pre + sufix
-        print("TO : ", target_key)
-        target_dict[target_key] = pretrained_weights_mvd[k].clone()
 
-
-    else:
-        target_dict[k] = pretrained_weights_mvd[k].clone()
-
-
-to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_model.time_embed.0.bias", "model.diffusion_model.time_embed.2.weight", "model.diffusion_model.time_embed.2.bias"]
-for k in to_discard:
-    target_dict.pop(k,None)
-
-
-model.load_state_dict(target_dict, strict=True)
-torch.save(model.state_dict(), output_path)
-print('Done.')
+# model.load_state_dict(target_dict, strict=True)
+# torch.save(model.state_dict(), output_path)
+# print('Done.')
 
 
