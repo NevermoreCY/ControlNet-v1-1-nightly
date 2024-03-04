@@ -891,6 +891,7 @@ class ControlLDM(LatentDiffusion):
 
         log = dict()
         z, c = self.get_input(batch, self.first_stage_key, bs=N)
+        # z noised label image , c is control + camera + text
 
 
         DEBUG = True
@@ -952,6 +953,7 @@ class ControlLDM(LatentDiffusion):
                                              unconditional_conditioning=uc_full,
                                              )
             x_samples_cfg = self.decode_first_stage(samples_cfg)
+            print("\n\n x_samples_cfg shape is : ", x_samples_cfg.shape)
             log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = x_samples_cfg
 
         return log
