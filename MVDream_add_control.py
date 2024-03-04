@@ -4,7 +4,7 @@
 input_path_control = 'base_models/control_sd15_canny.pth'
 input_path_control2 = 'base_models/control_v11p_sd15_canny.pth'
 input_path_mvd = 'base_models/sd-v1.5-4view.pt'
-output_path = 'base_models/mvcontrol_base_v3.pt'
+output_path = 'base_models/mvcontrol_base_v4.pt'
 
 # assert os.path.exists(input_path_control), 'Input model does not exist.'
 # assert not os.path.exists(output_path), 'Output filename already exists.'
@@ -98,51 +98,70 @@ for item in control_key:
 
 
 
-# target_dict = {}
-# # 0th step copy original weights, these are all the keys we nedd
-# for k in control3D_dict.keys():
-#     target_dict[k] = control3D_dict[k].clone()
-# # First copy control net v1.0 parameters
-# for k in pretrained_weights_control.keys():
-#     target_dict[k] = pretrained_weights_control[k].clone()
-# # second copy control net v1.1 parameters
-# for k in pretrained_weights_control2.keys():
-#     target_dict[k] = pretrained_weights_control2[k].clone()
+target_dict = {}
+# 0th step copy original weights, these are all the keys we nedd
+for k in control3D_dict.keys():
+    target_dict[k] = control3D_dict[k].clone()
+# First copy control net v1.0 parameters
+for k in pretrained_weights_control.keys():
+    target_dict[k] = pretrained_weights_control[k].clone()
+# second copy control net v1.1 parameters
+for k in pretrained_weights_control2.keys():
+    target_dict[k] = pretrained_weights_control2[k].clone()
 
 # copy mvd
+for k in pretrained_weights_mvd.keys():
+
+    if ('model.diffusion_model.time_embed.' in k):
+        print("time in MVD!, copy it")
+        prefix_l = len('model.diffusion_model.time_embed.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.time_embed.'
+        target_key = target_pre + sufix
+        print("TO : " , target_key)
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
+    elif ('model.diffusion_model.camera_embed.' in k):
+        print("camera in MVD!, copy it")
+        prefix_l = len('model.diffusion_model.camera_embed.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.camera_embed.'
+        target_key = target_pre + sufix
+        print("TO : ", target_key)
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
+    elif ('model.diffusion_model.input_blocks.' in k):
+        print(" copy input block from ", k)
+        prefix_l = len('model.diffusion_model.input_blocks.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.input_blocks.'
+        target_key = target_pre + sufix
+        print("TO : ", target_key)
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
+    elif ('model.diffusion_model.middle_blocks.' in k):
+        print("copy middle block from ", k)
+        prefix_l = len('model.diffusion_model.middle_blocks.')
+        sufix = k[prefix_l:]
+        print('sufix:', sufix)
+        target_pre = 'control_model.middle_blocks.'
+        target_key = target_pre + sufix
+        print("TO : ", target_key)
+        target_dict[target_key] = pretrained_weights_mvd[k].clone()
+    else:
+        target_dict[k] = pretrained_weights_mvd[k].clone()
+
 # for k in pretrained_weights_mvd.keys():
-#
-#     if ('model.diffusion_model.time_embed.' in k):
-#         print("time in MVD!, copy it")
-#         prefix_l = len('model.diffusion_model.time_embed.')
-#         sufix = k[prefix_l:]
-#         print('sufix:', sufix)
-#         target_pre = 'control_model.time_embed.'
-#         target_key = target_pre + sufix
-#         print("TO : " , target_key)
-#         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-#     elif ('model.diffusion_model.camera_embed.' in k):
-#         print("camera in MVD!, copy it")
-#         prefix_l = len('model.diffusion_model.camera_embed.')
-#         sufix = k[prefix_l:]
-#         print('sufix:', sufix)
-#         target_pre = 'control_model.camera_embed.'
-#         target_key = target_pre + sufix
-#         print("TO : ", target_key)
-#         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-#
-#
-#     else:
-#         target_dict[k] = pretrained_weights_mvd[k].clone()
-#
-#
-# to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_model.time_embed.0.bias", "model.diffusion_model.time_embed.2.weight", "model.diffusion_model.time_embed.2.bias"]
-# for k in to_discard:
-#     target_dict.pop(k,None)
 
 
-# model.load_state_dict(target_dict, strict=True)
-# torch.save(model.state_dict(), output_path)
-# print('Done.')
+to_discard = ["model.diffusion_model.time_embed.0.weight", "model.diffusion_model.time_embed.0.bias", "model.diffusion_model.time_embed.2.weight", "model.diffusion_model.time_embed.2.bias"]
+for k in to_discard:
+    target_dict.pop(k,None)
 
 
+model.load_state_dict(target_dict, strict=True)
+torch.save(model.state_dict(), output_path)
+print('Done.')
+
+
+#
