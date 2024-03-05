@@ -950,6 +950,16 @@ class ImageLogger(Callback):
             os.makedirs(os.path.split(path)[0], exist_ok=True)
             Image.fromarray(grid).save(path)
 
+            # extra image save
+            if 'samples_cfg_scale' in k:
+                print("extra debugging save : ", k )
+                x_samples = images[k]
+                print(type(x_samples))
+                print(x_samples.shape)
+                # print()
+
+
+
     def log_img(self, pl_module, batch, batch_idx, split="train"):
         check_idx = batch_idx if self.log_on_batch_idx else pl_module.global_step
         if self.log_all_val and split == "val":
