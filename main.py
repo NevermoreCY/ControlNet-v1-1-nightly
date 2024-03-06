@@ -954,9 +954,24 @@ class ImageLogger(Callback):
             if 'samples_cfg_scale' in k:
                 print("extra debugging save : ", k )
                 x_samples = images[k]
-                print(type(x_samples))
-                print(x_samples.shape)
+                # print(type(x_samples))
+                # print(x_samples.shape)
+                #  x_samples_cfg shape is :  torch.Size([B*4, 3, 256, 256])
                 # print()
+                x_sample = torch.clamp((x_sample + 1.0) / 2.0, min=0.0, max=1.0)
+                x_sample = 255. * x_sample.permute(0, 2, 3, 1).cpu().numpy()
+                img = np.concatenate(x_sample, 1)
+                images.append(img)
+                images = np.concatenate(images, 0)
+
+                filename = "DEBUGING_{}_gs-{:06}_e-{:06}_b-{:06}.png".format(
+                    k,
+                    global_step,
+                    current_epoch,
+                    batch_idx)
+
+                Image.fromarray(images).save(filename)
+
 
 
 
