@@ -960,6 +960,7 @@ class ImageLogger(Callback):
                 # print()
                 x_sample = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
                 x_sample = 255. * x_sample.permute(0, 2, 3, 1).cpu().numpy()
+                x_sample = list(x_sample.astype(np.uint8))
                 img = np.concatenate(x_sample, 1)
                 images_mvd = []
                 images_mvd.append(img)
