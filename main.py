@@ -958,7 +958,7 @@ class ImageLogger(Callback):
                 # print(x_samples.shape)
                 #  x_samples_cfg shape is :  torch.Size([B*4, 3, 256, 256])
                 # print()
-                x_sample = torch.clamp((x_sample + 1.0) / 2.0, min=0.0, max=1.0)
+                x_sample = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
                 x_sample = 255. * x_sample.permute(0, 2, 3, 1).cpu().numpy()
                 img = np.concatenate(x_sample, 1)
                 images.append(img)
