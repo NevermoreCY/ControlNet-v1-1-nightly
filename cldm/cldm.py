@@ -953,7 +953,8 @@ class ControlLDM(LatentDiffusion):
                                              unconditional_conditioning=uc_full,
                                              )
             x_samples_cfg = self.decode_first_stage(samples_cfg)
-            print("\n\n x_samples_cfg shape is : ", x_samples_cfg.shape)
+            # print("\n\n x_samples_cfg shape is : ", x_samples_cfg.shape)
+            #  x_samples_cfg shape is :  torch.Size([32, 3, 256, 256])
             log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = x_samples_cfg
 
         return log
