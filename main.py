@@ -961,8 +961,9 @@ class ImageLogger(Callback):
                 x_sample = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
                 x_sample = 255. * x_sample.permute(0, 2, 3, 1).cpu().numpy()
                 img = np.concatenate(x_sample, 1)
-                images.append(img)
-                images = np.concatenate(images, 0)
+                images_mvd = []
+                images_mvd.append(img)
+                images_mvd = np.concatenate(images_mvd, 0)
 
                 filename = "DEBUGING_{}_gs-{:06}_e-{:06}_b-{:06}.png".format(
                     k,
@@ -970,7 +971,7 @@ class ImageLogger(Callback):
                     current_epoch,
                     batch_idx)
 
-                Image.fromarray(images).save(filename)
+                Image.fromarray(images_mvd).save(filename)
 
 
 
