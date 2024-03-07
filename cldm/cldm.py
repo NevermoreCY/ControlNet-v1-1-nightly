@@ -725,12 +725,12 @@ class MultiViewControlNet(nn.Module):
             # check batch size
             assert camera.shape[0] == emb.shape[0]
             # camera = self.camera_embed_pre(camera)
-            emb = emb + self.camera_embed(camera)
+            emb_res = emb + self.camera_embed(camera)
 
         # print("\n camera + t  embedding shape is : ", emb.shape)
         # camera + t  embedding shape is :  torch.Size([120, 1280])
 
-        emb = self.zero_mlp1(emb)
+        emb = self.zero_mlp1(emb_res)
 
         # print("\n zero mlp1 emb : ", emb.shape)
 
@@ -774,6 +774,9 @@ class MultiViewControlNet(nn.Module):
         # print("\n zero mlp2 emb after rearrange : ", global_emb.shape)
         global_emb = torch.sum(global_emb, dim=2)
         # print("\n glob  emb after sum up : ", global_emb.shape)
+
+        # residule for emb
+        global_emb = global_emb + emb_res
 
 
 
