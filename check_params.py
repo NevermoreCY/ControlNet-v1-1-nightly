@@ -3,6 +3,7 @@
 
 
 m_path = 'base_models/mvcontrol_base_v2.pt'
+m_path = '/yuch_ws/TripoSR/model.ckpt'
 
 # assert os.path.exists(input_path_control), 'Input model does not exist.'
 # assert not os.path.exists(output_path), 'Output filename already exists.'
