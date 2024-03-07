@@ -4,7 +4,7 @@
 input_path_control = 'base_models/control_sd15_canny.pth'
 input_path_control2 = 'base_models/control_v11p_sd15_canny.pth'
 input_path_mvd = 'base_models/sd-v1.5-4view.pt'
-output_path = 'base_models/mvcontrol_base_v4.pt'
+output_path = 'base_models/mvcontrol_base_v0.pt'
 
 # assert os.path.exists(input_path_control), 'Input model does not exist.'
 # assert not os.path.exists(output_path), 'Output filename already exists.'
