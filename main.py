@@ -971,9 +971,10 @@ class ImageLogger(Callback):
                     global_step,
                     current_epoch,
                     batch_idx)
+                path = os.path.join(root,filename)
                 print("\n\n\n DEBUG Images type is ", type(images_mvd))
                 print("\n\n images shape is ", images_mvd.shape)
-                Image.fromarray(images_mvd).save(filename)
+                Image.fromarray(images_mvd).save(path)
 
 
 
