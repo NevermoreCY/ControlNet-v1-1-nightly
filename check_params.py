@@ -1,5 +1,5 @@
 
-trained_weight_path = 'base_models/sd-v1.5-4view.pt'
+trained_weight_path = 'logs/2024-03-12T02-41-07_MVD_cfg9_control3D_trainv4/checkpoints/epoch=9-step=15599.ckpt'
 pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
 
 import torch
