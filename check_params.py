@@ -15,16 +15,12 @@ def get_node_name(name, parent_name):
         return False, ''
     return True, name[len(parent_name):]
 
-# load pretrained A
-pretrained_weights_control = torch.load(pretrained_weight_path)
 
-if 'state_dict' in pretrained_weights_control:
-    pretrained_weights_control = pretrained_weights_control['state_dict']
 
 
 # load trained B
 
-pretrained_weights = torch.load(trained_weight_path)
+pretrained_weights = torch.load(pretrained_weight_path)
 
 if 'state_dict' in pretrained_weights:
     pretrained_weights = pretrained_weights['state_dict']
