@@ -55,14 +55,14 @@ for item in pretrained_key:
     pre_item = pretrained_weights[item]
     trained_item = trained_weights[item]
 
-    # diff = pre_item - trained_item
-    # x = torch.sum(diff)
+    diff = pre_item - trained_item
+    x = torch.sum(diff)
     item_shape = pre_item.shape
     totral_param = 1
     for num in item_shape:
         totral_param *= num
     print(item , pre_item.shape )
-    # print("\n" , totral_param,x )
+    print("\n" , totral_param,x )
     print(pre_item[0:10], trained_item[0:10])
 
     # print(item, pretrained_weights_mvd[item].shape)
