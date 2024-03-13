@@ -39,8 +39,8 @@ if 'state_dict' in trained_weights:
 print(type(pretrained_weights))
 
 print(type(trained_weights))
-#pretrained_weights.to(cuda0)
-#trained_weights.to(cuda0)
+pretrained_weights.to(cuda0)
+trained_weights.to(cuda0)
 
 
 
