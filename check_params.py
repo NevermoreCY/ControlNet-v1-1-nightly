@@ -21,7 +21,7 @@ def get_node_name(name, parent_name):
 cuda0 = torch.device('cuda:0')
 # load trained B
 
-pretrained_weights = torch.load(pretrained_weight_path,map_location=c)
+pretrained_weights = torch.load(pretrained_weight_path)
 print(type(pretrained_weights) )
 
 if 'state_dict' in pretrained_weights:
