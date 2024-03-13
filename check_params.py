@@ -54,8 +54,8 @@ for item in pretrained_key:
     pre_item = pretrained_weights[item]
     trained_item = trained_weights[item]
 
-    diff = pre_item - trained_item
-    x = torch.sum(diff)
+    # diff = pre_item - trained_item
+    # x = torch.sum(diff)
     item_shape = pre_item.shape
     totral_param = 1
     for num in item_shape:
