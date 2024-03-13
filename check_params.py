@@ -21,7 +21,7 @@ def get_node_name(name, parent_name):
 cuda0 = torch.device('cuda:0')
 # load trained B
 
-pretrained_weights = torch.load(pretrained_weight_path)
+pretrained_weights = torch.load(pretrained_weight_path,map_location=c)
 print(type(pretrained_weights) )
 
 if 'state_dict' in pretrained_weights:
@@ -61,7 +61,7 @@ for item in pretrained_key:
     totral_param = 1
     for num in item_shape:
         totral_param *= num
-    # print(item , pre_item.shape )
+    print(item , pre_item.shape )
     # print("\n" , totral_param,x )
     print(pre_item, trained_item)
 
