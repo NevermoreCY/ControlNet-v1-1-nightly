@@ -776,7 +776,7 @@ class MultiViewControlNet(nn.Module):
         # print("\n glob  emb after sum up : ", global_emb.shape)
 
         # residule for emb
-        global_emb = global_emb + emb_res
+        # global_emb = global_emb + emb_res
 
 
 
