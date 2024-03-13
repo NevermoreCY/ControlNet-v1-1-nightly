@@ -39,8 +39,8 @@ if 'state_dict' in trained_weights:
 print(type(pretrained_weights))
 
 print(type(trained_weights))
-pretrained_weights.to(cuda0)
-trained_weights.to(cuda0)
+# pretrained_weights.to(cuda0)
+# trained_weights.to(cuda0)
 
 
 
@@ -53,6 +53,9 @@ for item in pretrained_key:
 
     pre_item = pretrained_weights[item]
     trained_item = trained_weights[item]
+
+    pre_item.to(cuda0)
+    trained_item.to(cuda0)
 
     same_item = (pre_item == trained_item)
     x = torch.sum(same_item)
