@@ -21,6 +21,7 @@ cuda0 = torch.device('cuda:0')
 # load trained B
 
 pretrained_weights = torch.load(pretrained_weight_path)
+print(type(pretrained_weights))
 
 if 'state_dict' in pretrained_weights:
     pretrained_weights = pretrained_weights['state_dict']
@@ -28,13 +29,14 @@ if 'state_dict' in pretrained_weights:
 # load c
 
 trained_weights = torch.load(trained_weight_path)
+print(type(trained_weights))
 
 if 'state_dict' in trained_weights:
-    trained_weights = trained_weights['state_dict']
+    trained_weights = trained_weights['state_dict'][0]
 
-print(type(pretrained_weights) , pretrained_weights)
+print(type(pretrained_weights))
 
-print(type(trained_weights), trained_weights)
+print(type(trained_weights))
 #pretrained_weights.to(cuda0)
 #trained_weights.to(cuda0)
 
