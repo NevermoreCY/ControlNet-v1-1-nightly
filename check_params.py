@@ -32,8 +32,13 @@ trained_weights = torch.load(trained_weight_path)
 if 'state_dict' in trained_weights:
     trained_weights = trained_weights['state_dict']
 
-pretrained_weights.to(cuda0)
-trained_weights.to(cuda0)
+print(type(pretrained_weights) , pretrained_weights)
+
+print(type(trained_weights), trained_weights)
+#pretrained_weights.to(cuda0)
+#trained_weights.to(cuda0)
+
+
 
 pretrained_key = list(pretrained_weights.keys())
 trained_key = list(trained_weights.keys()) # note all item in control_key2 are also included in control_key
