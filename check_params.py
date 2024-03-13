@@ -63,6 +63,7 @@ for item in pretrained_key:
     print(item , pre_item.shape )
     print("\n" , totral_param,x )
 
+
     # print(item, pretrained_weights_mvd[item].shape)
 #
 # print('\n\n\n\n\n\n  in control3d, not in mvd')
