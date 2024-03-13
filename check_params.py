@@ -54,11 +54,8 @@ for item in pretrained_key:
     pre_item = pretrained_weights[item]
     trained_item = trained_weights[item]
 
-    pre_item.to(cuda0)
-    trained_item.to(cuda0)
-
-    same_item = (pre_item == trained_item)
-    x = torch.sum(same_item)
+    diff = pre_item - trained_item
+    x = torch.sum(diff)
     item_shape = pre_item.shape
     totral_param = 1
     for num in item_shape:
