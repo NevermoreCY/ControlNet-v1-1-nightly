@@ -17,7 +17,7 @@ def get_node_name(name, parent_name):
 
 
 
-
+cuda0 = torch.device('cuda:0')
 # load trained B
 
 pretrained_weights = torch.load(pretrained_weight_path)
@@ -32,6 +32,8 @@ trained_weights = torch.load(trained_weight_path)
 if 'state_dict' in trained_weights:
     trained_weights = trained_weights['state_dict']
 
+pretrained_weights.to(cuda0)
+trained_weights.to(cuda0)
 
 pretrained_key = list(pretrained_weights.keys())
 trained_key = list(trained_weights.keys()) # note all item in control_key2 are also included in control_key
