@@ -40,16 +40,21 @@ if 'state_dict' in trained_weights:
 pretrained_key = list(pretrained_weights.keys())
 trained_key = list(trained_weights.keys()) # note all item in control_key2 are also included in control_key
 
+print("loading done ! ")
 
 for item in pretrained_key:
 
     pre_item = pretrained_weights[item]
     trained_item = trained_weights[item]
 
-    same_item = pre_item == trained_item
+    same_item = (pre_item == trained_item)
     x = torch.sum(same_item)
-
-    print(item , pre_item.shape , x)
+    item_shape = pre_item.shape
+    totral_param = 1
+    for num in item_shape:
+        totral_param *= num
+    print(item , pre_item.shape, same_item )
+    print("\n" , totral_param,x )
 
     # print(item, pretrained_weights_mvd[item].shape)
 #
