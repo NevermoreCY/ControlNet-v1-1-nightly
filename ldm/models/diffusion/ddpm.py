@@ -1402,7 +1402,7 @@ class LatentDiffusion(DDPM):
         if self.learn_logvar:
             print('Diffusion model optimizing logvar')
             params.append(self.logvar)
-        print("*** parameters to optimize is ", params)
+        print("\n\n\n\n\n ATTENTION we call optimizer in DDPM *** parameters to optimize is ", params)
         opt = torch.optim.AdamW(params, lr=lr)
         # opt = torch.optim.AdamW([{"params": self.model.parameters(), "lr": lr},
         #                          {"params": self.cc_projection.parameters(), "lr": 10. * lr}], lr=lr)
