@@ -1306,16 +1306,18 @@ class ControlLDM(LatentDiffusion):
                 # print('\n Found camera model ')
                 model_dict[k].requires_grad = False
                 # print(model_dict[k])
+                params.append(model_dict[k])
             else:
                 DEBUG=True
 
-                if DEBUG:
+                # if DEBUG:
+                #     print("\n\n Before set ", k , model_dict[k].requires_grad)
 
-                    print("\n\n Before set ", k , model_dict[k].requires_grad)
                 model_dict[k].requires_grad = True
 
-                if DEBUG:
-                    print("\n\n After set ", k , model_dict[k].requires_grad)
+                # if DEBUG:
+                #     print("\n\n After set ", k , model_dict[k].requires_grad)
+
                 params.append(model_dict[k])
 
         # print(len(params) , len(params1))
