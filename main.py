@@ -1554,7 +1554,7 @@ if __name__ == "__main__":
             print("not lightning_config.get : ", not lightning_config.get("find_unused_parameters", True))
             from pytorch_lightning.plugins import DDPPlugin
 
-            trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=True))
+            trainer_kwargs["plugins"].append(DDPPlugin(find_unused_parameters=False))
 
         from pytorch_lightning.plugins import DDPPlugin
         # save ckpt every n steps:
