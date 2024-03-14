@@ -13,8 +13,8 @@ pretrained_weight_path = 'base_models/mvcontrol_base_v5.pt'
 cuda0 = torch.device('cuda:0')
 # load trained B
 
-# pretrained_weights = torch.load(pretrained_weight_path,map_location=cuda0)
-pretrained_weights = torch.load(pretrained_weight_path)
+pretrained_weights = torch.load(pretrained_weight_path,map_location=cuda0)
+# pretrained_weights = torch.load(pretrained_weight_path)
 print(type(pretrained_weights) )
 
 if 'state_dict' in pretrained_weights:
