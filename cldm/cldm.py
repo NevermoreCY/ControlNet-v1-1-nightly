@@ -1310,7 +1310,7 @@ class ControlLDM(LatentDiffusion):
         params += list(self.control_model.input_blocks.parameters())
         params += list(self.control_model.zero_mlp1.parameters())
         params += list(self.control_model.zero_mlp2.parameters())
-        params += list(self.control_model.zero_time_embed.parameters())
+        params += list(self.control_model.time_embed.parameters())
 
         # for k in model_dict.keys():
         #     # print('\n',k)
