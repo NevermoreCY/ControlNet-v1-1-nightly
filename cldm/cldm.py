@@ -1221,7 +1221,7 @@ class ControlLDM(LatentDiffusion):
         # z noised label image , c is control + camera + text
 
 
-        DEBUG = True
+        DEBUG = False
 
         if DEBUG:
             print('\n\n\n  !!camera: ', c['camera'])
