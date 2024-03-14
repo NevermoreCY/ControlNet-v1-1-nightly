@@ -160,8 +160,9 @@ for k in pretrained_weights_mvd.keys():
         target_dict[target_key].requires_grad = True
     else:
         print("\n ELSE case for ", k )
-        target_dict[k] = pretrained_weights_mvd[k].clone()
-        target_dict[k].requires_grad = True
+        if 'cond_stage_model' not in k:
+            target_dict[k] = pretrained_weights_mvd[k].clone()
+            target_dict[k].requires_grad = True
 
 # for k in pretrained_weights_mvd.keys():
 
