@@ -435,12 +435,12 @@ class DDPM(pl.LightningModule):
 
     def shared_step(self, batch):
         x = self.get_input(batch, self.first_stage_key)
-        print("\n\n\n shared_step get input done, now we call self to get loss!")
+        # print("\n\n\n shared_step get input done, now we call self to get loss!")
         loss, loss_dict = self(x)
         return loss, loss_dict
 
     def training_step(self, batch, batch_idx):
-        print(" \n\n\n *** Training step in ddpm , check ucg_training , this should be None! --ddpm.py line 433", self.ucg_training)
+        # print(" \n\n\n *** Training step in ddpm , check ucg_training , this should be None! --ddpm.py line 433", self.ucg_training)
         for k in self.ucg_training:  # this should be None
             p = self.ucg_training[k]["p"]
             val = self.ucg_training[k]["val"]
@@ -450,7 +450,7 @@ class DDPM(pl.LightningModule):
                 if self.ucg_prng.choice(2, p=[1 - p, p]):
                     batch[k][i] = val
 
-        print("\n\n\n Run a shared step to get loss!")
+        # print("\n\n\n Run a shared step to get loss!")
         loss, loss_dict = self.shared_step(batch)
 
         self.log_dict(loss_dict, prog_bar=True,
