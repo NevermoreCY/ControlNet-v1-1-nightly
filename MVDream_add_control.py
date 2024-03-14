@@ -180,9 +180,9 @@ for key in target_dict:
         print(item.requires_grad)
         target_dict[key].requires_grad =True
 
-# model.load_state_dict(target_dict, strict=True)
-# torch.save(model.state_dict(), output_path)
-# print('Done.')
+model.load_state_dict(target_dict, strict=True)
+torch.save(model.state_dict(), output_path)
+print('Done.')
 
 
 #
