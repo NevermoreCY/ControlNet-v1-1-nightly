@@ -3,7 +3,7 @@ import torch
 
 
 
-trained_weight_path = 'logs/2024-03-14T12-10-31_opt_res_control3D_trainv5/checkpoints/epoch=0-step=299.ckpt'
+trained_weight_path = 'logs/2024-03-14T15-08-08_opt_fix_3Donly_control3D_trainv5/checkpoints/epoch=0-step=99.ckpt'
 # trained_weight_path = 'logs/2024-03-14T08-54-34_res_control3D_trainv5/checkpoints/epoch=0-step=999.ckpt'
 pretrained_weight_path = 'base_models/mvcontrol_base_v5.pt'
 # pretrained_weight_path = 'logs/2024-03-14T08-54-34_res_control3D_trainv5/checkpoints/epoch=0-step=999.ckpt'
