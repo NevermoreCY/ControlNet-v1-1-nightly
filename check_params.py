@@ -5,16 +5,16 @@ import torch
 
 # trained_weight_path = 'logs/2024-03-14T08-19-47_res_control3D_trainv4/checkpoints/epoch=0-step=399.ckpt'
 trained_weight_path = 'logs/2024-03-14T08-54-34_res_control3D_trainv5/checkpoints/epoch=0-step=999.ckpt'
-pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
-# pretrained_weight_path = 'logs/2024-03-14T08-54-34_res_control3D_trainv5/checkpoints/epoch=0-step=999.ckpt'
+# pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
+pretrained_weight_path = 'logs/2024-03-14T08-54-34_res_control3D_trainv5/checkpoints/epoch=0-step=99.ckpt'
 # epoch=0-step=1199.ckpt
 
 
 cuda0 = torch.device('cuda:0')
 # load trained B
 
-pretrained_weights = torch.load(pretrained_weight_path,map_location=cuda0)
-# pretrained_weights = torch.load(pretrained_weight_path)
+# pretrained_weights = torch.load(pretrained_weight_path,map_location=cuda0)
+pretrained_weights = torch.load(pretrained_weight_path)
 print(type(pretrained_weights) )
 
 if 'state_dict' in pretrained_weights:
