@@ -3,9 +3,9 @@ import torch
 
 
 
-trained_weight_path = 'logs/2024-03-14T07-10-11_MVD_0314_control3D_trainv4/checkpoints/epoch=0-step=99.ckpt'
+trained_weight_path = 'logs/2024-03-14T08-19-47_res_control3D_trainv4/checkpoints/epoch=0-step=99.ckpt'
 # pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
-pretrained_weight_path = 'logs/2024-03-14T07-10-11_MVD_0314_control3D_trainv4/checkpoints/epoch=0-step=199.ckpt'
+pretrained_weight_path = 'logs/2024-03-14T08-19-47_res_control3D_trainv4/checkpoints/epoch=0-step=199.ckpt'
 # epoch=0-step=1199.ckpt
 
 
