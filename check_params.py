@@ -1,13 +1,14 @@
 
-trained_weight_path = 'logs/2024-03-14T03-50-24_MVD_no_res_3d_cfg9_control3D_trainv4/checkpoints/epoch=0-step=599.ckpt'
-pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
-# pretrained_weight_path = 'logs/2024-03-12T02-41-07_MVD_cfg9_control3D_trainv4/checkpoints/epoch=5-step=8999.ckpt'
-
 import torch
 # from share import *
 from cldm.model import create_model
 
 
+
+trained_weight_path = 'logs/2024-03-14T03-50-24_MVD_no_res_3d_cfg9_control3D_trainv4/checkpoints/epoch=0-step=599.ckpt'
+# pretrained_weight_path = 'base_models/mvcontrol_base_v4.pt'
+pretrained_weight_path = 'logs/2024-03-14T03-50-24_MVD_no_res_3d_cfg9_control3D_trainv4/checkpoints/epoch=0-step=1199.ckpt'
+# epoch=0-step=1199.ckpt
 def get_node_name(name, parent_name):
     if len(name) <= len(parent_name):
         return False, ''
