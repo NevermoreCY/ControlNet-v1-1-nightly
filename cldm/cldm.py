@@ -1175,6 +1175,8 @@ class ControlLDM(LatentDiffusion):
         return x, dict(c_crossattn=[c], c_concat=[control],camera=[T])
 
     def apply_model(self, x_noisy, t, cond, *args, **kwargs):
+
+        print("\n\n\n Now after share step ,we call apply model!")
         assert isinstance(cond, dict)
         diffusion_model = self.model.diffusion_model
 
