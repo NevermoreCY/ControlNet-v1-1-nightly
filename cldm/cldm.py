@@ -1312,6 +1312,7 @@ class ControlLDM(LatentDiffusion):
         params += list(self.control_model.zero_mlp2.parameters())
         params += list(self.control_model.time_embed.parameters())
 
+
         # for k in model_dict.keys():
         #     # print('\n',k)
         #     if 'camera_embed.' in k:
