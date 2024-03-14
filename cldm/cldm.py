@@ -1176,7 +1176,7 @@ class ControlLDM(LatentDiffusion):
 
     def apply_model(self, x_noisy, t, cond, *args, **kwargs):
 
-        print("\n\n\n Now after share step ,we call apply model!")
+        # print("\n\n\n Now after share step ,we call apply model!")
         assert isinstance(cond, dict)
         diffusion_model = self.model.diffusion_model
 
@@ -1201,7 +1201,7 @@ class ControlLDM(LatentDiffusion):
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control , global_emb=global_emb)
             # print("\n diffusion model ends!")
 
-        print("\n\n\n calculation done! now we return the eps noise : " ,eps)
+        # print("\n\n\n calculation done! now we return the eps noise : " ,eps)
         return eps
 
     @torch.no_grad()
