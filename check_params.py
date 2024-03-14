@@ -46,8 +46,8 @@ for item in pretrained_key:
     totral_param = 1
     for num in item_shape:
         totral_param *= num
-    print(item , pre_item.shape,  )
-    print("\n diff is " ,x )
+    print(item, pre_item.shape)
+    print("\n", totral_param, x)
     # print(pre_item[0:10], trained_item[0:10])
 
     # print(item, pretrained_weights_mvd[item].shape)
