@@ -1200,6 +1200,8 @@ class ControlLDM(LatentDiffusion):
             # print("\n\n Input global_emb shape : " ,global_emb.shape)
             eps = diffusion_model(x=x_noisy, timesteps=t, context=cond_txt, control=control, only_mid_control=self.only_mid_control , global_emb=global_emb)
             # print("\n diffusion model ends!")
+
+        print("\n\n\n calculation done! now we return the eps noise : " ,eps)
         return eps
 
     @torch.no_grad()
