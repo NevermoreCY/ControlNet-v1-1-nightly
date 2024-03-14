@@ -127,7 +127,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : " , target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-        target_dict[target_key].requires_grad = True
+        # target_dict[target_key].requires_grad = True
     elif ('model.diffusion_model.camera_embed.' in k):
         print("camera in MVD!, copy it")
         prefix_l = len('model.diffusion_model.camera_embed.')
@@ -137,7 +137,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-        target_dict[target_key].requires_grad = False
+        # target_dict[target_key].requires_grad = False
     elif ('model.diffusion_model.input_blocks.' in k):
         print(" copy input block from ", k)
         prefix_l = len('model.diffusion_model.input_blocks.')
@@ -147,7 +147,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-        target_dict[target_key].requires_grad = True
+        # target_dict[target_key].requires_grad = True
     elif ('model.diffusion_model.middle_block.' in k):
         print("copy middle block from ", k)
         prefix_l = len('model.diffusion_model.middle_block.')
@@ -157,12 +157,12 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
-        target_dict[target_key].requires_grad = True
+        # target_dict[target_key].requires_grad = True
     else:
         print("\n ELSE case for ", k )
         if 'cond_stage_model' not in k:
             target_dict[k] = pretrained_weights_mvd[k].clone()
-            target_dict[k].requires_grad = True
+            # target_dict[k].requires_grad = True
 
 # for k in pretrained_weights_mvd.keys():
 
@@ -175,6 +175,12 @@ for k in to_discard:
 for key in target_dict:
     item = target_dict[key]
     print(key)
+
+    if 'control_model' in key and 'camera' not in key:
+        target_dict[key].requires_grad = True
+
+
+
     if 'cond_stage_model' not in key:
         # target_dict[key].requires_grad = True
         print(type(item))
