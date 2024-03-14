@@ -1670,6 +1670,7 @@ if __name__ == "__main__":
                 if not opt.debug:
                     melk()
                 raise
+        print("\n\n\n\n\n ********* Caution: training is done, now we got for test!!!")
         if not opt.no_test and not trainer.interrupted:
             trainer.test(model, data)
     except RuntimeError as err:
