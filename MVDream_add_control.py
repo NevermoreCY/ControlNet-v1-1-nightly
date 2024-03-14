@@ -183,7 +183,7 @@ for key in target_dict:
 
     if 'cond_stage_model' not in key:
         # target_dict[key].requires_grad = True
-        print(type(item))
+        # print(type(item))
         print(item.requires_grad)
 
 
