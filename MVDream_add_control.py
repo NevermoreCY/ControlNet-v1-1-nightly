@@ -148,12 +148,12 @@ for k in pretrained_weights_mvd.keys():
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
         target_dict[target_key].requires_grad = True
-    elif ('model.diffusion_model.middle_blocks.' in k):
+    elif ('model.diffusion_model.middle_block.' in k):
         print("copy middle block from ", k)
-        prefix_l = len('model.diffusion_model.middle_blocks.')
+        prefix_l = len('model.diffusion_model.middle_block.')
         sufix = k[prefix_l:]
         print('sufix:', sufix)
-        target_pre = 'control_model.middle_blocks.'
+        target_pre = 'control_model.middle_block.'
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
