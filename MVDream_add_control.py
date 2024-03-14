@@ -101,19 +101,19 @@ for item in control_key:
 target_dict = {}
 # 0th step copy original weights, these are all the keys we nedd
 for k in control3D_dict.keys():
-    print("control 3D " , k )
+    # print("control 3D " , k )
     target_dict[k] = control3D_dict[k].clone()
-    target_dict[k].requires_grad = True
+    # target_dict[k].requires_grad = True
 # First copy control net v1.0 parameters
 for k in pretrained_weights_control.keys():
-    print("control net v1  ", k)
+    # print("control net v1  ", k)
     target_dict[k] = pretrained_weights_control[k].clone()
-    target_dict[k].requires_grad = True
+    # target_dict[k].requires_grad = True
 # second copy control net v1.1 parameters
 for k in pretrained_weights_control2.keys():
-    print("control net v2  ", k)
+    # print("control net v2  ", k)
     target_dict[k] = pretrained_weights_control2[k].clone()
-    target_dict[k].requires_grad = True
+    # target_dict[k].requires_grad = True
 
 # copy mvd
 for k in pretrained_weights_mvd.keys():
@@ -174,8 +174,9 @@ for k in to_discard:
 for key in target_dict:
     item = target_dict[key]
     print(key)
-    print(type(item))
-    print(item.requires_grad)
+    if 'cond_stage_model' not in key:
+        print(type(item))
+        print(item.requires_grad)
 
 # model.load_state_dict(target_dict, strict=True)
 # torch.save(model.state_dict(), output_path)
