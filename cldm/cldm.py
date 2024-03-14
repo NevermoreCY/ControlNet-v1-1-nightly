@@ -48,19 +48,23 @@ class ControlledUnetModel(UNetModel):
 class MultiViewControlledUnetModel(MultiViewUNetModel):
     def forward(self, x, timesteps=None, context=None, control=None, only_mid_control=False, global_emb=None, **kwargs):
         hs = []
-        with torch.no_grad():
+
+
+        # with torch.no_grad():
             # t_emb = timestep_embedding(timesteps, self.model_channels, repeat_only=False)
             # emb = self.time_embed(t_emb)
 
-            # print("global embd is ", global_emb)
-            emb = global_emb
-            h = x.type(self.dtype)
 
-            # print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
-            for module in self.input_blocks:
-                h = module(h, emb, context)
-                hs.append(h)
-            h = self.middle_block(h, emb, context)
+        # print("global embd is ", global_emb)
+        emb = global_emb
+        h = x.type(self.dtype)
+
+        # print('\n\n\n h shape', h.shape, 'emb : ', emb, 'context : ', context.shape)
+        for module in self.input_blocks:
+            h = module(h, emb, context)
+            hs.append(h)
+        h = self.middle_block(h, emb, context)
+
 
         if control is not None:
             h += control.pop()
@@ -1327,8 +1331,8 @@ class ControlLDM(LatentDiffusion):
             params += list(self.model.diffusion_model.out.parameters())
 
 
-        for item in params:
-            print("\n",item.requires_grad)
+        # for item in params:
+        #     print("\n",item.requires_grad)
 
         opt = torch.optim.AdamW(params, lr=lr)
         return opt
