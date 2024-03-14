@@ -167,7 +167,9 @@ for k in to_discard:
 
 for key in target_dict:
     item = target_dict[key]
-    print(key , item.requires_grad)
+    print(key)
+    print(type(item))
+    print(item.requires_grad)
 
 # model.load_state_dict(target_dict, strict=True)
 # torch.save(model.state_dict(), output_path)
