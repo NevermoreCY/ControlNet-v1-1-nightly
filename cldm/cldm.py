@@ -1300,29 +1300,29 @@ class ControlLDM(LatentDiffusion):
 
     def configure_optimizers(self):
         lr = self.learning_rate
-        # params1 = list(self.control_model.parameters())
-        model_dict = self.control_model.state_dict()
-        params = []
+        params = list(self.control_model.parameters())
+        # model_dict = self.control_model.state_dict()
+        # params = []
 
-        for k in model_dict.keys():
-            # print('\n',k)
-            if 'camera_embed.' in k:
-                # print('\n Found camera model ')
-                model_dict[k].requires_grad = False
-                # print(model_dict[k])
-                params.append(model_dict[k])
-            else:
-                DEBUG=True
-
-                # if DEBUG:
-                #     print("\n\n Before set ", k , model_dict[k].requires_grad)
-
-                model_dict[k].requires_grad = True
-
-                # if DEBUG:
-                #     print("\n\n After set ", k , model_dict[k].requires_grad)
-
-                params.append(model_dict[k])
+        # for k in model_dict.keys():
+        #     # print('\n',k)
+        #     if 'camera_embed.' in k:
+        #         # print('\n Found camera model ')
+        #         model_dict[k].requires_grad = False
+        #         # print(model_dict[k])
+        #         params.append(model_dict[k])
+        #     else:
+        #         DEBUG=True
+        #
+        #         # if DEBUG:
+        #         #     print("\n\n Before set ", k , model_dict[k].requires_grad)
+        #
+        #         model_dict[k].requires_grad = True
+        #
+        #         # if DEBUG:
+        #         #     print("\n\n After set ", k , model_dict[k].requires_grad)
+        #
+        #         params.append(model_dict[k])
 
         # print(len(params) , len(params1))
 
