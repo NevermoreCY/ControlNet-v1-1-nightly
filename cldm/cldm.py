@@ -1311,7 +1311,6 @@ class ControlLDM(LatentDiffusion):
                 model_dict[k].requires_grad = True
 
                 if DEBUG:
-
                     print("\n\n After set ", k , model_dict[k].requires_grad)
                 params.append(model_dict[k])
 
@@ -1326,6 +1325,11 @@ class ControlLDM(LatentDiffusion):
         if not self.sd_locked:
             params += list(self.model.diffusion_model.output_blocks.parameters())
             params += list(self.model.diffusion_model.out.parameters())
+
+
+        for item in params:
+            print("\n",item.requires_grad)
+
         opt = torch.optim.AdamW(params, lr=lr)
         return opt
 
