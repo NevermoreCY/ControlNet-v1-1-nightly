@@ -343,7 +343,7 @@ class ObjaverseData(Dataset):
         # data_choice = 0.4
         # print("d_c: ", data_choice)
         # case for singe image dataset
-        if data_choice < 0.3:
+        if data_choice < -1:
 
             try:
                 sample_index = random.randint(0,len(self.mscoco_name_list)-1)
