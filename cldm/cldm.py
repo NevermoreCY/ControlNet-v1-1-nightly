@@ -780,7 +780,7 @@ class MultiViewControlNet(nn.Module):
         # print("\n glob  emb after sum up : ", global_emb.shape)
 
         # residule for emb
-        global_emb = global_emb + emb_res
+        # global_emb = global_emb + emb_res
 
 
 
@@ -1300,9 +1300,17 @@ class ControlLDM(LatentDiffusion):
 
     def configure_optimizers(self):
         lr = self.learning_rate
-        params = list(self.control_model.parameters())
+        # params = list(self.control_model.parameters())
         # model_dict = self.control_model.state_dict()
-        # params = []
+        params = []
+        params += list(self.control_model.middle_block.parameters())
+        params += list(self.control_model.input_hint_block.parameters())
+        params += list(self.control_model.hint_mixed_conv_out.parameters())
+        params += list(self.control_model.zero_convs.parameters())
+        params += list(self.control_model.input_blocks.parameters())
+        params += list(self.control_model.zero_mlp1.parameters())
+        params += list(self.control_model.zero_mlp2.parameters())
+        params += list(self.control_model.zero_time_embed.parameters())
 
         # for k in model_dict.keys():
         #     # print('\n',k)
