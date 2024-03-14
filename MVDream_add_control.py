@@ -176,9 +176,10 @@ for key in target_dict:
     item = target_dict[key]
     print(key)
     if 'cond_stage_model' not in key:
+        target_dict[key].requires_grad = True
         print(type(item))
         print(item.requires_grad)
-        target_dict[key].requires_grad =True
+
 
 model.load_state_dict(target_dict, strict=True)
 torch.save(model.state_dict(), output_path)
