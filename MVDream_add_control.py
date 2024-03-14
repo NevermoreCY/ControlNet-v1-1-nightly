@@ -4,7 +4,7 @@
 input_path_control = 'base_models/control_sd15_canny.pth'
 input_path_control2 = 'base_models/control_v11p_sd15_canny.pth'
 input_path_mvd = 'base_models/sd-v1.5-4view.pt'
-output_path = 'base_models/mvcontrol_base_v0.pt'
+output_path = 'base_models/mvcontrol_base_v5.pt'
 
 # assert os.path.exists(input_path_control), 'Input model does not exist.'
 # assert not os.path.exists(output_path), 'Output filename already exists.'
@@ -121,6 +121,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : " , target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+        target_dict[target_key].requires_grad = True
     elif ('model.diffusion_model.camera_embed.' in k):
         print("camera in MVD!, copy it")
         prefix_l = len('model.diffusion_model.camera_embed.')
@@ -130,6 +131,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+        target_dict[target_key].requires_grad = False
     elif ('model.diffusion_model.input_blocks.' in k):
         print(" copy input block from ", k)
         prefix_l = len('model.diffusion_model.input_blocks.')
@@ -139,6 +141,7 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+        target_dict[target_key].requires_grad = True
     elif ('model.diffusion_model.middle_blocks.' in k):
         print("copy middle block from ", k)
         prefix_l = len('model.diffusion_model.middle_blocks.')
@@ -148,8 +151,11 @@ for k in pretrained_weights_mvd.keys():
         target_key = target_pre + sufix
         print("TO : ", target_key)
         target_dict[target_key] = pretrained_weights_mvd[k].clone()
+        target_dict[target_key].requires_grad = True
     else:
+        print("\n ELSE case for ", k )
         target_dict[k] = pretrained_weights_mvd[k].clone()
+        target_dict[k].requires_grad = True
 
 # for k in pretrained_weights_mvd.keys():
 
@@ -159,9 +165,13 @@ for k in to_discard:
     target_dict.pop(k,None)
 
 
-model.load_state_dict(target_dict, strict=True)
-torch.save(model.state_dict(), output_path)
-print('Done.')
+for key in target_dict:
+    item = target_dict[key]
+    print(key , item.requires_grad)
+
+# model.load_state_dict(target_dict, strict=True)
+# torch.save(model.state_dict(), output_path)
+# print('Done.')
 
 
 #
