@@ -1,5 +1,5 @@
 model:
-  base_learning_rate: 1.0e-04
+  base_learning_rate: 1.0e-02
   sd_locked: True
   only_mid_control: False
   target: cldm.cldm.ControlLDM
