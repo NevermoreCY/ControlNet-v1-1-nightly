@@ -31,6 +31,7 @@ import time
 from pytorch_lightning.utilities import rank_zero_info
 from camera_utils import get_camera, get_camera_2d
 
+
 DEBUG=True
 @rank_zero_only
 def rank_zero_print(*args):
@@ -1222,6 +1223,11 @@ from cldm.model import create_model, load_state_dict
 
 
 if __name__ == "__main__":
+
+    # expandable
+    import os
+    os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
     now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
     sys.path.append(os.getcwd())
 
